@@ -15,16 +15,16 @@ public class ReplyHandler extends SimpleChannelInboundHandler<FramePacket> {
 
     private static final Logger logger = LoggerFactory.getLogger(ReplyHandler.class);
 
-    private ArrayBlockingQueue<String> wait;
+    private ArrayBlockingQueue<FramePacket> wait;
 
-    public ReplyHandler(ArrayBlockingQueue<String> w){
+    public ReplyHandler(ArrayBlockingQueue<FramePacket> w){
         this.wait = w;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, final FramePacket fm) throws Exception {
-        logger.info(fm.toString());
-        wait.offer("done");
+//        logger.info(fm.toString());
+        wait.offer(fm);
     }
 
     @Override

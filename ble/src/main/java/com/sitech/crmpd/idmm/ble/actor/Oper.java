@@ -17,6 +17,7 @@ final public class Oper {
     public volatile int seq;
     public volatile long process_time;
     public volatile int ret = -1; // 0 success
+    public long create_time;
 
     public Oper(OType t) {
         this.type = t;

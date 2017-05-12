@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.sitech.crmpd.idmm.ble.util.SZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.netapi.*;
@@ -26,6 +27,8 @@ public class CmdActor extends AbstractActor {
 
     // 保存最后发送消息给本BLE的supervisor的channel, 以便进行状态通知(leaving的分区消费完毕)
     private Channel supervisor;
+
+    private SZK zk;
 
     public static class Msg {
         Channel channel;
@@ -54,6 +57,9 @@ public class CmdActor extends AbstractActor {
                 .match(RefMsg.class, s -> {
                     onReceive(s);
                 })
+                .match(PartConfig.class, s -> {
+                    onReceive(s);
+                })
                 .matchAny(o -> log.info("received unknown message:{}", o))
                 .build();
     }
@@ -65,7 +71,13 @@ public class CmdActor extends AbstractActor {
             store = s.ref;
         }else if("reply".equals(s.name)){
             reply = s.ref;
+        }else if("zk".equals(s.name)) {
+            zk = (SZK)s.obj;
         }
+    }
+
+    private void onReceive(PartConfig s){
+        zk.chgPartStatus(s);
     }
 
     private void onReceive(Msg s) {
@@ -153,7 +165,7 @@ public class CmdActor extends AbstractActor {
             }
 
             ActorRef mem = getContext().actorOf(
-                    Props.create(MemActor.class, c, store, brk, reply),
+                    Props.create(MemActor.class, c, store, brk, reply, getSelf()),
                     String.valueOf(part_id));
 
             Mem x = new Mem();

@@ -16,6 +16,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
 import java.net.SocketAddress;
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author heihuwudi@gmail.com</br> Created By: 2015年3月24日 下午8:11:10
  */
 @Sharable
+@Configuration
 public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> implements
 		ApplicationContextAware {
 
@@ -38,11 +40,6 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 	public static final String MDC_UUID_KEY = "uuid";
 	private Set<SocketAddress> remoteAddresses = Sets.newConcurrentHashSet();
 	private ApplicationContext applicationContext;
-	/**
-	 * 计数器，用spring控制为单例
-	 */
-	@Resource
-	private AtomicLong uuid;
 
 	@Value("${maxconn.per.broker:10000}")
 	private int maxconn_per_broker; //单个broker允许的最大连接数

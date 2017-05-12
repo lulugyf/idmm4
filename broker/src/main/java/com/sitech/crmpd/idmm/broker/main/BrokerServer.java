@@ -1,8 +1,13 @@
 package com.sitech.crmpd.idmm.broker.main;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
+import com.sitech.crmpd.idmm.broker.actor.PersistentActor;
+import com.sitech.crmpd.idmm.broker.actor.ReplyActor;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
-import com.sitech.crmpd.idmm.broker.util.ZK;
+import com.sitech.crmpd.idmm.broker.util.BZK;
+import com.sitech.crmpd.idmm.supervisor.Supervisor;
 import com.sitech.crmpd.idmm.transport.FrameCodeC;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -41,8 +46,11 @@ public class BrokerServer {
     private LogicHandler logicHandler;
 
     @Resource
-    private ZK zk;
+    private BZK zk;
     private String bleid;
+
+    @Resource
+    private Supervisor spv;
 
     public static void main(String[] args) throws Exception {
         ClassPathXmlApplicationContext applicationContext = null;
@@ -74,8 +82,8 @@ public class BrokerServer {
 //                MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(50));
 
         ActorSystem system = ActorSystem.create("root");
-//        ActorRef replyActor = system.actorOf(Props.create(ReplyActor.class, replyCount), "reply");
-//        ActorRef storeActor = system.actorOf(Props.create(PersistentActor.class, persistentCount), "store");
+        ActorRef replyActor = system.actorOf(Props.create(ReplyActor.class, replyCount), "reply");
+        ActorRef storeActor = system.actorOf(Props.create(PersistentActor.class, persistentCount), "store");
 //        ActorRef cmdactor = system.actorOf(Props.create(BLEActor.class), "cmd");
 //        ActorRef brkactor = system.actorOf(Props.create(BrkActor.class), "brk");
 //
@@ -109,6 +117,7 @@ public class BrokerServer {
             ChannelFuture cf = ch.closeFuture();
 
             zk.init();
+            spv.startup(); // 启动supervisor
 
             cf.sync();
         } finally {

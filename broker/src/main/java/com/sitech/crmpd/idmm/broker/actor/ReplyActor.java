@@ -20,6 +20,15 @@ import java.util.List;
 public class ReplyActor extends AbstractActor {
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
+    public ReplyActor(int size) {
+        List<Routee> routees = new ArrayList<Routee>();
+        for (int i = 0; i < size; i++) {
+            ActorRef r = getContext().actorOf(Props.create(Worker.class));
+            getContext().watch(r);
+            routees.add(new ActorRefRoutee(r));
+        }
+        router = new Router(new RoundRobinRoutingLogic(), routees);
+    }
 
     private Router router;
     public static class Msg {
@@ -55,15 +64,7 @@ public class ReplyActor extends AbstractActor {
         }
     }
 
-    public ReplyActor(int size) {
-        List<Routee> routees = new ArrayList<Routee>();
-        for (int i = 0; i < size; i++) {
-            ActorRef r = getContext().actorOf(Props.create(Worker.class));
-            getContext().watch(r);
-            routees.add(new ActorRefRoutee(r));
-        }
-        router = new Router(new RoundRobinRoutingLogic(), routees);
-    }
+
 
     @Override
     public Receive createReceive() {

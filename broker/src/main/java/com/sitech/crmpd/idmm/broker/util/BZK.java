@@ -24,6 +24,8 @@ package com.sitech.crmpd.idmm.broker.util;
  *      ...
  */
 
+import com.sitech.crmpd.idmm.cfg.PartConfig;
+import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -38,8 +40,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Configuration
-public class ZK {
-    private static final Logger log = LoggerFactory.getLogger(ZK.class);
+public class BZK {
+    private static final Logger log = LoggerFactory.getLogger(BZK.class);
 
     @Value("${zk.addr}")
     private String zk_addr;
@@ -149,7 +151,7 @@ public class ZK {
     }
 
     public void createOneTopic(String topic, String client, int partCount, int partid){
-        String basePath = prefix + "/" + topic + "/" +client;
+        String basePath = prefix + "/partitions/" + topic + "/" +client;
 
         try {
             if(zkClient.checkExists().forPath(basePath) != null){
@@ -160,12 +162,78 @@ public class ZK {
                 zkClient.create().creatingParentsIfNeeded().forPath(basePath);
             }
             for(int i=0; i<partCount; i++) {
-                //- (part_id):  (part_num)-(part_status)-(ble_id)
+                //- (part_id):  (part_num)~(part_status)~(ble_id)
                 String path = basePath + "/" + partid ++;
-                zkClient.create().forPath(path, ((i+1)+":shut:none").getBytes());
+                zkClient.create().forPath(path,
+                        ((i+1)+"~"+ PartitionStatus.SHUT.name()+"~none").getBytes());
             }
         } catch (Exception e) {
             log.error("", e);
+        }
+    }
+
+    public int getMaxPartid() {
+        String path = prefix + "/partitions/maxpartid";
+        try {
+            if(zkClient.checkExists().forPath(path) == null){
+                return 1;
+            }else{
+                int r = Integer.parseInt(new String(zkClient.getData().forPath(path) ))+1;
+                if(r > (Math.pow(2, 30))){
+                    r = 1;
+                }
+                return r;
+            }
+        } catch (Exception e) {
+            log.error("", e);
+            return 1;
+        }
+    }
+    public void setMaxPartid(int partid) {
+        String path = prefix + "/partitions/maxpartid";
+        try {
+            if(zkClient.checkExists().forPath(path) == null){
+                zkClient.create().forPath(path, String.valueOf(partid).getBytes());
+            }else{
+                zkClient.setData().forPath(path, String.valueOf(partid).getBytes());
+            }
+        } catch (Exception e) {
+            log.error("", e);
+        }
+    }
+
+    /**
+     * 列出一个分区的全部数据
+     * @param topic
+     * @param client
+     * @return
+     */
+    public List<PartConfig> getParts(String topic, String client) {
+        String basePath = prefix + "/partitions/" + topic + "/" +client;
+        try {
+            if(zkClient.checkExists().forPath(basePath) == null){
+                return null;
+            }
+            List<PartConfig> r = new LinkedList<>();
+            PartConfig c1 = new PartConfig();
+            c1.setTopicId(topic);
+            c1.setClientId(client);
+            for(String partid: zkClient.getChildren().forPath(basePath)) {
+                //- (part_id):  (part_num)~(part_status)~(ble_id)
+                String path = basePath + "/" + partid;
+                String data = new String(zkClient.getData().forPath(path));
+                PartConfig c = c1.clone();
+                c.setPartId(Integer.parseInt(partid));
+                String[] d = data.split("~");
+                c.setPartNum(Integer.parseInt(d[0]));
+                c.setStatus(PartitionStatus.valueOf(d[1]));
+                c.setBleid(d[2]);
+                r.add(c);
+            }
+            return r;
+        } catch (Exception e) {
+            log.error("", e);
+            return null;
         }
     }
 

@@ -9,9 +9,16 @@ import akka.actor.ActorRef;
 public class RefMsg {
     final public String name;
     final public ActorRef ref;
+    final public Object obj;
 
+    public RefMsg(String name, ActorRef ref, Object obj) {
+        this.name = name;
+        this.ref = ref;
+        this.obj = obj;
+    }
     public RefMsg(String name, ActorRef ref) {
         this.name = name;
         this.ref = ref;
+        this.obj = null;
     }
 }

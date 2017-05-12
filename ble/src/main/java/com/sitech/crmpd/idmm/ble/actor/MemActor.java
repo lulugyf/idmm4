@@ -30,12 +30,14 @@ public class MemActor extends AbstractActor {
     private ActorRef persistent;
     private ActorRef brk;
     private ActorRef reply;
+    private ActorRef cmd;
 
-    public MemActor(PartConfig c, ActorRef persistent, ActorRef brk,  ActorRef reply) {
+    public MemActor(PartConfig c, ActorRef persistent, ActorRef brk,  ActorRef reply, ActorRef cmd) {
         this.c = c;
         this.persistent = persistent;
         this.brk = brk;
         this.reply = reply;
+        this.cmd = cmd;
 
         this.topic_id = c.getTopicId();
         this.client_id = c.getClientId();
@@ -48,14 +50,21 @@ public class MemActor extends AbstractActor {
             // TODO loading index data from store
             new Thread(){
                 public void run() {
-                    brk.tell(new BrkActor.PartChg(part_id, getSelf(), status), getSelf());
+                    _startFinished();
                 }
             }.start();
 
         }else {
-            // 通知brkActor 有新的part上线了
-            brk.tell(new BrkActor.PartChg(part_id, getSelf(), status), getSelf());
+            _startFinished();
         }
+    }
+
+    private void _startFinished() {
+        // 通知brkActor 有新的part上线了
+        brk.tell(new BrkActor.PartChg(part_id, getSelf(), status), getSelf());
+
+        // 然后告知 cmdActor 更新zk数据
+        cmd.tell(c, ActorRef.noSender());
     }
 
     public static class Msg
@@ -180,8 +189,8 @@ public class MemActor extends AbstractActor {
                         persistent.tell(o, getSelf());
                         return;
                     }else{
-                        // already commited
-                        log.info("messageid {} not exists, return ok", msgid);
+                        // already committed
+                        log.info("commit: messageid {} not exists, return ok", msgid);
                         mr = BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
                     }
                 }

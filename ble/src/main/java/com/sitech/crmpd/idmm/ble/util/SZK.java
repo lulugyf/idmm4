@@ -15,7 +15,7 @@ package com.sitech.crmpd.idmm.ble.util;
  *  - partitions
  *    - (target_topic_id)
  *      - (client_id)
- *        - (part_num)-(part_id)-(part_status)-(ble_id)
+ *        - (part_id)-(part_num)-(part_status)-(ble_id)
  *        - (part_num)-(part_id)-(part_status)-(ble_id)
  *        - (part_num)-(part_id)-(part_status)-(ble_id)
  *      - (client_id)
@@ -24,11 +24,11 @@ package com.sitech.crmpd.idmm.ble.util;
  *      ...
  */
 
+import com.sitech.crmpd.idmm.cfg.PartConfig;
+import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.RetryOneTime;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
@@ -37,8 +37,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ZK {
-    private static final Logger log = LoggerFactory.getLogger(ZK.class);
+public class SZK {
+    private static final Logger log = LoggerFactory.getLogger(SZK.class);
 
     @Value("${zk.addr}")
     private String zk_addr;
@@ -52,6 +52,7 @@ public class ZK {
     @Value("${zk.root}")
     private String prefix;
 
+    private String bleid;
     private CuratorFramework zkClient;
 
     public void init() {
@@ -84,6 +85,7 @@ public class ZK {
         }
         this.zkClient = zkClient;
     }
+    public String getBleid() {return bleid; }
 
     /**
      * 创建BLE启动的临时zk节点
@@ -131,7 +133,22 @@ public class ZK {
                 }
             }
         });
+        this.bleid = bleid;
         return bleid;
+    }
+
+    public void chgPartStatus(PartConfig p) {
+//            String topic, String client, int partnum, int partid, PartitionStatus status){
+        String path = prefix + "/partitions/" + p.getTopicId() + "/" +p.getClientId() +"/" + p.getPartId();
+
+        try {
+            //- (part_id):  (part_num)~(part_status)~(ble_id)
+            zkClient.setData().forPath(path,
+                    (p.getPartNum()+"~"+ p.getStatus().name()+"~"+bleid).getBytes());
+        } catch (Exception e) {
+            log.error("", e);
+        }
+
     }
 
     public void close() {

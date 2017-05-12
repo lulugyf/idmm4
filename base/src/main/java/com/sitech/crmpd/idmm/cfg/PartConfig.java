@@ -14,6 +14,16 @@ public class PartConfig extends JSONSerializable{
     private int partId;
     private PartitionStatus status;
 
+    public String getBleid() {
+        return bleid;
+    }
+
+    public void setBleid(String bleid) {
+        this.bleid = bleid;
+    }
+
+    private String bleid;
+
     public String getTopicId() {
         return topicId;
     }
@@ -60,5 +70,22 @@ public class PartConfig extends JSONSerializable{
 
     public void setStatus(PartitionStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return topicId + "~" + clientId + "~" + partNum;
+    }
+
+    public PartConfig clone() {
+        PartConfig c = new PartConfig();
+        c.topicId = topicId;
+        c.clientId = clientId;
+        c.maxOnWay = maxOnWay;
+        c.partNum = partNum;
+        c.partId = partId;
+        c.status = status;
+        c.bleid = c.bleid;
+        return c;
     }
 }

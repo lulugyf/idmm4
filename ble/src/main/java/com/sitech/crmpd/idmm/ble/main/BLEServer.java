@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.ble.actor.*;
-import com.sitech.crmpd.idmm.ble.util.ZK;
+import com.sitech.crmpd.idmm.ble.util.SZK;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -43,7 +43,7 @@ public class BLEServer {
 
 
     @Resource
-    private ZK zk;
+    private SZK zk;
     private String bleid;
 
     public static void main(String[] args) throws Exception {
@@ -82,10 +82,10 @@ public class BLEServer {
         ActorRef brkactor = system.actorOf(Props.create(BrkActor.class), "brk");
 
         // 逐个提供 ActorRef
-        cmdactor.tell(new RefMsg("store", storeActor), system.deadLetters());
-        cmdactor.tell(new RefMsg("brk", brkactor), system.deadLetters());
-        cmdactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
-        brkactor.tell(new RefMsg("cmd", cmdactor), system.deadLetters());
+        cmdactor.tell(new RefMsg("store", storeActor), ActorRef.noSender());
+        cmdactor.tell(new RefMsg("brk", brkactor), ActorRef.noSender());
+        cmdactor.tell(new RefMsg("reply", replyActor), ActorRef.noSender());
+        brkactor.tell(new RefMsg("cmd", cmdactor), ActorRef.noSender());
         //brkactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
 
         try {
@@ -131,6 +131,10 @@ public class BLEServer {
             ChannelFuture cf1 = ch1.closeFuture();
 
             zk.init();
+
+            // 把zk传送给CmdActor
+            cmdactor.tell(new RefMsg("zk", null, zk), ActorRef.noSender());
+
             bleid = zk.createBLE(ch.localAddress().toString(), ch1.localAddress().toString());
             if(bleid != null) {
                 log.warn("startup successfully!");

@@ -8,11 +8,10 @@
   
   <version>4.0.0</version>
     <modules>
-        <module>supervisor</module>
       <module>broker</module>
       <module>base</module>
       <module>ble</module>
-        <module>client-api</module>
+      <module>client-api</module>
     </modules>
     <packaging>pom</packaging>
 

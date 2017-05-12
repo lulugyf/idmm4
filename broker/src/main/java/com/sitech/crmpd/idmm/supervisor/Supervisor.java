@@ -1,6 +1,6 @@
 package com.sitech.crmpd.idmm.supervisor;
 
-import com.sitech.crmpd.idmm.broker.util.ZK;
+import com.sitech.crmpd.idmm.broker.util.BZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.netapi.BMessage;
@@ -20,7 +20,6 @@ import javax.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -34,11 +33,12 @@ public class Supervisor implements Runnable{
 
     // 集群唯一的分区id 数字累加， 需要把值存到zk中去， 并从中初始化
     private int partid_seed =  1;
+    private int seq_seed = 1;
 
     @Resource
-    private ZK zk;
+    private BZK zk;
 
-    private ArrayBlockingQueue<String> wait = new ArrayBlockingQueue<String>(10);
+    private ArrayBlockingQueue<FramePacket> wait = new ArrayBlockingQueue<>(100);
     private ReplyHandler handler = new ReplyHandler(wait);
     private EventLoopGroup group = new NioEventLoopGroup(5);
     private Bootstrap bootstrap;
@@ -84,7 +84,7 @@ public class Supervisor implements Runnable{
         zk.createOneTopic(topic, client, partCount, partid);
 
         for(int i=0; i<partCount; i++) {
-            Channel ch = bles.get(i % bles.size()).ch;
+            BLEState b = bles.get(i % bles.size());
 
             PartConfig p = new PartConfig();
             p.setClientId(client);
@@ -94,17 +94,17 @@ public class Supervisor implements Runnable{
             p.setPartNum(i+1);
             p.setStatus(PartitionStatus.READY);
             FramePacket f = new FramePacket(FrameType.CMD_PT_START,
-                    BMessage.create(p.toString()) );
-            ch.writeAndFlush(f);
+                    BMessage.create(p.toString()), seq_seed++ );
+            b.ch.writeAndFlush(f);
 
             try {
-                wait.take();
+                log.info("reply from BLE: {}", wait.take().toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-
         }
+        zk.setMaxPartid(partid_seed);
     }
 
     /**
@@ -144,6 +144,8 @@ public class Supervisor implements Runnable{
                     }
                 });
         bootstrap = b;
+
+        partid_seed = zk.getMaxPartid();
 
 //        try {
 //
