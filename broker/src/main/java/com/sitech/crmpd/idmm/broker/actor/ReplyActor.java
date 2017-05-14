@@ -11,6 +11,7 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.RoundRobinRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.Router;
+import com.sitech.crmpd.idmm.client.api.FrameMessage;
 import com.sitech.crmpd.idmm.netapi.FramePacket;
 import io.netty.channel.Channel;
 
@@ -33,15 +34,16 @@ public class ReplyActor extends AbstractActor {
     private Router router;
     public static class Msg {
         public Channel channel;
-        public FramePacket packet;
+        public FrameMessage frameMessage;
         public long create_time;
-        public Msg(Channel c, FramePacket p) {
-            channel = c;packet = p; create_time=System.currentTimeMillis();
+        public Msg(Channel c, FrameMessage p) {
+            channel = c;frameMessage = p; create_time=System.currentTimeMillis();
         }
     }
 
     private static class Worker extends AbstractActor{
         private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+//        public Worker(int i) {}
         public Receive createReceive(){
             return receiveBuilder()
                     .match(Msg.class, s -> {
@@ -56,13 +58,14 @@ public class ReplyActor extends AbstractActor {
         }
         private void onReceive(Msg s) {
             try{
-                if(s.packet != null)
-                    s.channel.writeAndFlush(s.packet);
+                if(s.frameMessage != null)
+                    s.channel.writeAndFlush(s.frameMessage);
             }catch(Exception ex) {
                 log.error("write reply to channel failed", ex);
             }
         }
     }
+
 
 
 

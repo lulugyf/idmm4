@@ -155,7 +155,9 @@ public class CmdActor extends AbstractActor {
         // props: TARGET_TOPIC  CLIENT_ID， PART_NUM, PART_ID, PART_STATUS
 
         try {
-            PartConfig c = JSONSerializable.fromJson(m.getContentAsString(), PartConfig.class);
+            String body = m.getContentAsString();
+            System.out.println("===="+body);
+            PartConfig c = JSONSerializable.fromJson(body, PartConfig.class);
             int part_id = c.getPartId();
 
             if (parts.containsKey(c.getPartId())) {

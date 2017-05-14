@@ -7,6 +7,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.client.api.FrameMessage;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
 
@@ -29,10 +30,10 @@ public class BLEActor extends AbstractActor {
 
     public static class Msg {
         Channel channel;
-        FramePacket packet;
+        FrameMessage fm;
         long create_time;
-        public Msg(Channel c, FramePacket p) {
-            channel = c;packet = p; create_time=System.currentTimeMillis();
+        public Msg(Channel c, FrameMessage f) {
+            channel = c;fm = f; create_time=System.currentTimeMillis();
         }
     }
 
@@ -71,39 +72,7 @@ public class BLEActor extends AbstractActor {
     private void onReceive(Msg s) {
         supervisor = s.channel;
 
-        FramePacket p = s.packet;
-        BMessage m = p.getMessage();
-        BMessage mr = null;
 
-        switch(p.getType() ) {
-            case HEARTBEAT:
-                break;
-            case CMD_PT_START:
-                log.info("CMD_PT_START, {}", System.currentTimeMillis());
-                mr = startPart(m);
-                break;
-            case CMD_PT_CHANGE:
-                log.info("CMD_PT_CHANGE, {}", System.currentTimeMillis());
-                mr = chgPartStatus(m);
-                break;
-            case CMD_PT_QUERY:
-                log.info("CMD_PT_QUERY, {}", System.currentTimeMillis());
-                break;
-            default:
-                log.error("unknown command {}", p.getType().code());
-                break;
-        }
-
-        if(mr == null){
-            mr = BMessage.c()
-                    .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)
-                    .p(BProps.RESULT_DESC, "invalid request");
-        }
-
-        FramePacket pr = new FramePacket(
-                FrameType.valueOfCode(p.getType().code()|0x80),
-                mr, p.getSeq());
-        reply.tell( new ReplyActor.Msg(s.channel, pr), getSelf());
     }
 
     /**

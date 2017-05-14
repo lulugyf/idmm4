@@ -3,22 +3,26 @@ package com.sitech.crmpd.idmm.broker.handler;
 import akka.actor.ActorRef;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+import com.sitech.crmpd.idmm.broker.actor.PersistActor;
 import com.sitech.crmpd.idmm.client.api.*;
 import com.sitech.crmpd.idmm.client.exception.OperationException;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.ehcache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.MDC.MDCCloseable;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +47,13 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 
 	@Value("${maxconn.per.broker:10000}")
 	private int maxconn_per_broker; //单个broker允许的最大连接数
+
+	@Resource
+	private MessageIdGenerator messageIdGenerator;
+	private AtomicLong messageIdSequence = new AtomicLong();
+
+    @Resource
+    private Cache<String, Message> messageCache;
 	
 	/**
 	 * @see ApplicationContextAware#setApplicationContext(ApplicationContext)
@@ -103,8 +114,33 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 		final MessageType type = msg.getType();
 		switch(type) {
 			case SEND:
+            {
+                Message message = msg.getMessage();
+                final SocketAddress address = ctx.channel().remoteAddress();
+                final MessageId id = messageIdGenerator.generate((InetSocketAddress) address, message,
+                        messageIdSequence.incrementAndGet());
+                message.setId(id.getValue());
+                messageCache.put(id.getValue(), message);
+                persist.tell(new PersistActor.Msg(ctx.channel(), msg), ActorRef.noSender());
+            }
 				break;
 			case SEND_COMMIT:
+            {
+                Message mq = msg.getMessage();
+                final String[] batchIds = mq.existProperty(PropertyOption.BATCH_MESSAGE_ID) ? mq
+                        .getArray(PropertyOption.BATCH_MESSAGE_ID, new String[0]) : new String[] { mq
+                        .getStringProperty(PropertyOption.MESSAGE_ID) };
+
+                for(String msgid: batchIds) {
+                    Message message = messageCache.get(msgid);
+                    messageCache.remove(msgid);
+                    String src_topic = message.getStringProperty(PropertyOption.TOPIC);
+                    String producer_client = message.getStringProperty(PropertyOption.CLIENT_ID);
+
+                    // 主题映射
+
+                }
+            }
 				break;
 			case SEND_ROLLBACK:
 				break;
@@ -114,49 +150,49 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 				break;
 		}
 
-		try {
-			if (!applicationContext.containsBean(type.name())) {
-				/** 当Handler未找到时，判断下是否在可接受类型里 */
-				/** 如果在，则说明是服务端配置出问题，否则是错误的请求 */
-				final Message answerMessage = Message.create();
-				answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.BAD_REQUEST);
-				ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
-				/** 主动关闭连接 */
-				ctx.close();
-			} else {
-				final MessageHandler messageHandler = applicationContext.getBean(type.name(),
-						MessageHandler.class);
-
-				final Message message = msg.getMessage();
-				final String clientId = message.getStringProperty(PropertyOption.CLIENT_ID);
-				if (Strings.isNullOrEmpty(clientId)) {
-					throw new OperationException(ResultCode.BAD_REQUEST,
-							"The value of property client-id must not be empty!");
-				}
-				LOGGER.debug("开始处理客户端[{}]发送的类型为[{}]的消息", clientId, type);
-
-				final Message answerMessage = messageHandler.handle(ctx, message);
-				if (!answerMessage.existProperty(PropertyOption.RESULT_CODE)) {
-					answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
-				}
-				ctx.writeAndFlush(new FrameMessage(messageHandler.getAnswerType(), answerMessage));
-			}
-		} catch (final OperationException e) {
-			LOGGER.error("", e);
-			final Message answerMessage = Message.create();
-			answerMessage.setProperty(PropertyOption.RESULT_CODE, e.getResultCode());
-			answerMessage.setProperty(PropertyOption.CODE_DESCRIPTION, e.getResultDescrition());
-			ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
-		} catch (final Exception e) {
-			LOGGER.error("", e);
-			final Message answerMessage = Message.create();
-			answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
-			final String detailMessage = e.getMessage();
-			if (!Strings.isNullOrEmpty(detailMessage)) {
-				answerMessage.setProperty(PropertyOption.CODE_DESCRIPTION, detailMessage);
-			}
-			ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
-		}
+//		try {
+//			if (!applicationContext.containsBean(type.name())) {
+//				/** 当Handler未找到时，判断下是否在可接受类型里 */
+//				/** 如果在，则说明是服务端配置出问题，否则是错误的请求 */
+//				final Message answerMessage = Message.create();
+//				answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.BAD_REQUEST);
+//				ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
+//				/** 主动关闭连接 */
+//				ctx.close();
+//			} else {
+//				final MessageHandler messageHandler = applicationContext.getBean(type.name(),
+//						MessageHandler.class);
+//
+//				final Message message = msg.getMessage();
+//				final String clientId = message.getStringProperty(PropertyOption.CLIENT_ID);
+//				if (Strings.isNullOrEmpty(clientId)) {
+//					throw new OperationException(ResultCode.BAD_REQUEST,
+//							"The value of property client-id must not be empty!");
+//				}
+//				LOGGER.debug("开始处理客户端[{}]发送的类型为[{}]的消息", clientId, type);
+//
+//				final Message answerMessage = messageHandler.handle(ctx, message);
+//				if (!answerMessage.existProperty(PropertyOption.RESULT_CODE)) {
+//					answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
+//				}
+//				ctx.writeAndFlush(new FrameMessage(messageHandler.getAnswerType(), answerMessage));
+//			}
+//		} catch (final OperationException e) {
+//			LOGGER.error("", e);
+//			final Message answerMessage = Message.create();
+//			answerMessage.setProperty(PropertyOption.RESULT_CODE, e.getResultCode());
+//			answerMessage.setProperty(PropertyOption.CODE_DESCRIPTION, e.getResultDescrition());
+//			ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
+//		} catch (final Exception e) {
+//			LOGGER.error("", e);
+//			final Message answerMessage = Message.create();
+//			answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
+//			final String detailMessage = e.getMessage();
+//			if (!Strings.isNullOrEmpty(detailMessage)) {
+//				answerMessage.setProperty(PropertyOption.CODE_DESCRIPTION, detailMessage);
+//			}
+//			ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
+//		}
 	}
 
 	/**

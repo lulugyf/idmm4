@@ -11,17 +11,18 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.RoundRobinRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.Router;
-import com.sitech.crmpd.idmm.client.api.FrameMessage;
+import com.sitech.crmpd.idmm.client.api.*;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersistentActor extends AbstractActor {
+public class PersistActor extends AbstractActor {
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
 
+    private ActorRef reply;
     private Router router;
     public static class Msg {
         public Channel channel;
@@ -34,6 +35,8 @@ public class PersistentActor extends AbstractActor {
 
     private static class Worker extends AbstractActor{
         private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+        private ActorRef reply;
+        Worker(ActorRef r) {this.reply = r;}
         public Receive createReceive(){
             return receiveBuilder()
                     .match(Msg.class, s -> {
@@ -47,17 +50,37 @@ public class PersistentActor extends AbstractActor {
                     .build();
         }
         private void onReceive(Msg s) {
-
+            FrameMessage frameMessage = s.packet;
+            Message message = frameMessage.getMessage();
+            Message answer = null;
+            MessageType answerType = null;
+            switch(frameMessage.getType()) {
+                case SEND:
+                    //TODO save to persistent
+                    answer = Message.create();
+                    answer.setProperty(PropertyOption.MESSAGE_ID, message.getId());
+                    answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
+                    answerType = MessageType.ANSWER;
+                    break;
+                default:
+                    break;
+            }
+            if(answer != null) {
+                FrameMessage fr = new FrameMessage(answerType, answer);
+                reply.tell(new ReplyActor.Msg(s.channel, fr), getSelf());
+            }
         }
     }
 
-    public PersistentActor(int size) {
+
+    public PersistActor(int size, ActorRef reply) {
         List<Routee> routees = new ArrayList<Routee>();
         for (int i = 0; i < size; i++) {
-            ActorRef r = getContext().actorOf(Props.create(Worker.class));
+            ActorRef r = getContext().actorOf(Props.create(Worker.class, reply));
             getContext().watch(r);
             routees.add(new ActorRefRoutee(r));
         }
+        this.reply = reply;
         router = new Router(new RoundRobinRoutingLogic(), routees);
     }
 
@@ -69,7 +92,7 @@ public class PersistentActor extends AbstractActor {
                 })
                 .match(Terminated.class, message -> {
                     router = router.removeRoutee(message.actor());
-                    ActorRef r = getContext().actorOf(Props.create(Worker.class));
+                    ActorRef r = getContext().actorOf(Props.create(Worker.class, reply));
                     getContext().watch(r);
                     router = router.addRoutee(new ActorRefRoutee(r));
                 })

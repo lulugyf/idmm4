@@ -1,5 +1,6 @@
 package com.sitech.crmpd.idmm.supervisor;
 
+import com.alibaba.fastjson.JSON;
 import com.sitech.crmpd.idmm.broker.util.BZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
@@ -94,7 +95,7 @@ public class Supervisor implements Runnable{
             p.setPartNum(i+1);
             p.setStatus(PartitionStatus.READY);
             FramePacket f = new FramePacket(FrameType.CMD_PT_START,
-                    BMessage.create(p.toString()), seq_seed++ );
+                    BMessage.create(JSON.toJSONString(p)), seq_seed++ );
             b.ch.writeAndFlush(f);
 
             try {
