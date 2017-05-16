@@ -9,14 +9,19 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
+@Configuration
 public class BLEClient {
     private static final Logger log = LoggerFactory.getLogger(BLEClient.class);
+
+    @Value("${ble.client.threads:5}")
+    private int bleclientThreads;
 
     private Bootstrap bootstrap;
     private ActorRef ble;
@@ -32,9 +37,9 @@ public class BLEClient {
         }
     }
 
-    public BLEClient(int threads, ActorRef ble)
+    public void init(ActorRef ble)
     {
-        group = new NioEventLoopGroup(threads);
+        group = new NioEventLoopGroup(bleclientThreads);
         this.ble = ble;
 
         final BLEReplyHandler handler =

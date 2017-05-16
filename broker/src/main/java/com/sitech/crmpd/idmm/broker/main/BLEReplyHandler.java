@@ -1,6 +1,7 @@
 package com.sitech.crmpd.idmm.broker.main;
 
 import akka.actor.ActorRef;
+import com.sitech.crmpd.idmm.broker.actor.BLEActor;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,6 +25,7 @@ public class BLEReplyHandler extends SimpleChannelInboundHandler<FramePacket> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, final FramePacket fm) throws Exception {
+        ref.tell(new BLEActor.RMsg(ctx.channel(), fm), ActorRef.noSender());
 //        log.info(fm.toString());
 //        String ret = "done";
 //        BMessage m = fm.getMessage();

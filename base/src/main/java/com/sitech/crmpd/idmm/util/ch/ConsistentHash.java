@@ -14,8 +14,10 @@ public class ConsistentHash<T> {
         this.hashFunction = hashFunction;
         this.numberOfReplicas = numberOfReplicas;
 
-        for (T node : nodes) {
-            add(node);
+        if(nodes != null) {
+            for (T node : nodes) {
+                add(node);
+            }
         }
     }
 

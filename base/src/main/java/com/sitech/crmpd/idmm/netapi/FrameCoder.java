@@ -124,7 +124,7 @@ public class FrameCoder extends ByteToMessageCodec<FramePacket> {
 		}
 		final BMessage message = BMessage.create(propertiesData, content);
 		message.setProperty(BProps.TYPE, type);
-		out.add(new FramePacket(type, message));
+		out.add(new FramePacket(type, message, seq));
 	}
 
 }

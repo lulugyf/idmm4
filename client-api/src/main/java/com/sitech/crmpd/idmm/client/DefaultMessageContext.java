@@ -167,7 +167,8 @@ public class DefaultMessageContext extends MessageContext {
 	 */
 	@Override
 	public void rollback(String... id) throws OperationException {
-		commit(false, MessageType.SEND_ROLLBACK, id);
+		Message r = commit(false, MessageType.SEND_ROLLBACK, id);
+		System.out.println(r.toString());
 	}
 
 	private Message commit(boolean isRetry, MessageType type, String... id)

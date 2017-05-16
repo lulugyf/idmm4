@@ -414,6 +414,22 @@ final public class MemQueue {
         return true;
     }
 
+    public boolean rollback(String messageid){
+        MsgIndex m = null;
+
+        m = messageids.get(messageid);
+        if(m == null)
+            return false;
+        String groupid = m.getGroupid();
+        if(!groupid.startsWith("[groupid]"))
+            grouplocks.remove(groupid);
+
+        _removeLock(m);
+
+        m.setGetTime(0);
+        return true;
+    }
+
 
     ///////////////////// 状态采集 /////////////
     long consume = 0L;

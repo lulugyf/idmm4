@@ -5,14 +5,16 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import com.sitech.crmpd.idmm.ble.util.SZK;
+import com.alibaba.fastjson.JSON;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.netapi.*;
+import com.sitech.crmpd.idmm.util.BZK;
 import io.netty.channel.Channel;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by gyf on 5/1/2017.
@@ -23,12 +25,12 @@ public class CmdActor extends AbstractActor {
     private ActorRef store;
     private ActorRef brk;
     private HashMap<Integer, Mem> parts = new HashMap<>();
-    private LinkedList<Mem> list = new LinkedList<>();
+//    private LinkedList<Mem> list = new LinkedList<>();
 
     // 保存最后发送消息给本BLE的supervisor的channel, 以便进行状态通知(leaving的分区消费完毕)
     private Channel supervisor;
 
-    private SZK zk;
+    private BZK zk;
 
     public static class Msg {
         Channel channel;
@@ -72,7 +74,7 @@ public class CmdActor extends AbstractActor {
         }else if("reply".equals(s.name)){
             reply = s.ref;
         }else if("zk".equals(s.name)) {
-            zk = (SZK)s.obj;
+            zk = (BZK)s.obj;
         }
     }
 
@@ -100,6 +102,7 @@ public class CmdActor extends AbstractActor {
                 break;
             case CMD_PT_QUERY:
                 log.info("CMD_PT_QUERY, {}", System.currentTimeMillis());
+                mr = query(m);
                 break;
             default:
                 log.error("unknown command {}", p.getType().code());
@@ -116,6 +119,15 @@ public class CmdActor extends AbstractActor {
                 FrameType.valueOfCode(p.getType().code()|0x80),
                 mr, p.getSeq());
         reply.tell( new ReplyActor.Msg(s.channel, pr), getSelf());
+    }
+
+    private BMessage query(BMessage m) {
+        List<PartConfig> l = new LinkedList<>();
+        for(Mem m1: parts.values()){
+            l.add(m1.c);
+        }
+        String json = JSON.toJSON(l).toString();
+        return BMessage.create(json).p(BProps.RESULT_CODE, RetCode.OK);
     }
 
     /**

@@ -4,8 +4,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.ble.actor.*;
-import com.sitech.crmpd.idmm.ble.util.SZK;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
+import com.sitech.crmpd.idmm.util.BZK;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -41,9 +41,9 @@ public class BLEServer {
     @Value("${actor.persistentCount:30}")
     private int persistentCount; //持久化actor数量
 
-
     @Resource
-    private SZK zk;
+    private BZK zk;
+
     private String bleid;
 
     public static void main(String[] args) throws Exception {
@@ -63,7 +63,6 @@ public class BLEServer {
                 log.error("spring exit");
             }
         }
-
     }
 
     public void startup() throws Exception {

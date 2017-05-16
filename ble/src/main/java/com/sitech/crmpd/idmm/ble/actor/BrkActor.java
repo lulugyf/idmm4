@@ -61,6 +61,7 @@ public class BrkActor extends AbstractActor {
     }
     private void onReceive(Msg s) {
         FramePacket p = s.packet;
+        int seq = p.getSeq();
         BMessage m = p.getMessage();
 
         switch(p.getType() ) {
@@ -75,13 +76,14 @@ public class BrkActor extends AbstractActor {
             case BRK_PULL:
             case BRK_COMMIT:
             case BRK_RETRY:
+            case BRK_ROLLBACK:
             case BRK_SKIP:
             {
                 if(!m.existProperty(BProps.PART_ID)){
                     log.error("request without part_id");
                     FramePacket f = new FramePacket(FrameType.CMD_PT_START_ACK, BMessage.c()
                             .p(BProps.RESULT_CODE, RetCode.REQUIRED_PARAMETER_MISSING)
-                            .p(BProps.RESULT_DESC, "request without part_id"));
+                            .p(BProps.RESULT_DESC, "request without part_id"), seq);
                     s.channel.writeAndFlush(f);
                     break;
                 }
@@ -92,10 +94,10 @@ public class BrkActor extends AbstractActor {
                     log.error("part {} not found", part_id);
                     FramePacket f = new FramePacket(FrameType.CMD_PT_START_ACK, BMessage.c()
                             .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)
-                            .p(BProps.RESULT_DESC, "part not found:"+part_id));
+                            .p(BProps.RESULT_DESC, "part not found:"+part_id), seq);
                     s.channel.writeAndFlush(f);
                 }else {
-                    log.info("operator: {} to {}", p.getType(), part_id);
+                    log.info("operator: {} to part {} seq {}", p.getType(), part_id, p.getSeq());
                     parts.get(part_id).ref.tell(new MemActor.Msg(s.channel, p), getSelf());
                 }
             }

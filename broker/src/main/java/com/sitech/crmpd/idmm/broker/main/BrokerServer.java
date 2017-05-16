@@ -3,12 +3,11 @@ package com.sitech.crmpd.idmm.broker.main;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.sitech.crmpd.idmm.broker.actor.BLEActor;
-import com.sitech.crmpd.idmm.broker.actor.PersistActor;
-import com.sitech.crmpd.idmm.broker.actor.ReplyActor;
-import com.sitech.crmpd.idmm.broker.config.TopicMapping;
+import com.sitech.crmpd.idmm.broker.actor.*;
+import com.sitech.crmpd.idmm.broker.config.Config;
+import com.sitech.crmpd.idmm.broker.config.Parts;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
-import com.sitech.crmpd.idmm.broker.util.BZK;
+import com.sitech.crmpd.idmm.util.BZK;
 import com.sitech.crmpd.idmm.client.api.Message;
 import com.sitech.crmpd.idmm.supervisor.Supervisor;
 import com.sitech.crmpd.idmm.transport.FrameCodeC;
@@ -32,6 +31,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class BrokerServer {
@@ -61,6 +63,14 @@ public class BrokerServer {
     @Resource
     private Supervisor spv;
 
+    @Resource
+    private BLEClient bleclient;
+
+    private Map<String, ActorRef> bles = new HashMap<>();
+
+    private CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+            .build(true);
+
     public static void main(String[] args) throws Exception {
         ClassPathXmlApplicationContext applicationContext = null;
         try {
@@ -83,16 +93,21 @@ public class BrokerServer {
 
     @Bean
     public Cache messageCache() {
-        CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache("preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Message.class,
-                                ResourcePoolsBuilder.heap(100))
-                                .build())
-                .build(true);
+//        CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+//                .withCache("preConfigured",
+//                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Message.class,
+//                                ResourcePoolsBuilder.heap(100))
+//                                .build())
+//                .build(true);
+//
+//        Cache<String, Message> cache
+//                = cacheManager.getCache("preConfigured", String.class, Message.class);
 
-        Cache<String, Message> preConfigured
-                = cacheManager.getCache("preConfigured", String.class, Message.class);
-        return preConfigured;
+        Cache<String, Message> cache = cacheManager.createCache("messageCache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Message.class,
+                        ResourcePoolsBuilder.heap(100)).build() );
+
+        return cache;
 
 //        Cache<Long, String> myCache = cacheManager.createCache("myCache",
 //                CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, String.class,
@@ -116,7 +131,7 @@ public class BrokerServer {
         ActorSystem system = ActorSystem.create("root");
         ActorRef replyActor = system.actorOf(Props.create(ReplyActor.class, replyCount), "creply");
         ActorRef persistActor = system.actorOf(Props.create(PersistActor.class, persistentCount, replyActor), "persist");
-        ActorRef bleActor = system.actorOf(Props.create(BLEActor.class), "ble");
+        final ActorRef bleActor = system.actorOf(Props.create(BLEActor.class), "ble");
 
         logicHandler.setRef("creply", replyActor);
         logicHandler.setRef("persist", persistActor);
@@ -125,7 +140,7 @@ public class BrokerServer {
 //        // 逐个提供 ActorRef
 //        cmdactor.tell(new RefMsg("store", storeActor), system.deadLetters());
 //        cmdactor.tell(new RefMsg("brk", brkactor), system.deadLetters());
-//        cmdactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
+        bleActor.tell(new RefMsg("reply", replyActor), ActorRef.noSender());
 //        brkactor.tell(new RefMsg("cmd", cmdactor), system.deadLetters());
         //brkactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
 
@@ -152,13 +167,62 @@ public class BrokerServer {
             ChannelFuture cf = ch.closeFuture();
 
             zk.init();
-            spv.startup(); // 启动supervisor
+            spv.startup(); // 尝试启动supervisor, 通过zk竞争
 
-            cf.sync();
+            //TODO 获取BLE列表, 并添加监视更改的功能
+            bleclient.init(bleActor);
+
+            Parts parts = new Parts();
+            parts.setAllParts(zk);
+            logicHandler.setParts(parts);
+
+            // TODO 已经添加了分区变化的更新监视, 但需要做延迟处理, 一个避免过于频繁的更新, 另一个避免漏掉更新
+            zk.watchPartChange(new BZK.CallBack() {
+                @Override
+                public void call() {
+                    Parts parts = new Parts();
+                    parts.setAllParts(zk);
+                    logicHandler.setParts(parts);
+                    log.warn("part status changed");
+                }
+            });
+
+            // 两个配置数据的设置: 主题映射和订阅关系
+            logicHandler.setTopicMapping(Config.getMap());
+            logicHandler.setSubscribes(Config.getSub());
+
+            refreshBLEList(bleActor, replyActor, system);
+            zk.watchBLEChange(new BZK.CallBack() {
+                @Override
+                public void call() {
+                    refreshBLEList(bleActor, replyActor, system);
+                }
+            });
+
+            zk.createBroker(nt_local_addr); //向zk注册broker地址
+
+            cf.sync(); //阻塞调用
         } finally {
             system.terminate();
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+        }
+    }
+
+    /**
+     * 与BLE的通讯端口建立连接
+     */
+    private void refreshBLEList(ActorRef ble, ActorRef reply, ActorSystem system) {
+        for(String[] v: zk.getBLEList()){
+            String bleid = v[1];
+            if(bles.containsKey(bleid)){
+
+            }else{
+                Channel ch = bleclient.getCh(bleid);
+                ActorRef ref = system.actorOf(Props.create(BLEWriterActor.class, ch, reply), bleid);
+                ble.tell(new RefMsg("ble", ref, bleid, ch), ActorRef.noSender());
+                bles.put(bleid, ref);
+            }
         }
     }
 }

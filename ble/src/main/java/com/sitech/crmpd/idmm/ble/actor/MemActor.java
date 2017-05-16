@@ -32,6 +32,8 @@ public class MemActor extends AbstractActor {
     private ActorRef reply;
     private ActorRef cmd;
 
+    private int default_priority = 200; //TODO 默认优先级从配置中获取
+
     public MemActor(PartConfig c, ActorRef persistent, ActorRef brk,  ActorRef reply, ActorRef cmd) {
         this.c = c;
         this.persistent = persistent;
@@ -107,7 +109,7 @@ public class MemActor extends AbstractActor {
             case addOP1:
                 // after persistent
                 mq.add(s.mi);
-                log.info("add index {}, size: {}", s.mi.getMsgid(), mq.size());
+                log.info("add index {}, size: {} seq {}", s.mi.getMsgid(), mq.size(), s.seq);
                 fr = new FramePacket(FrameType.BRK_SEND_COMMIT_ACK,
                         BMessage.c().p(BProps.RESULT_CODE, RetCode.OK), s.seq ) ;
                 break;
@@ -161,20 +163,21 @@ public class MemActor extends AbstractActor {
 
     private void onReceive(Msg s) {
         FramePacket p = s.packet;
+        int seq = p.getSeq();
         BMessage m = p.getMessage();
         BMessage mr = null;
 
-        if(_checkStatus(p.getType(), s.channel, p.getSeq()))
+        if(_checkStatus(p.getType(), s.channel, seq))
             return;
         try {
             switch (p.getType()) {
                 case BRK_SEND_COMMIT:
-                    mr = sendCommit(m, s.channel, p.getSeq());
+                    mr = sendCommit(m, s.channel, seq);
                     if(mr == null)
                         return; //to store actor
                     break;
                 case BRK_PULL:
-                    mr = pull(m, s.channel, p.getSeq());
+                    mr = pull(m, s.channel, seq);
                     break;
                 case BRK_COMMIT:
                 {
@@ -231,6 +234,15 @@ public class MemActor extends AbstractActor {
                     }
                 }
                     break;
+                case BRK_ROLLBACK:
+                {
+                    String msgid = m.p(BProps.MESSAGE_ID);
+                    boolean r = mq.rollback(msgid);
+                    mr = BMessage.c().p(BProps.RESULT_CODE, r?RetCode.OK:RetCode.INTERNAL_SERVER_ERROR);
+                    if(!r)
+                        mr.p(BProps.RESULT_DESC, "rollback message failed");
+                }
+                    break;
 
                 default:
                     log.error("unknown command {}", p.getType().code());
@@ -250,7 +262,7 @@ public class MemActor extends AbstractActor {
 
         FramePacket pr = new FramePacket(
                 FrameType.valueOfCode(p.getType().code()|0x80),
-                mr, p.getSeq());
+                mr, seq);
         reply.tell( new ReplyActor.Msg(s.channel, pr), getSelf());
     }
 
@@ -258,7 +270,10 @@ public class MemActor extends AbstractActor {
         MsgIndex mi = new MsgIndex();
         mi.setMsgid(m.p(BProps.MESSAGE_ID));
         mi.setGroupid(m.p(BProps.GROUP));
-        mi.setPriority(m.p(BProps.PRIORITY));
+        int priority = default_priority;
+        if(m.existProperty(BProps.PRIORITY))
+            priority = m.p(BProps.PRIORITY);
+        mi.setPriority(default_priority);
         log.info("BRK_SEND_COMMIT, {}", System.currentTimeMillis());
         if(!mq.exists(mi.getMsgid())) {
             Oper o = new Oper(Oper.OType.addOP);
@@ -266,8 +281,7 @@ public class MemActor extends AbstractActor {
             o.channel = ch;
             o.seq = seq;
             persistent.tell(o, getSelf());
-            log.info("send addOP to persistent {} ",
-                    persistent.path().toString());
+            log.info("send addOP to persistent seq {}", seq);
         }else{
             // duplicated with mem, return OK
             log.info("duplicated index");

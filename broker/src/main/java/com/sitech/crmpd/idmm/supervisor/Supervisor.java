@@ -1,7 +1,7 @@
 package com.sitech.crmpd.idmm.supervisor;
 
 import com.alibaba.fastjson.JSON;
-import com.sitech.crmpd.idmm.broker.util.BZK;
+import com.sitech.crmpd.idmm.util.BZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.netapi.BMessage;
@@ -18,8 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -45,6 +47,7 @@ public class Supervisor implements Runnable{
     private Bootstrap bootstrap;
 
     private List<BLEState> bles = new LinkedList<>();
+    private Map<String, List<PartConfig>> parts = new HashMap<>(); //以 topic~client 为key的分区数据
 
     static class BLEState{
         Channel ch;
@@ -59,14 +62,30 @@ public class Supervisor implements Runnable{
         new Thread(this).start();
     }
 
-
-
     public void run() {
 
         try{
             init();
 
+            while(true){
+                if(zk.becomeSupervisor("supervisor"))
+                    break;
+                else
+                    Thread.sleep(5000L);
+            }
+
+            log.info("starting supvisor");
+
             getList();
+
+            zk.watchBLEChange(new BZK.CallBack() {
+                @Override
+                public void call() {
+                    getList();
+                }
+            });
+
+            query();
 
             // for test only
             startTopic("topic", "client", 20, 10);
@@ -76,8 +95,43 @@ public class Supervisor implements Runnable{
         }
     }
 
+    // 查询分区数据
+    private void query() {
+        log.info("query -----");
+        parts.clear();
+        for(BLEState b: bles){
+            FramePacket f = new FramePacket(FrameType.CMD_PT_QUERY,
+                    BMessage.c(), seq_seed++ );
+            b.ch.writeAndFlush(f);
+
+            try {
+                FramePacket fr = wait.take();
+                String body = fr.getMessage().getContentAsString();
+                log.debug("query reply from BLE: {}", body);
+
+                List<PartConfig> l = JSON.parseArray(body, PartConfig.class);
+                for(PartConfig p: l){
+                    String k = p.getTopicId() + "~" + p.getClientId();
+                    List<PartConfig> pl = parts.getOrDefault(k, new LinkedList<>());
+                    if(pl.size() == 0)
+                        parts.put(k, pl);
+                    pl.add(p);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
     private void startTopic(String topic, String client, int maxOnway, int partCount) {
         // TODO sort the ble list
+
+        String k = topic + "~" + client;
+        if(parts.containsKey(k)){
+            log.info("topic {} already started", k);
+            return;
+        }
 
         // and start partitions
         int partid = partid_seed;
@@ -109,12 +163,21 @@ public class Supervisor implements Runnable{
     }
 
     /**
-     * 与现在的BLE建立连接
+     * 与BLE的cmd端口建立连接
      */
     private void getList() {
-        bles.clear();
-        List<String[]> blelist = zk.getBLEList();
-        for(String[] x: blelist) {
+//        bles.clear();
+
+        for(String[] x: zk.getBLEList()) {
+            String bleid = x[1];
+            boolean found = false;
+            for(BLEState y: bles){
+                if(bleid.equals(y.id)){
+                    found = true;
+                    break;
+                }
+            }
+            if(found) continue;
             BLEState b = new BLEState();
             b.id = x[1];
             b.cmdaddr = x[0];

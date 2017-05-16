@@ -12,6 +12,6 @@
     <context:property-placeholder location="classpath:/application.properties"   />
     <!-- <context:component-scan base-package="com.sitech.crmpd.idmm2" /> -->
 
-    <context:component-scan base-package="com.sitech.crmpd.idmm.ble" />
+    <context:component-scan base-package="com.sitech.crmpd.idmm" />
 
 </beans>

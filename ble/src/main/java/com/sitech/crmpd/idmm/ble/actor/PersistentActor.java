@@ -46,7 +46,7 @@ public class PersistentActor extends AbstractActor {
                     .build();
         }
         private void onReceive(Oper s) {
-            log.info("got {}", s.type);
+            log.info("got {} seq {}", s.type, s.seq);
             switch(s.type){
                 case addOP: {
                     Oper o = new Oper(Oper.OType.addOP1);
@@ -54,7 +54,7 @@ public class PersistentActor extends AbstractActor {
                     o.mi = s.mi;
                     o.seq = s.seq;
                     getSender().tell(o, getSelf());
-                    log.info("send addOP1 to memactor, {}", s.mi.getMsgid());
+                    log.info("send addOP1 to memactor, {}, seq {}", s.mi.getMsgid(), s.seq);
                 }
                     break;
                 case getOP:

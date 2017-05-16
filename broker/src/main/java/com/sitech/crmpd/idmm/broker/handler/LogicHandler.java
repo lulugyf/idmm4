@@ -3,19 +3,24 @@ package com.sitech.crmpd.idmm.broker.handler;
 import akka.actor.ActorRef;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+import com.sitech.crmpd.idmm.broker.actor.BLEActor;
 import com.sitech.crmpd.idmm.broker.actor.PersistActor;
+import com.sitech.crmpd.idmm.broker.actor.ReplyActor;
+import com.sitech.crmpd.idmm.broker.config.Parts;
+import com.sitech.crmpd.idmm.broker.config.TopicMapping;
+import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.client.api.*;
-import com.sitech.crmpd.idmm.client.exception.OperationException;
+import com.sitech.crmpd.idmm.netapi.BMessage;
+import com.sitech.crmpd.idmm.netapi.BProps;
+import com.sitech.crmpd.idmm.netapi.FramePacket;
+import com.sitech.crmpd.idmm.netapi.FrameType;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.slf4j.MDC.MDCCloseable;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -24,8 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.Resource;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -37,7 +41,7 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 		ApplicationContextAware {
 
 	/** name="{@link LogicHandler}" */
-	private static final Logger LOGGER = LoggerFactory.getLogger(LogicHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(LogicHandler.class);
 	/**
 	 * uuid在mdc中的key
 	 */
@@ -54,6 +58,13 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 
     @Resource
     private Cache<String, Message> messageCache;
+
+    private Map<String, List<TopicMapping>> topicMapping;
+    private Map<String, List<String>> subscribes;
+    private Parts parts;
+	public void setTopicMapping(Map<String, List<TopicMapping>> m) { this.topicMapping = m;}
+	public void setSubscribes(Map<String, List<String>> s) { this.subscribes = s; }
+	public void setParts(Parts p) {this.parts = p;}
 	
 	/**
 	 * @see ApplicationContextAware#setApplicationContext(ApplicationContext)
@@ -65,14 +76,14 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 
 	private ActorRef persist;
 	private ActorRef ble;
-	private ActorRef creply;
+	private ActorRef reply;
 	public void setRef(String name, ActorRef ref) {
         if("persist".equals(name))
             persist = ref;
         else if("ble".equals(name))
             ble = ref;
         else if("creply".equals(name))
-            creply = ref;
+            reply = ref;
     }
 
 	/**
@@ -87,7 +98,7 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 		}
 
 		if(remoteAddresses.size()>maxconn_per_broker){
-			LOGGER.error("current connects is " + remoteAddresses.size() + ",maxconn_per_broker is [" + maxconn_per_broker +"]", "");
+			log.error("current connects is " + remoteAddresses.size() + ",maxconn_per_broker is [" + maxconn_per_broker +"]", "");
 			ctx.close();
 		}
 	}
@@ -103,6 +114,7 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			remoteAddresses.remove(s);
 		}
 	}
+	private Random rand = new Random(System.currentTimeMillis());
 
 	/**
 	 * @see io.netty.channel.SimpleChannelInboundHandler#channelRead0(io.netty.channel.ChannelHandlerContext,
@@ -125,74 +137,167 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
             }
 				break;
 			case SEND_COMMIT:
-            {
-                Message mq = msg.getMessage();
-                final String[] batchIds = mq.existProperty(PropertyOption.BATCH_MESSAGE_ID) ? mq
-                        .getArray(PropertyOption.BATCH_MESSAGE_ID, new String[0]) : new String[] { mq
-                        .getStringProperty(PropertyOption.MESSAGE_ID) };
-
-                for(String msgid: batchIds) {
-                    Message message = messageCache.get(msgid);
-                    messageCache.remove(msgid);
-                    String src_topic = message.getStringProperty(PropertyOption.TOPIC);
-                    String producer_client = message.getStringProperty(PropertyOption.CLIENT_ID);
-
-                    // 主题映射
-
-                }
-            }
+				sendCommit(ctx, msg);
+				break;
+			case PULL:
+				pull(ctx, msg);
 				break;
 			case SEND_ROLLBACK:
 				break;
-			case PULL:
-				break;
+
 			default:
+				log.error("invalid request type {}", type);
 				break;
 		}
 
-//		try {
-//			if (!applicationContext.containsBean(type.name())) {
-//				/** 当Handler未找到时，判断下是否在可接受类型里 */
-//				/** 如果在，则说明是服务端配置出问题，否则是错误的请求 */
-//				final Message answerMessage = Message.create();
-//				answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.BAD_REQUEST);
-//				ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
-//				/** 主动关闭连接 */
-//				ctx.close();
-//			} else {
-//				final MessageHandler messageHandler = applicationContext.getBean(type.name(),
-//						MessageHandler.class);
-//
-//				final Message message = msg.getMessage();
-//				final String clientId = message.getStringProperty(PropertyOption.CLIENT_ID);
-//				if (Strings.isNullOrEmpty(clientId)) {
-//					throw new OperationException(ResultCode.BAD_REQUEST,
-//							"The value of property client-id must not be empty!");
-//				}
-//				LOGGER.debug("开始处理客户端[{}]发送的类型为[{}]的消息", clientId, type);
-//
-//				final Message answerMessage = messageHandler.handle(ctx, message);
-//				if (!answerMessage.existProperty(PropertyOption.RESULT_CODE)) {
-//					answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
-//				}
-//				ctx.writeAndFlush(new FrameMessage(messageHandler.getAnswerType(), answerMessage));
-//			}
-//		} catch (final OperationException e) {
-//			LOGGER.error("", e);
-//			final Message answerMessage = Message.create();
-//			answerMessage.setProperty(PropertyOption.RESULT_CODE, e.getResultCode());
-//			answerMessage.setProperty(PropertyOption.CODE_DESCRIPTION, e.getResultDescrition());
-//			ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
-//		} catch (final Exception e) {
-//			LOGGER.error("", e);
-//			final Message answerMessage = Message.create();
-//			answerMessage.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
-//			final String detailMessage = e.getMessage();
-//			if (!Strings.isNullOrEmpty(detailMessage)) {
-//				answerMessage.setProperty(PropertyOption.CODE_DESCRIPTION, detailMessage);
-//			}
-//			ctx.writeAndFlush(new FrameMessage(MessageType.ANSWER, answerMessage));
-//		}
+	}
+
+	/**
+	 * 消费者请求处理, 这里有最复杂的处理流程, 大概率与BLE有多次交互
+	 * @param ctx
+	 * @param msg
+	 */
+	private void pull(ChannelHandlerContext ctx, FrameMessage msg) {
+		Message m = msg.getMessage();
+		PullCode pcode =  m.existProperty(PropertyOption.PULL_CODE) ?
+			m.getEnumProperty(PropertyOption.PULL_CODE, PullCode.class) : null;
+		String target_topicid = m.getStringProperty(PropertyOption.TARGET_TOPIC);
+		String clientid = m.getStringProperty(PropertyOption.CLIENT_ID);
+
+		if(pcode != null) {
+			String msgid = m.getId();
+			// 从 msgid 中解出 part_num, 暂定在最后一段
+			int part_num = -1;
+			int p = msgid.lastIndexOf("::");
+			if(p > 0){
+				part_num = Integer.parseInt(msgid.substring(p+2));
+				msgid = msgid.substring(0, p);
+			}
+			PartConfig part = parts.findPart(target_topicid, clientid, part_num);
+			boolean getNext = false;
+			BMessage mr = BMessage.c().p(BProps.MESSAGE_ID, msgid)
+					.p(BProps.TARGET_TOPIC, target_topicid)
+					.p(BProps.CLIENT_ID, clientid);
+			FrameType t = null;
+			switch (pcode) {
+				case COMMIT_AND_NEXT:
+					getNext = true;
+				case COMMIT:
+					t = FrameType.BRK_COMMIT;
+					break;
+
+				case ROLLBACK:
+					t = FrameType.BRK_ROLLBACK;
+					break; //这个暂时忽略, 可以不处理, 等待消息的自动解锁
+				case ROLLBACK_AND_NEXT:
+					getNext = true;
+					t = FrameType.BRK_SKIP;
+					break; //调用skip消息 BRK_SKIP
+				case ROLLBACK_BUT_RETRY:
+					t = FrameType.BRK_RETRY;
+					break; // BRK_RETRY
+				default:
+					log.error("invalid pullcode {}", pcode);
+					break;
+			}
+			FramePacket f = new FramePacket(t, mr);
+			BLEActor.Msg bmsg = new BLEActor.Msg(ctx.channel(), f);
+			bmsg.bleid = part.getBleid();
+			bmsg.wantmsg = getNext;
+			bmsg.req_total = 1;
+			ble.tell(bmsg, ActorRef.noSender());
+		}else{
+			// 直接开始拉取消息, 怎么遍历分区呢? 遍历的控制需要在BLEActor中实现
+		}
+	}
+
+	private void sendCommit(ChannelHandlerContext ctx, FrameMessage msg) {
+		Message mq = msg.getMessage();
+		final String[] batchIds = mq.existProperty(PropertyOption.BATCH_MESSAGE_ID) ? mq
+				.getArray(PropertyOption.BATCH_MESSAGE_ID, new String[0]) : new String[] { mq
+				.getStringProperty(PropertyOption.MESSAGE_ID) };
+
+		List<BLEActor.Msg> req = new LinkedList<>();
+		int seq = 0;
+		boolean refuse = false;
+		OUTERLOOP:
+		for(String msgid: batchIds) {
+			Message message = messageCache.get(msgid);
+			messageCache.remove(msgid); //TODO 应该commit 成功后再删除, 以便允许客户端重试
+			String src_topic = message.getStringProperty(PropertyOption.TOPIC);
+			String producer_client = message.getStringProperty(PropertyOption.CLIENT_ID);
+
+			String group = mq.existProperty(PropertyOption.GROUP) ?
+					mq.getStringProperty(PropertyOption.GROUP) : String.valueOf(rand.nextDouble());
+			int priority = mq.existProperty(PropertyOption.PRIORITY) ?
+					mq.getIntegerProperty(PropertyOption.PRIORITY) : -1;
+			long expire = mq.existProperty(PropertyOption.EXPIRE_TIME) ?
+					mq.getLongProperty(PropertyOption.EXPIRE_TIME) : -1;
+
+			// 主题映射 & 消费订阅 & 确定分区
+			for(TopicMapping tm: topicMapping.get(src_topic)) {
+				// TODO 对表达式求值, 或者值匹配, 暂时认为全部都有效
+				if("_all_".equals(tm.getPropertyValue()) || "_default_".equals(tm.getPropertyValue()))
+				{}else{
+					continue;
+				}
+				String target_topic = tm.getTargetTopicId();
+				for(String consume_client: subscribes.get(target_topic)){
+					PartConfig part = parts.findPart(target_topic, consume_client, group);
+					switch(part.getStatus()){
+						case READY:
+						case JOINING:
+						{
+							BMessage bm = BMessage.c()
+									.p(BProps.MESSAGE_ID, msgid)
+									.p(BProps.GROUP, group)
+									.p(BProps.PART_ID, part.getPartId());
+							if(priority > 0)
+								bm.p(BProps.PRIORITY, priority);
+							if(expire > 0)
+								bm.p(BProps.EXPIRE_TIME, expire);
+							FramePacket fp = new FramePacket(FrameType.BRK_SEND_COMMIT, bm);
+							BLEActor.Msg am = new BLEActor.Msg(ctx.channel(), fp);
+							am.bleid = part.getBleid();
+							am.req_seq = seq ++;
+							req.add(am);
+							log.debug("group {} to part_num {} part_id {}",
+									group, part.getPartNum(), part.getPartId());
+						}
+						break;
+						default:
+							log.error("part {} status not allow send-commit", part);
+							refuse = true;
+							break OUTERLOOP;
+					}
+				}
+			}
+
+		}
+		if(refuse){
+			// 有分区状态不满足要求, 拒绝
+			Message answer = Message.create();
+			answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.SERVICE_ADDRESS_NOT_FOUND);
+			answer.setProperty(PropertyOption.CODE_DESCRIPTION, "part not allow send-commit");
+			FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
+			reply.tell(new ReplyActor.Msg(ctx.channel(), fr), ActorRef.noSender());
+		}else{
+			if(req.size() == 0) {
+				log.warn("no matched topic found");
+				Message answer = Message.create();
+				answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.SERVICE_ADDRESS_NOT_FOUND);
+				answer.setProperty(PropertyOption.CODE_DESCRIPTION, "no match topic found");
+				FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
+				reply.tell(new ReplyActor.Msg(ctx.channel(), fr), ActorRef.noSender());
+			}else{
+				int total = req.size();
+				for(BLEActor.Msg m: req){
+					m.req_total = total;
+					ble.tell(m, ActorRef.noSender());
+				}
+
+			}
+		}
 	}
 
 	/**
@@ -201,7 +306,7 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 	 */
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		LOGGER.error(Strings.nullToEmpty(cause.getMessage()), cause);
+		log.error(Strings.nullToEmpty(cause.getMessage()), cause);
 		ctx.close();
 	}
 

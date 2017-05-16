@@ -29,8 +29,10 @@ public class DefaultMessageIdGenerator implements MessageIdGenerator {
 		final StringBuilder builder = new StringBuilder(64);
 		return new DefaultMessageId(builder.append(System.currentTimeMillis()).append(SEP)
 				.append(sequence).append(SEP).append(address.getHostString()).append(":")
-				.append(address.getPort()).append(SEP).append(sequence % bleTableIndexMax) // 倒数第二段为ble索引表的分表数字
-				.append(SEP).append(sequence % tableIndexMax).toString());
+				.append(address.getPort())
+				.append(SEP).append(sequence % bleTableIndexMax) // 倒数第二段为ble索引表的分表数字
+				.append(SEP).append(sequence % tableIndexMax)    // 最后一段为 消息体分表数字
+				.toString());
 	}
 
 	/**
