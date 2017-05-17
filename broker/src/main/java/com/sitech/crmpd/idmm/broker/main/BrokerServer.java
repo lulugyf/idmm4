@@ -5,6 +5,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.broker.actor.*;
 import com.sitech.crmpd.idmm.broker.config.Config;
+import com.sitech.crmpd.idmm.broker.config.ConsumeParts;
 import com.sitech.crmpd.idmm.broker.config.Parts;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
 import com.sitech.crmpd.idmm.util.BZK;
@@ -65,6 +66,8 @@ public class BrokerServer {
 
     @Resource
     private BLEClient bleclient;
+
+    private ActorRef bleActor;
 
     private Map<String, ActorRef> bles = new HashMap<>();
 
@@ -131,7 +134,8 @@ public class BrokerServer {
         ActorSystem system = ActorSystem.create("root");
         ActorRef replyActor = system.actorOf(Props.create(ReplyActor.class, replyCount), "creply");
         ActorRef persistActor = system.actorOf(Props.create(PersistActor.class, persistentCount, replyActor), "persist");
-        final ActorRef bleActor = system.actorOf(Props.create(BLEActor.class), "ble");
+        ActorRef bleActor = system.actorOf(Props.create(BLEActor.class), "ble");
+        this.bleActor = bleActor;
 
         logicHandler.setRef("creply", replyActor);
         logicHandler.setRef("persist", persistActor);
@@ -172,18 +176,14 @@ public class BrokerServer {
             //TODO 获取BLE列表, 并添加监视更改的功能
             bleclient.init(bleActor);
 
-            Parts parts = new Parts();
-            parts.setAllParts(zk);
-            logicHandler.setParts(parts);
+            partsChanged();
 
             // TODO 已经添加了分区变化的更新监视, 但需要做延迟处理, 一个避免过于频繁的更新, 另一个避免漏掉更新
             zk.watchPartChange(new BZK.CallBack() {
                 @Override
                 public void call() {
-                    Parts parts = new Parts();
-                    parts.setAllParts(zk);
-                    logicHandler.setParts(parts);
-                    log.warn("part status changed");
+                    isPartsChanged = true;
+                    partsChanged();
                 }
             });
 
@@ -207,6 +207,21 @@ public class BrokerServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+    }
+
+    private volatile boolean isPartsChanged = true;
+    private void partsChanged() {
+        if(isPartsChanged){
+            isPartsChanged = false;
+        }else{
+            return;
+        }
+        Parts parts = new Parts();
+        ConsumeParts cp = new ConsumeParts();
+        parts.setAllParts(zk, cp);
+        logicHandler.setParts(parts);
+        bleActor.tell(cp, ActorRef.noSender());
+        log.warn("part status changed");
     }
 
     /**

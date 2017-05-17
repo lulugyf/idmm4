@@ -1,10 +1,12 @@
 package com.sitech.crmpd.idmm.broker.config;
 
+import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.util.BZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.util.ch.ConsistentHash;
 import com.sitech.crmpd.idmm.util.ch.StrHashFunction;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -17,7 +19,7 @@ import java.util.List;
  */
 public class Parts {
 //    Map<String, Sub> t2s = new HashMap<>();
-    private Map<String, Map<String, Sub>> subs = new HashMap<>();
+    private Map<String, Sub> subs = new HashMap<>();
 
     public static class Sub {
         private ConsistentHash<PartConfig> ch =
@@ -27,16 +29,12 @@ public class Parts {
 
         public void addParts(List<PartConfig> l) {
             num2Part = new PartConfig[l.size() +1];
-//            for(int i=0; i<num2Part.length; i++)
-//                num2Part[i] = null;
-//            System.out.println("======");
             for(PartConfig p: l) {
                 switch (p.getStatus()){
                     case READY:
                     case JOINING:
                     case SHUT:
                         ch.add(p);
-//                        System.out.println(p.toString() + "--"+p.getStatus());
                         break;
                 }
 
@@ -67,16 +65,19 @@ public class Parts {
      * 从zk获取全部的分区数据
      * @param zk
      */
-    public void setAllParts(BZK zk) {
-//        CuratorFramework zkClient = zk.getZkClient();
+    public void setAllParts(BZK zk, ConsumeParts cp) {
         for(String topic: zk.listTotic()) {
             Map<String, Sub> clients = new HashMap<>();
             for(String client: zk.listSubscribe(topic)){
                 Sub s = new Sub();
-                s.addParts(zk.getParts(topic, client));
-                clients.put(client, s);
+                List<PartConfig> pl = zk.getParts(topic, client);
+                s.addParts(pl);
+                subs.put(topic+"~"+client, s);
+
+                if(cp != null)
+                    cp.addSub(topic, client, pl);
             }
-            subs.put(topic, clients);
+
         }
     }
 
@@ -88,23 +89,21 @@ public class Parts {
      * @return
      */
     public PartConfig findPart(String topic, String client, String group){
-        Map<String, Sub> c = subs.getOrDefault(topic, null);
-        if(c == null)
-            return null;
-        Sub s = c.getOrDefault(client, null);
+        String key = topic + "~" + client;
+        Sub s = subs.getOrDefault(key, null);
         if(s == null)
             return null;
         return s.findPart(group);
     }
 
     public PartConfig findPart(String topic, String client, int part_num) {
-        Map<String, Sub> c = subs.getOrDefault(topic, null);
-        if(c == null)
-            return null;
-        Sub s = c.getOrDefault(client, null);
+        String key = topic + "~" + client;
+        Sub s = subs.getOrDefault(key, null);
         if(s == null)
             return null;
         return s.getPartByNum(part_num);
     }
+
+
 
 }

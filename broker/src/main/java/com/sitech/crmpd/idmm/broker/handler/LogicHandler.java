@@ -177,7 +177,8 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			boolean getNext = false;
 			BMessage mr = BMessage.c().p(BProps.MESSAGE_ID, msgid)
 					.p(BProps.TARGET_TOPIC, target_topicid)
-					.p(BProps.CLIENT_ID, clientid);
+					.p(BProps.CLIENT_ID, clientid)
+					.p(BProps.PART_ID, part.getPartId());
 			FrameType t = null;
 			switch (pcode) {
 				case COMMIT_AND_NEXT:
@@ -205,9 +206,21 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			bmsg.bleid = part.getBleid();
 			bmsg.wantmsg = getNext;
 			bmsg.req_total = 1;
+			if(m.existProperty(PropertyOption.PROCESSING_TIME))
+				mr.p(BProps.PROCESSING_TIME, m.getLongProperty(PropertyOption.PROCESSING_TIME).intValue());
 			ble.tell(bmsg, ActorRef.noSender());
 		}else{
 			// 直接开始拉取消息, 怎么遍历分区呢? 遍历的控制需要在BLEActor中实现
+			BMessage mr = BMessage.c()
+					.p(BProps.TARGET_TOPIC, target_topicid)
+					.p(BProps.CLIENT_ID, clientid);
+			FramePacket f = new FramePacket(FrameType.BRK_PULL, mr);
+			BLEActor.Msg bmsg = new BLEActor.Msg(ctx.channel(), f);
+			bmsg.bleid = null; //需要在BLEActor中选择分区后再确定BLE
+			bmsg.wantmsg = true;
+			bmsg.req_total = 1;
+			bmsg.req_seq = 0; // 第一次遍历, 分区数据需要提前推送给BLEActor
+			ble.tell(bmsg, ActorRef.noSender());
 		}
 	}
 
