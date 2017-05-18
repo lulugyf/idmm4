@@ -103,6 +103,9 @@ public class T {
                 no_c += 1;
                 if(no_c > 5)
                     break; //无消息5次则退出循环
+
+                lastMsgId = null;
+                code = null;
                 continue;
             }
             lastMsgId = msg3.getId();
