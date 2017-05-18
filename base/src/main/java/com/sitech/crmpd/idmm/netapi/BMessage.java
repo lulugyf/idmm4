@@ -744,7 +744,11 @@ public class BMessage extends JSONSerializable implements Serializable {
 		return this;
 	}
 	public <T> T p(BProps<T> key) {
-		return (T)get(key);
+		try {
+			return (T) get(key);
+		}catch(NoSuchPropertyException e){
+			return null;
+		}
 	}
 
 	/**

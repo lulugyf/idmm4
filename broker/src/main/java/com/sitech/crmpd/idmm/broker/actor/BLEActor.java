@@ -96,7 +96,9 @@ public class BLEActor extends AbstractActor {
     }
 
     private void onReceive(ConsumeParts cp) {
-        cp.copyStatus(this.cp);
+        if(this.cp != null)
+            cp.copyStatus(this.cp);
+        log.info("reset consume partitions");
         this.cp = cp;
     }
 
@@ -143,6 +145,7 @@ public class BLEActor extends AbstractActor {
             case BRK_ROLLBACK:
             case BRK_SKIP:
             case BRK_RETRY:
+            case BRK_COMMIT:
             {
                 if(!bles.containsKey(s.bleid)) {
                     log.error("ble {}  not found");
@@ -191,7 +194,10 @@ public class BLEActor extends AbstractActor {
         BMessage bm = fm.getMessage();
         RetCode rcode = bm.getEnumProperty(BProps.RESULT_CODE, RetCode.class);
         if( rcode != RetCode.OK){
-            log.error("ble reply failed, {} {}", rcode, bm.p(BProps.RESULT_DESC));
+            String desc = "[null]";
+            if(bm.existProperty(BProps.RESULT_DESC))
+                desc = bm.p(BProps.RESULT_DESC);
+            log.error("ble reply failed, {} {}", rcode, desc);
             // TODO 多包请求, 部分成功怎么处理?
         }
         int i = jobs.getOrDefault(ch, -1);
@@ -231,11 +237,13 @@ public class BLEActor extends AbstractActor {
                 }else {
                     if (s.wantmsg) {
                         // 需要进一步PULL消息, 另外发起PULL请求
-                        String target_topicid = bm.p(BProps.TARGET_TOPIC);
-                        String clientid = bm.p(BProps.CLIENT_ID);
+                        BMessage bml = s.fm.getMessage(); // 上次请求的报文
+                        String target_topicid = bml.p(BProps.TARGET_TOPIC);
+                        String clientid = bml.p(BProps.CLIENT_ID);
                         BMessage mr = BMessage.c()
                                 .p(BProps.TARGET_TOPIC, target_topicid)
-                                .p(BProps.CLIENT_ID, clientid);
+                                .p(BProps.CLIENT_ID, clientid)
+                                .p(BProps.PROCESSING_TIME, bml.p(BProps.PROCESSING_TIME));
                         FramePacket f = new FramePacket(FrameType.BRK_PULL, mr);
                         BLEActor.Msg bmsg = new BLEActor.Msg(s.channel, f);
                         bmsg.bleid = null; //需要在BLEActor中选择分区后再确定BLE

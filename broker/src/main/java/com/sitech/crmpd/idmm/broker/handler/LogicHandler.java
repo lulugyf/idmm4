@@ -214,6 +214,8 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			BMessage mr = BMessage.c()
 					.p(BProps.TARGET_TOPIC, target_topicid)
 					.p(BProps.CLIENT_ID, clientid);
+			if(m.existProperty(PropertyOption.PROCESSING_TIME))
+				mr.p(BProps.PROCESSING_TIME, m.getLongProperty(PropertyOption.PROCESSING_TIME).intValue());
 			FramePacket f = new FramePacket(FrameType.BRK_PULL, mr);
 			BLEActor.Msg bmsg = new BLEActor.Msg(ctx.channel(), f);
 			bmsg.bleid = null; //需要在BLEActor中选择分区后再确定BLE
