@@ -269,8 +269,10 @@ public class BLEActor extends AbstractActor {
                     Message answer = Message.create();
                     answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
                     answer.setId(msgid);
+                    answer.setProperty(PropertyOption.CONSUMER_RETRY, bm.p(BProps.CONSUMER_RETRY));
                     FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
                     // TODO redirect pull_reply to persistent, and find message body, then reply
+                    // TODO get status of queue and save to ConsumeParts
                     reply.tell(new ReplyActor.Msg(ch, fr), ActorRef.noSender());
                 }else if(rcode == RetCode.NO_MORE_MESSAGE) {
                     // 无消息, 判断遍历次数, 最多遍历5次
