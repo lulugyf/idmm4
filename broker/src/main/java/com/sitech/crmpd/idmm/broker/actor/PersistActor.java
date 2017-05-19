@@ -62,6 +62,14 @@ public class PersistActor extends AbstractActor {
                     answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
                     answerType = MessageType.ANSWER;
                     break;
+                case ANSWER:
+                    // pull 返回了消息, 需要取回原本的消息, 返回的属性字段有:
+                {
+                    String msgid = message.getId();
+                    answerType = MessageType.ANSWER;
+                    answer = message;
+                }
+                    break;
                 default:
                     break;
             }

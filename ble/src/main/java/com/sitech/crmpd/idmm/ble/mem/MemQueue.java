@@ -445,10 +445,14 @@ final public class MemQueue {
      * 积压消息的最大优先级
      * @return
      */
-    public int getMaxPriority() {
+    public int maxPriority() {
         if(plist.isEmpty())
             return -1;
         return plist.last().prio;
+    }
+
+    public int onwayLeft() {
+        return nMaxOnway - lockingMessages.size();
     }
 
     /**

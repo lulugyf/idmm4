@@ -309,7 +309,8 @@ public class MemActor extends AbstractActor {
                 MsgIndex mi = op.mi;
                 return BMessage.c().p(BProps.RESULT_CODE, RetCode.OK)
                                 .p(BProps.MESSAGE_ID, mi.getMsgid())
-                                .p(BProps.CONSUMER_RETRY, mi.getRetry());
+                                .p(BProps.CONSUMER_RETRY, mi.getRetry())
+                        .p(BProps.QSTATE, new int[]{mq.size(), mq.maxPriority(), mq.onwayLeft()});
                 //TODO return message size to broker
             }else{
                 log.error("invalid optype {}", op.op);

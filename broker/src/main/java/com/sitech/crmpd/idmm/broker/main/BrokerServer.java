@@ -95,7 +95,7 @@ public class BrokerServer {
     }
 
     @Bean
-    public Cache messageCache() {
+    public Cache<String, Message> messageCache() {
 //        CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
 //                .withCache("preConfigured",
 //                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Message.class,
@@ -120,6 +120,14 @@ public class BrokerServer {
 //        String value = myCache.get(1L);
 //
 //        cacheManager.close();
+    }
+
+    public Cache<String, Message> persistCache() {
+        Cache<String, Message> cache = cacheManager.createCache("persistCache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Message.class,
+                        ResourcePoolsBuilder.heap(100)).build() );
+
+        return cache;
     }
 
     public void startup() throws Exception {

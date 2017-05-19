@@ -48,6 +48,7 @@ public final class BProps<T> {
      * 目标主题
      */
     public static final BProps<String> TARGET_TOPIC = systemValueOf("target-topic");
+
     /**
      * Broker地址列表
      */
@@ -177,6 +178,11 @@ public final class BProps<T> {
      * 分区状态， 1-ready 2-joining 3-leaving 9-shut
      */
     public static final BProps<PartitionStatus> PART_STATUS = systemValueOf("part-status");
+
+    /**
+     * 队列状态,  暂定3个元素 size max_priority onway_left, 用于消费者分区扫描排序, 减少空闲扫描
+     */
+    public static final BProps<int[]> QSTATE = systemValueOf("qstate");
     /**
      * broker 标识id
      */

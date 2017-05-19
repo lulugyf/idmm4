@@ -2,6 +2,8 @@ package com.sitech.crmpd.idmm.broker.config;
 
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -9,6 +11,8 @@ import java.util.*;
  * Created by guanyf on 5/17/2017.
  */
 public class ConsumeParts {
+    private static final Logger log = LoggerFactory.getLogger(ConsumeParts.class);
+
     private final static String SEP = "~";
     private Map<String, SSub> subs = new HashMap<>();
 
@@ -116,6 +120,18 @@ public class ConsumeParts {
         if(s == null)
             return null;
         return s.nextPart();
+    }
+
+    public void setStatus(String topic, String client, int part_num,
+                          int msg_count, int max_priority, int onway_left)
+    {
+        final String key = topic + SEP + client;
+        SSub s = subs.getOrDefault(key, null);
+        if(s == null){
+            log.error("queue {} not found", key);
+            return;
+        }
+        s.setStatus(part_num, msg_count, max_priority, onway_left);
     }
 
 }
