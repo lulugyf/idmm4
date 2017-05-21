@@ -56,16 +56,21 @@ public class ConsumeParts {
 
     public static class SSub {
         protected List<SPart> list;
+        protected SPart[] parts;
         private int cur;
         private int setCount = 0; //更新状态的次数
         public SSub(List<PartConfig> pl) {
+            parts = new SPart[pl.size()+1];
             list = new ArrayList<>(pl.size());
             for(PartConfig p: pl){
                 switch(p.getStatus()){
                     case READY:
-                    case LEAVING:
-                        list.add(new SPart(p.getBleid(), p.getPartNum(),
-                                p.getPartId(), p.getStatus()));
+                    case LEAVING: {
+                        SPart s = new SPart(p.getBleid(), p.getPartNum(),
+                                p.getPartId(), p.getStatus());
+                        list.add(s);
+                        parts[s.num] = s;
+                    }
                         break;
                     default:
                         break;
@@ -75,16 +80,20 @@ public class ConsumeParts {
             cur = 0;
         }
         public void setStatus(int partnum, int count, int prio, int onway){
-            for(SPart s: list) {
-                if (s.num == partnum) {
-                    s.msg_count = count;
-                    s.max_priority = prio;
-                    s.onway_left = onway;
-                    setCount ++;
-                    break;
-                }
+            if(partnum >= parts.length || partnum < 1){
+                log.error("setStatus: invalid partnum: {}", partnum);
+                return;
             }
-            if(setCount >= list.size()){
+            SPart s = parts[partnum];
+
+            if(s.msg_count == count)
+                return;
+            s.msg_count = count;
+            s.max_priority = prio;
+            s.onway_left = onway;
+            setCount ++;
+
+            if(setCount >= parts.length){
                 setCount = 0;
                 Collections.sort(list); //更新次数超过元素个数时, 重新排序
                 cur = 0;
@@ -133,5 +142,4 @@ public class ConsumeParts {
         }
         s.setStatus(part_num, msg_count, max_priority, onway_left);
     }
-
 }

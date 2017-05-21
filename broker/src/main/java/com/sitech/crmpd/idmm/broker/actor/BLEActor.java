@@ -279,6 +279,9 @@ public class BLEActor extends AbstractActor {
                             state[0], state[1], state[2]);
                     store.tell(new PersistActor.Msg(ch, fr), ActorRef.noSender());
                 }else if(rcode == RetCode.NO_MORE_MESSAGE) {
+                    BMessage bm1 = s.fm.getMessage();
+                    cp.setStatus(bm1.p(BProps.TARGET_TOPIC), bm1.p(BProps.CLIENT_ID), s.partnum,
+                            0, 0, 0);
                     // 无消息, 判断遍历次数, 最多遍历5次
                     if(s.req_seq >= max_pull_time){
                         // 应答到客户端无消息
