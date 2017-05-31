@@ -35,6 +35,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
 public class BrokerServer {
@@ -181,17 +182,18 @@ public class BrokerServer {
             zk.init();
             spv.startup(); // 尝试启动supervisor, 通过zk竞争
 
-            //TODO 获取BLE列表, 并添加监视更改的功能
+            //TODO 获取BLE列表, 并添加监视更改并更新列表
             bleclient.init(bleActor);
 
-            partsChanged();
+            final ActorRef partsGetter = system.actorOf(Props.create(GetPartsFromZKActor.class, zk, bleActor, logicHandler), "partsGetter");
 
-            // TODO 已经添加了分区变化的更新监视, 但需要做延迟处理, 一个避免过于频繁的更新, 另一个避免漏掉更新
+            partsGetter.tell(1, ActorRef.noSender()); //进行第一次延迟更新分区数据
+
+            // DONE 已经添加了分区变化的更新监视, 但需要做延迟处理, 一个避免过于频繁的更新, 另一个避免漏掉更新
             zk.watchPartChange(new BZK.CallBack() {
                 @Override
                 public void call() {
-                    isPartsChanged = true;
-                    partsChanged();
+                    partsGetter.tell(1, ActorRef.noSender());
                 }
             });
 
@@ -215,21 +217,6 @@ public class BrokerServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    private volatile boolean isPartsChanged = true;
-    private void partsChanged() {
-        if(isPartsChanged){
-            isPartsChanged = false;
-        }else{
-            return;
-        }
-        Parts parts = new Parts();
-        ConsumeParts cp = new ConsumeParts();
-        parts.setAllParts(zk, cp);
-        logicHandler.setParts(parts);
-        bleActor.tell(cp, ActorRef.noSender());
-        log.warn("part status changed");
     }
 
     /**
