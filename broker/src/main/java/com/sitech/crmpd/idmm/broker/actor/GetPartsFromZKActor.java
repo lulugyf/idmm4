@@ -3,15 +3,12 @@ package com.sitech.crmpd.idmm.broker.actor;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.sitech.crmpd.idmm.broker.config.ConsumeParts;
-import com.sitech.crmpd.idmm.broker.config.Parts;
+import com.sitech.crmpd.idmm.broker.config.PartsConsumer;
+import com.sitech.crmpd.idmm.broker.config.PartsProducer;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
-import com.sitech.crmpd.idmm.netapi.FramePacket;
 import com.sitech.crmpd.idmm.util.BZK;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Int;
 import scala.concurrent.duration.Duration;
 
 import java.util.concurrent.TimeUnit;
@@ -58,8 +55,8 @@ public class GetPartsFromZKActor extends AbstractActor {
         if( times == 0){
             return;
         }
-        Parts parts = new Parts();
-        ConsumeParts cp = new ConsumeParts();
+        PartsProducer parts = new PartsProducer();
+        PartsConsumer cp = new PartsConsumer();
         parts.setAllParts(zk, cp);
         logicHandler.setParts(parts);
         ble.tell(cp, ActorRef.noSender());

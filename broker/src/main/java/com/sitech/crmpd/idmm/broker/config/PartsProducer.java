@@ -1,12 +1,10 @@
 package com.sitech.crmpd.idmm.broker.config;
 
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.util.BZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.util.ch.ConsistentHash;
 import com.sitech.crmpd.idmm.util.ch.StrHashFunction;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -14,10 +12,10 @@ import java.util.List;
 
 /**
  * Created by guanyf on 5/15/2017.
- * 分区管理类
+ * 给生产过程使用的分区管理类, 应用consistent-hash的地方
  *
  */
-public class Parts {
+public class PartsProducer {
 //    Map<String, Sub> t2s = new HashMap<>();
     private Map<String, Sub> subs = new HashMap<>();
 
@@ -43,8 +41,6 @@ public class Parts {
                     case LEAVING:
                         num2Part[p.getPartNum()] = p;
                         break;
-                    default:
-                        break;
                 }
             }
         }
@@ -65,7 +61,7 @@ public class Parts {
      * 从zk获取全部的分区数据
      * @param zk
      */
-    public void setAllParts(BZK zk, ConsumeParts cp) {
+    public void setAllParts(BZK zk, PartsConsumer cp) {
         for(String topic: zk.listTotic()) {
             Map<String, Sub> clients = new HashMap<>();
             for(String client: zk.listSubscribe(topic)){

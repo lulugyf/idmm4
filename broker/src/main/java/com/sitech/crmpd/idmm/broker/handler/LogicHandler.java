@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 import com.sitech.crmpd.idmm.broker.actor.BLEActor;
 import com.sitech.crmpd.idmm.broker.actor.PersistActor;
 import com.sitech.crmpd.idmm.broker.actor.ReplyActor;
-import com.sitech.crmpd.idmm.broker.config.Parts;
+import com.sitech.crmpd.idmm.broker.config.PartsProducer;
 import com.sitech.crmpd.idmm.broker.config.TopicMapping;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.client.api.*;
@@ -61,10 +61,10 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 
     private Map<String, List<TopicMapping>> topicMapping;
     private Map<String, List<String>> subscribes;
-    private Parts parts;
+    private PartsProducer parts;
 	public void setTopicMapping(Map<String, List<TopicMapping>> m) { this.topicMapping = m;}
 	public void setSubscribes(Map<String, List<String>> s) { this.subscribes = s; }
-	public void setParts(Parts p) {this.parts = p;}
+	public void setParts(PartsProducer p) {this.parts = p;}
 	
 	/**
 	 * @see ApplicationContextAware#setApplicationContext(ApplicationContext)

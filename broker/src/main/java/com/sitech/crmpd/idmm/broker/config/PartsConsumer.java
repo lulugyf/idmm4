@@ -9,9 +9,10 @@ import java.util.*;
 
 /**
  * Created by guanyf on 5/17/2017.
+ * 给消费过程使用的分区遍历和选择
  */
-public class ConsumeParts {
-    private static final Logger log = LoggerFactory.getLogger(ConsumeParts.class);
+public class PartsConsumer {
+    private static final Logger log = LoggerFactory.getLogger(PartsConsumer.class);
 
     private final static String SEP = "~";
     private Map<String, SSub> subs = new HashMap<>();
@@ -110,7 +111,7 @@ public class ConsumeParts {
      * 复制排序数据状态
      * @param cp
      */
-    public void copyStatus(ConsumeParts cp) {
+    public void copyStatus(PartsConsumer cp) {
 
         for(String key: subs.keySet()){
             SSub s1 = subs.get(key);
