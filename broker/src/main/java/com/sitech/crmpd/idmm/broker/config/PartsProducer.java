@@ -30,7 +30,7 @@ public class PartsProducer {
             for(PartConfig p: l) {
                 switch (p.getStatus()){
                     case READY:
-                    case JOINING:
+                    case JOIN:
                     case SHUT:
                         ch.add(p);
                         break;
@@ -38,7 +38,7 @@ public class PartsProducer {
 
                 switch(p.getStatus()){
                     case READY:
-                    case LEAVING:
+                    case LEAVE:
                         num2Part[p.getPartNum()] = p;
                         break;
                 }

@@ -261,7 +261,7 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 					PartConfig part = parts.findPart(target_topic, consume_client, group);
 					switch(part.getStatus()){
 						case READY:
-						case JOINING:
+						case JOIN:
 						{
 							BMessage bm = BMessage.c()
 									.p(BProps.MESSAGE_ID, msgid)

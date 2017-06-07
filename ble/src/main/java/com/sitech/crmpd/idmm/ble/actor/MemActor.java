@@ -142,14 +142,14 @@ public class MemActor extends AbstractActor {
         String desc = null;
         switch(tp){
             case BRK_SEND_COMMIT:
-                r = status == PartitionStatus.LEAVING;
+                r = status == PartitionStatus.LEAVE;
                 desc = "leaving not allow send";
                 break;
             case BRK_COMMIT:
             case BRK_PULL:
             case BRK_RETRY:
             case BRK_SKIP:
-                r = status == PartitionStatus.JOINING;
+                r = status == PartitionStatus.JOIN;
                 desc = "joining now allow consume";
                 break;
         }

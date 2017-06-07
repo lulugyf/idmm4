@@ -66,7 +66,7 @@ public class PartsConsumer {
             for(PartConfig p: pl){
                 switch(p.getStatus()){
                     case READY:
-                    case LEAVING: {
+                    case LEAVE: {
                         SPart s = new SPart(p.getBleid(), p.getPartNum(),
                                 p.getPartId(), p.getStatus());
                         list.add(s);
