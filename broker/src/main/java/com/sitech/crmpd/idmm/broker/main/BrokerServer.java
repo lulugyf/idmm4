@@ -219,8 +219,12 @@ public class BrokerServer {
      * 与BLE的通讯端口建立连接
      */
     private void refreshBLEList(ActorRef ble, ActorRef reply, ActorSystem system) {
-        for(String[] v: zk.getBLEList()){
-            String bleid = v[1];
+        Map<String, String> m = zk.getBLEList();
+        if(m == null){
+            log.error("get ble list from zk failed");
+            return;
+        }
+        for(String bleid: m.keySet()){
             if(bles.containsKey(bleid)){
 
             }else{

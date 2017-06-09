@@ -78,6 +78,7 @@ public class CmdActor extends AbstractActor {
         }
     }
 
+    // 接收到从 MemActor 状态更改完成的消息， 此消息只用于修改zk状态
     private void onReceive(PartConfig s){
         zk.chgPartStatus(s);
     }
@@ -91,6 +92,7 @@ public class CmdActor extends AbstractActor {
 
         switch(p.getType() ) {
             case HEARTBEAT:
+                mr = BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
                 break;
             case CMD_PT_START:
                 log.info("CMD_PT_START, {}", System.currentTimeMillis());

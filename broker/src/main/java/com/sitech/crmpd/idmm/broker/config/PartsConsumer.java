@@ -18,10 +18,9 @@ public class PartsConsumer {
     private Map<String, SSub> subs = new HashMap<>();
 
 
-    public void addSub(String topic, String client, List<PartConfig> pl) {
-        String key = topic + SEP + client;
+    public void addSub(String qid, List<PartConfig> pl) {
         SSub sub = new SSub(pl);
-        subs.put(key, sub);
+        subs.put(qid, sub);
     }
 
     /**

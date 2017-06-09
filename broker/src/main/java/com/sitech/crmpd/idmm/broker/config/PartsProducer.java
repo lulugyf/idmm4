@@ -62,17 +62,14 @@ public class PartsProducer {
      * @param zk
      */
     public void setAllParts(BZK zk, PartsConsumer cp) {
-        for(String topic: zk.listTotic()) {
-            Map<String, Sub> clients = new HashMap<>();
-            for(String client: zk.listSubscribe(topic)){
-                Sub s = new Sub();
-                List<PartConfig> pl = zk.getParts(topic, client);
-                s.addParts(pl);
-                subs.put(topic+"~"+client, s);
+        for(String qid: zk.listQueue()) {
+            Sub s = new Sub();
+            List<PartConfig> pl = zk.getParts(qid);
+            s.addParts(pl);
+            subs.put(qid, s);
 
-                if(cp != null)
-                    cp.addSub(topic, client, pl);
-            }
+            if(cp != null)
+                cp.addSub(qid, pl);
 
         }
     }

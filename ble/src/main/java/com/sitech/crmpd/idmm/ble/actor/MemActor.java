@@ -41,7 +41,7 @@ public class MemActor extends AbstractActor {
         this.reply = reply;
         this.cmd = cmd;
 
-        this.topic_id = c.getTopicId();
+        this.topic_id = c.getQid();
         this.client_id = c.getClientId();
         this.part_num = c.getPartNum();
         this.part_id = c.getPartId();

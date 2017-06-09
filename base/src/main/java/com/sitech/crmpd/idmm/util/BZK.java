@@ -30,6 +30,9 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.api.transaction.CuratorOp;
+import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
+import org.apache.curator.framework.api.transaction.TransactionOp;
 import org.apache.curator.retry.RetryOneTime;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -39,8 +42,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class BZK {
@@ -57,6 +62,8 @@ public class BZK {
 
     @Value("${zk.root}")
     private String prefix;
+
+    private final static String partChg = "partitions_change";
 
     private CuratorFramework zkClient;
     private String bleid;
@@ -108,38 +115,23 @@ public class BZK {
         String bleid = mainAddr;
 
         final String path_b = prefix + "/" + "ble" + "/" + bleid;
-        final String path_c = prefix + "/" + "blecmd" + "/" + cmdAddr + "-" + bleid;
         try {
             zkClient.create().creatingParentsIfNeeded()
                     .withMode(CreateMode.EPHEMERAL)
-                    .forPath(path_b, "".getBytes());
+                    .forPath(path_b, cmdAddr.getBytes());
             log.info("bleid node register succ {}", path_b);
         } catch (Exception e) {
             log.error("create bleid node path[{}] failed", path_b, e);
             return null;
         }
-        try {
-            zkClient.create().creatingParentsIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL)
-                    .forPath(path_c, "".getBytes());
-            log.info("ble cmd port node register succ {}", path_c);
-        } catch (Exception e) {
-            log.error("ble cmd port {} node register failed", path_c, e);
-            return null;
-        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(){
             public void run(){
-                try{
-                    zkClient.delete().forPath(path_b);
-                }catch(Exception ex){
-                    ex.printStackTrace();
-                }
-                try{
-                    zkClient.delete().forPath(path_c);
-                }catch(Exception ex){
-                    ex.printStackTrace();
-                }
+            try{
+                zkClient.delete().forPath(path_b);
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
             }
         });
         this.bleid = bleid;
@@ -164,7 +156,7 @@ public class BZK {
      */
     public void chgPartStatus(PartConfig p) {
 //            String topic, String client, int partnum, int partid, PartitionStatus status){
-        String path = prefix + "/partitions/" + p.getTopicId() + "/" +p.getClientId() +"/" + p.getPartId();
+        String path = prefix + "/partitions/" + p.getQid() +"/" + p.getPartId();
 
         try {
             //- (part_id):  (part_num)~(part_status)~(ble_id)
@@ -186,11 +178,13 @@ public class BZK {
 
     }
 
-    public List<String[]> getBLEList()  {
+    public Map<String, String> getBLEList()  {
+        String basePath = prefix + "/" + "ble";
         try {
-            List<String[]> l = new LinkedList<>();
-            for(String p: zkClient.getChildren().forPath(prefix + "/" + "blecmd") ){
-                l.add(p.split("-"));
+            Map<String, String> l = new HashMap<>();
+            for(String bleid: zkClient.getChildren().forPath(basePath) ){
+                String cmdAddr = new String(zkClient.getData().forPath(basePath + "/" + bleid) );
+                l.put(bleid, cmdAddr);
             }
             return l;
         } catch (Exception e) {
@@ -199,23 +193,26 @@ public class BZK {
         }
     }
 
-    public void createOneTopic(String topic, String client, int partCount, int partid){
-        String basePath = prefix + "/partitions/" + topic + "/" +client;
+    public void createInitialQueue(String qid, int partCount, int partid){
+        String basePath = prefix + "/partitions/" + qid;
 
         try {
-            if(zkClient.checkExists().forPath(basePath) != null){
-                //delete all children
-                for(String c: zkClient.getChildren().forPath(basePath))
-                    zkClient.delete().forPath(basePath + "/" + c);
-            }else{
+//            if(zkClient.checkExists().forPath(basePath) != null){
+//                //delete all children
+//                for(String c: zkClient.getChildren().forPath(basePath))
+//                    zkClient.delete().forPath(basePath + "/" + c);
+//            }else{
                 zkClient.create().creatingParentsIfNeeded().forPath(basePath);
-            }
+//            }
+            List<CuratorOp> ops = new LinkedList<>();
             for(int i=0; i<partCount; i++) {
                 //- (part_id):  (part_num)~(part_status)~(ble_id)
                 String path = basePath + "/" + partid ++;
-                zkClient.create().forPath(path,
-                        ((i+1)+"~"+ PartitionStatus.SHUT.name()+"~none").getBytes());
+                ops.add(zkClient.transactionOp().create().forPath(path,
+                        ((i+1)+"~"+ PartitionStatus.SHUT.name()+"~none").getBytes())
+                );
             }
+            List<CuratorTransactionResult> rets = zkClient.transaction().forOperations(ops);
         } catch (Exception e) {
             log.error("", e);
         }
@@ -252,25 +249,18 @@ public class BZK {
     }
 
 //    public CuratorFramework getZkClient() { return zkClient; }
-    public List<String> listTotic() {
+    public List<String> listQueue() {
         String basePath = prefix + "/partitions";
         try {
             if (zkClient.checkExists().forPath(basePath) == null) {
                 return null;
             }
-            return zkClient.getChildren().forPath(basePath);
-        } catch (Exception e) {
-            log.error("", e);
-            return null;
-        }
-    }
-    public List<String> listSubscribe(String topic) {
-        String basePath = prefix + "/partitions/" + topic;
-        try {
-            if (zkClient.checkExists().forPath(basePath) == null) {
-                return null;
+            LinkedList<String> r = new LinkedList<>();
+            for(String q: zkClient.getChildren().forPath(basePath)){
+                if(q.indexOf('~') > 0)
+                    r.add(q);
             }
-            return zkClient.getChildren().forPath(basePath);
+            return r;
         } catch (Exception e) {
             log.error("", e);
             return null;
@@ -280,20 +270,18 @@ public class BZK {
 
     /**
      * 列出一个分区的全部数据
-     * @param topic
-     * @param client
+     * @param qid
      * @return
      */
-    public List<PartConfig> getParts(String topic, String client) {
-        String basePath = prefix + "/partitions/" + topic + "/" +client;
+    public List<PartConfig> getParts(String qid) {
+        String basePath = prefix + "/partitions/" + qid;
         try {
             if(zkClient.checkExists().forPath(basePath) == null){
                 return null;
             }
             List<PartConfig> r = new LinkedList<>();
             PartConfig c1 = new PartConfig();
-            c1.setTopicId(topic);
-            c1.setClientId(client);
+            c1.setQid(qid);
             for(String partid: zkClient.getChildren().forPath(basePath)) {
                 //- (part_id):  (part_num)~(part_status)~(ble_id)
                 String path = basePath + "/" + partid;
@@ -348,19 +336,32 @@ public class BZK {
     }
 
 
+    /**
+     * 初始化分区变化标识
+     */
+    public void initPartChange() {
+        String path = prefix + "/" + partChg;
+        try{
+            if(zkClient.checkExists().forPath(path) == null){
+                zkClient.create().forPath(path,
+                        String.valueOf(System.currentTimeMillis()).getBytes());
+            }else{
+                zkClient.setData().forPath(path,
+                        String.valueOf(System.currentTimeMillis()).getBytes());
+            }
+        }catch (Exception ex) {
+            log.error("", ex);
+        }
+    }
 
     /**
      * 设置分区变化回调, 以便有分区变化使更新本地数据
      * @param callback
      */
     public void watchPartChange(final CallBack callback) {
-        String path = prefix + "/" + "part_change";
+        String path = prefix + "/" + partChg;
         try{
-            if(zkClient.checkExists().forPath(path) == null){
-                zkClient.create().forPath(path,
-                        String.valueOf(System.currentTimeMillis()).getBytes());
-            }
-            zkClient.checkExists().usingWatcher(new CuratorWatcher() {
+            zkClient.getData().usingWatcher(new CuratorWatcher() {
                 @Override
                 public void process(WatchedEvent watchedEvent) throws Exception {
                     watchPartChange(callback);

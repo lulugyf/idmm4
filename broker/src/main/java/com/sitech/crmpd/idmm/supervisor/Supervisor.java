@@ -1,5 +1,8 @@
 package com.sitech.crmpd.idmm.supervisor;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
 import com.alibaba.fastjson.JSON;
 import com.sitech.crmpd.idmm.util.BZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
@@ -13,6 +16,9 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +32,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  *
- * http://www.codeceo.com/article/netty-create-thread-pools.html
  * Created by guanyf on 2017/1/24.
  */
 @Configuration
@@ -42,11 +47,12 @@ public class Supervisor implements Runnable{
     private BZK zk;
 
     private ArrayBlockingQueue<FramePacket> wait = new ArrayBlockingQueue<>(100);
-    private ReplyHandler handler = new ReplyHandler(wait);
+
     private EventLoopGroup group = new NioEventLoopGroup(5);
     private Bootstrap bootstrap;
 
-    private List<BLEState> bles = new LinkedList<>();
+    private Map<String, BLEState> bles = new HashMap<>();
+
     private Map<String, List<PartConfig>> parts = new HashMap<>(); //以 topic~client 为key的分区数据
 
     static class BLEState{
@@ -56,6 +62,7 @@ public class Supervisor implements Runnable{
         boolean isOk;
 
         int part_count;
+        long lastHeartbeat; //最后心跳时间
     }
 
     public void startup(){
@@ -88,7 +95,7 @@ public class Supervisor implements Runnable{
             query();
 
             // for test only
-            startTopic("topic", "client", 20, 10);
+            startTopic("topic~client", 20, 10);
 
         }catch(Exception ex){
             log.error("init failed", ex);
@@ -99,7 +106,7 @@ public class Supervisor implements Runnable{
     private void query() {
         log.info("query -----");
         parts.clear();
-        for(BLEState b: bles){
+        for(BLEState b: bles.values()){
             FramePacket f = new FramePacket(FrameType.CMD_PT_QUERY,
                     BMessage.c(), seq_seed++ );
             b.ch.writeAndFlush(f);
@@ -111,39 +118,36 @@ public class Supervisor implements Runnable{
 
                 List<PartConfig> l = JSON.parseArray(body, PartConfig.class);
                 for(PartConfig p: l){
-                    String k = p.getTopicId() + "~" + p.getClientId();
-                    List<PartConfig> pl = parts.getOrDefault(k, new LinkedList<>());
+                    final String qid = p.getQid();
+                    List<PartConfig> pl = parts.getOrDefault(qid, new LinkedList<>());
                     if(pl.size() == 0)
-                        parts.put(k, pl);
+                        parts.put(qid, pl);
                     pl.add(p);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
-    private void startTopic(String topic, String client, int maxOnway, int partCount) {
+    private void startTopic(String qid, int maxOnway, int partCount) {
         // TODO sort the ble list
 
-        String k = topic + "~" + client;
-        if(parts.containsKey(k)){
-            log.info("topic {} already started", k);
+        if(parts.containsKey(qid)){
+            log.info("queue {} already started", qid);
             return;
         }
 
         // and start partitions
         int partid = partid_seed;
         partid_seed += partCount;
-        zk.createOneTopic(topic, client, partCount, partid);
+        zk.createInitialQueue(qid, partCount, partid);
 
         for(int i=0; i<partCount; i++) {
             BLEState b = bles.get(i % bles.size());
 
             PartConfig p = new PartConfig();
-            p.setClientId(client);
-            p.setTopicId(topic);
+            p.setQid(qid);
             p.setMaxOnWay(maxOnway);
             p.setPartId(partid ++);
             p.setPartNum(i+1);
@@ -168,32 +172,68 @@ public class Supervisor implements Runnable{
     private void getList() {
 //        bles.clear();
 
-        for(String[] x: zk.getBLEList()) {
-            String bleid = x[1];
-            boolean found = false;
-            for(BLEState y: bles){
-                if(bleid.equals(y.id)){
-                    found = true;
-                    break;
-                }
-            }
-            if(found) continue;
+        Map<String, String> m = zk.getBLEList();
+        if(m == null) {
+            log.error("can not get ble list from zk");
+            return;
+        }
+
+        // 检查新增的ble
+        for(String bleid: m.keySet()) {
+            if(bles.containsKey(bleid))
+                continue;
+
+            // new BLE
             BLEState b = new BLEState();
-            b.id = x[1];
-            b.cmdaddr = x[0];
+            b.id = bleid;
+            b.cmdaddr = m.get(bleid);
             try{
                 String v = b.cmdaddr;
                 int p = v.indexOf(':');
                 b.ch = bootstrap.connect(v.substring(0, p), Integer.parseInt(v.substring(p+1))).sync().channel();
                 b.isOk = true;
-                bles.add(b);
+                bles.put(bleid, b);
             }catch(Exception ex){
                 log.error("", ex);
+            }
+        }
+
+        // 检查离线的ble
+        for(String bleid: bles.keySet()){
+            if(m.containsKey(bleid))
+                continue;
+
+            BLEState b = bles.remove(bleid);
+            try {
+                b.ch.close().sync();
+            } catch (InterruptedException e) {
+                log.error("close channel for bleid {} failed", bleid, e);
             }
         }
     }
 
     private void init() throws  Exception {
+
+        ActorSystem system = ActorSystem.create("supervisor");
+        ActorRef supActor = system.actorOf(Props.create(SupActor.class), "sup");
+
+        ReplyHandler handler = new ReplyHandler(supActor);
+
+        ChannelDuplexHandler idleHandler = new ChannelDuplexHandler() {
+            @Override
+            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                if (evt instanceof IdleStateEvent) {
+                    IdleStateEvent e = (IdleStateEvent) evt;
+                    if (e.state() == IdleState.READER_IDLE) {
+                        ctx.close();
+                    } else if (e.state() == IdleState.WRITER_IDLE) {
+                        log.info("write a heartbeat to {}", ctx.channel().remoteAddress());
+                        ctx.writeAndFlush(new FramePacket(FrameType.HEARTBEAT, BMessage.c(), 0));
+                    }
+                }
+            }
+        };
+
         Bootstrap b = new Bootstrap();
         b.group(group)
                 .channel(NioSocketChannel.class)
@@ -202,7 +242,8 @@ public class Supervisor implements Runnable{
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline p = ch.pipeline();
-
+                        p.addLast("idleStateHandler", new IdleStateHandler(60, 30, 0));
+                        p.addLast("idleHandler", idleHandler);
                         p.addLast(new FrameCoder());
                         p.addLast(handler);
                     }
@@ -231,7 +272,7 @@ public class Supervisor implements Runnable{
 //
 //            PartConfig p = new PartConfig();
 //            p.setClientId("clientid");
-//            p.setTopicId("topic");
+//            p.setQid("topic");
 //            p.setMaxOnWay(10);
 //            p.setPartId(12312312);
 //            p.setPartNum(1);

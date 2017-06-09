@@ -7,12 +7,30 @@ import com.sitech.crmpd.idmm.netapi.JSONSerializable;
  * 用于传输BLE的配置数据, 便于在mgr和ble间交换状态
  */
 public class PartConfig extends JSONSerializable{
-    private String topicId;
-    private String clientId;
+    private String qid;
     private int maxOnWay;
     private int partNum;
     private int partId;
     private PartitionStatus status;
+    private String[] relatedPart; // leave 状态分区的关联 join 分区
+    private long leaveTime;      // 状态变为 leave 的时间, 用于检测是否超时
+    private String bleid;
+
+    public String[] getRelatedPart() {
+        return relatedPart;
+    }
+
+    public void setRelatedPart(String[] relatedPart) {
+        this.relatedPart = relatedPart;
+    }
+
+    public long getLeaveTime() {
+        return leaveTime;
+    }
+
+    public void setLeaveTime(long leaveTime) {
+        this.leaveTime = leaveTime;
+    }
 
     public String getBleid() {
         return bleid;
@@ -22,23 +40,11 @@ public class PartConfig extends JSONSerializable{
         this.bleid = bleid;
     }
 
-    private String bleid;
-
-    public String getTopicId() {
-        return topicId;
+    public String getQid() {
+        return qid;
     }
 
-    public void setTopicId(String topicId) {
-        this.topicId = topicId;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
+    public void setQid(String qid) { this.qid = qid;    }
 
     public int getMaxOnWay() {
         return maxOnWay;
@@ -74,13 +80,12 @@ public class PartConfig extends JSONSerializable{
 
     @Override
     public String toString() {
-        return topicId + "~" + clientId + "~" + partNum;
+        return qid + "~" + partNum;
     }
 
     public PartConfig clone() {
         PartConfig c = new PartConfig();
-        c.topicId = topicId;
-        c.clientId = clientId;
+        c.qid = qid;
         c.maxOnWay = maxOnWay;
         c.partNum = partNum;
         c.partId = partId;
