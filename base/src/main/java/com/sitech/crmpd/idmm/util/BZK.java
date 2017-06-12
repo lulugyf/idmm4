@@ -288,10 +288,7 @@ public class BZK {
                 String data = new String(zkClient.getData().forPath(path));
                 PartConfig c = c1.clone();
                 c.setPartId(Integer.parseInt(partid));
-                String[] d = data.split("~");
-                c.setPartNum(Integer.parseInt(d[0]));
-                c.setStatus(PartitionStatus.valueOf(d[1]));
-                c.setBleid(d[2]);
+                c.fromZKString(data);
                 r.add(c);
             }
             return r;
@@ -335,6 +332,36 @@ public class BZK {
         }
     }
 
+    /**
+     * 更新或创建分区数据
+     * @param pc
+     */
+    public void setPart(PartConfig pc) {
+        String path = prefix + "/partitions/" + pc.getQid() + "/" + pc.getPartId();
+        try{
+            if(zkClient.checkExists().forPath(path) == null){
+                zkClient.create().forPath(path,
+                        pc.toZKString().getBytes());
+            }else{
+                zkClient.setData().forPath(path,
+                        pc.toZKString().getBytes());
+            }
+        }catch (Exception ex) {
+            log.error("", ex);
+        }
+    }
+
+    public void delPart(PartConfig pc) {
+        String path = prefix + "/partitions/" + pc.getQid() + "/" + pc.getPartId();
+        try{
+            if(zkClient.checkExists().forPath(path) == null){
+                zkClient.delete().forPath(path);
+            }
+        }catch (Exception ex) {
+            log.error("", ex);
+        }
+    }
+
 
     /**
      * 初始化分区变化标识
@@ -349,6 +376,20 @@ public class BZK {
                 zkClient.setData().forPath(path,
                         String.valueOf(System.currentTimeMillis()).getBytes());
             }
+        }catch (Exception ex) {
+            log.error("", ex);
+        }
+    }
+
+    /**
+     * 更新分区变化标记
+     */
+    public void partChanged() {
+        String path = prefix + "/" + partChg;
+        try{
+            zkClient.setData().forPath(path,
+                String.valueOf(System.currentTimeMillis()).getBytes());
+
         }catch (Exception ex) {
             log.error("", ex);
         }

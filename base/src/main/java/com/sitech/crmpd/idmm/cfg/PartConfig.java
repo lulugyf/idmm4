@@ -83,6 +83,50 @@ public class PartConfig extends JSONSerializable{
         return qid + "~" + partNum;
     }
 
+    /**
+     * 从zk的数据字符串中解出字段内容
+     * (part_num)~leave~(ble_id)[~(part_id)[,(part_id)]~(leaveTime)]
+     *
+     * @param s
+     */
+    public void fromZKString(String s) {
+        String[] d = s.split("~");
+        if(d.length < 3){
+//            log.error("part data on zk error: {}, {}", qid, partid);
+            return;
+        }
+        setPartNum(Integer.parseInt(d[0]));
+        setStatus(PartitionStatus.valueOf(d[1]));
+        setBleid(d[2]);
+        if(d.length > 3){
+            // 有关联分区数据
+            setRelatedPart(d[3].split(","));
+        }
+        if(d.length > 4){
+            // leave_time
+            setLeaveTime(Long.parseLong(d[4]));
+        }
+    }
+
+    /**
+     * 拼装zk字符串
+     * @return
+     */
+    public String toZKString() {
+        char P = '~';
+        StringBuilder sb = new StringBuilder();
+        sb.append(partNum).append(P).append(status.toString()).append(P).append(bleid);
+        if(status == PartitionStatus.LEAVE){
+            sb.append(P);
+            for(String r: relatedPart)
+                sb.append(r).append(',');
+            if(relatedPart.length > 0) sb.deleteCharAt(sb.length()-1);
+            sb.append(P).append(leaveTime);
+        }
+
+        return sb.toString();
+    }
+
     public PartConfig clone() {
         PartConfig c = new PartConfig();
         c.qid = qid;
@@ -90,7 +134,9 @@ public class PartConfig extends JSONSerializable{
         c.partNum = partNum;
         c.partId = partId;
         c.status = status;
-        c.bleid = c.bleid;
+        c.bleid = bleid;
+        c.relatedPart = relatedPart;
+        c.leaveTime = leaveTime;
         return c;
     }
 }

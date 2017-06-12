@@ -43,27 +43,13 @@ public class Supervisor implements Runnable{
     private int partid_seed =  1;
     private int seq_seed = 1;
 
+    private ActorRef supActor;
+
     @Resource
     private BZK zk;
 
-    private ArrayBlockingQueue<FramePacket> wait = new ArrayBlockingQueue<>(100);
-
     private EventLoopGroup group = new NioEventLoopGroup(5);
     private Bootstrap bootstrap;
-
-    private Map<String, BLEState> bles = new HashMap<>();
-
-    private Map<String, List<PartConfig>> parts = new HashMap<>(); //以 topic~client 为key的分区数据
-
-    static class BLEState{
-        Channel ch;
-        String id;
-        String cmdaddr;
-        boolean isOk;
-
-        int part_count;
-        long lastHeartbeat; //最后心跳时间
-    }
 
     public void startup(){
         new Thread(this).start();
@@ -81,143 +67,68 @@ public class Supervisor implements Runnable{
                     Thread.sleep(5000L);
             }
 
+
             log.info("starting supvisor");
 
-            getList();
+            zk.initPartChange();
+
+            supActor.tell(new String[]{"blelist", null}, ActorRef.noSender()); //触发更新ble列表
 
             zk.watchBLEChange(new BZK.CallBack() {
                 @Override
                 public void call() {
-                    getList();
+                    supActor.tell(new String[]{"blelist", null}, ActorRef.noSender()); //触发更新ble列表
                 }
             });
 
-            query();
-
             // for test only
-            startTopic("topic~client", 20, 10);
+//            startTopic("topic~client", 20, 10);
 
         }catch(Exception ex){
             log.error("init failed", ex);
         }
     }
 
-    // 查询分区数据
-    private void query() {
-        log.info("query -----");
-        parts.clear();
-        for(BLEState b: bles.values()){
-            FramePacket f = new FramePacket(FrameType.CMD_PT_QUERY,
-                    BMessage.c(), seq_seed++ );
-            b.ch.writeAndFlush(f);
+//    private void startTopic(String qid, int maxOnway, int partCount) {
+//        // TODO sort the ble list
+//
+//        if(parts.containsKey(qid)){
+//            log.info("queue {} already started", qid);
+//            return;
+//        }
+//
+//        // and start partitions
+//        int partid = partid_seed;
+//        partid_seed += partCount;
+//        zk.createInitialQueue(qid, partCount, partid);
+//
+//        for(int i=0; i<partCount; i++) {
+//            BLEState b = bles.get(i % bles.size());
+//
+//            PartConfig p = new PartConfig();
+//            p.setQid(qid);
+//            p.setMaxOnWay(maxOnway);
+//            p.setPartId(partid ++);
+//            p.setPartNum(i+1);
+//            p.setStatus(PartitionStatus.READY);
+//            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
+//                    BMessage.create(JSON.toJSONString(p)), seq_seed++ );
+//            b.ch.writeAndFlush(f);
+//
+//            try {
+//                log.info("reply from BLE: {}", wait.take().toString());
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//        zk.setMaxPartid(partid_seed);
+//    }
 
-            try {
-                FramePacket fr = wait.take();
-                String body = fr.getMessage().getContentAsString();
-                log.debug("query reply from BLE: {}", body);
-
-                List<PartConfig> l = JSON.parseArray(body, PartConfig.class);
-                for(PartConfig p: l){
-                    final String qid = p.getQid();
-                    List<PartConfig> pl = parts.getOrDefault(qid, new LinkedList<>());
-                    if(pl.size() == 0)
-                        parts.put(qid, pl);
-                    pl.add(p);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void startTopic(String qid, int maxOnway, int partCount) {
-        // TODO sort the ble list
-
-        if(parts.containsKey(qid)){
-            log.info("queue {} already started", qid);
-            return;
-        }
-
-        // and start partitions
-        int partid = partid_seed;
-        partid_seed += partCount;
-        zk.createInitialQueue(qid, partCount, partid);
-
-        for(int i=0; i<partCount; i++) {
-            BLEState b = bles.get(i % bles.size());
-
-            PartConfig p = new PartConfig();
-            p.setQid(qid);
-            p.setMaxOnWay(maxOnway);
-            p.setPartId(partid ++);
-            p.setPartNum(i+1);
-            p.setStatus(PartitionStatus.READY);
-            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
-                    BMessage.create(JSON.toJSONString(p)), seq_seed++ );
-            b.ch.writeAndFlush(f);
-
-            try {
-                log.info("reply from BLE: {}", wait.take().toString());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-        zk.setMaxPartid(partid_seed);
-    }
-
-    /**
-     * 与BLE的cmd端口建立连接
-     */
-    private void getList() {
-//        bles.clear();
-
-        Map<String, String> m = zk.getBLEList();
-        if(m == null) {
-            log.error("can not get ble list from zk");
-            return;
-        }
-
-        // 检查新增的ble
-        for(String bleid: m.keySet()) {
-            if(bles.containsKey(bleid))
-                continue;
-
-            // new BLE
-            BLEState b = new BLEState();
-            b.id = bleid;
-            b.cmdaddr = m.get(bleid);
-            try{
-                String v = b.cmdaddr;
-                int p = v.indexOf(':');
-                b.ch = bootstrap.connect(v.substring(0, p), Integer.parseInt(v.substring(p+1))).sync().channel();
-                b.isOk = true;
-                bles.put(bleid, b);
-            }catch(Exception ex){
-                log.error("", ex);
-            }
-        }
-
-        // 检查离线的ble
-        for(String bleid: bles.keySet()){
-            if(m.containsKey(bleid))
-                continue;
-
-            BLEState b = bles.remove(bleid);
-            try {
-                b.ch.close().sync();
-            } catch (InterruptedException e) {
-                log.error("close channel for bleid {} failed", bleid, e);
-            }
-        }
-    }
 
     private void init() throws  Exception {
 
         ActorSystem system = ActorSystem.create("supervisor");
-        ActorRef supActor = system.actorOf(Props.create(SupActor.class), "sup");
-
-        ReplyHandler handler = new ReplyHandler(supActor);
 
         ChannelDuplexHandler idleHandler = new ChannelDuplexHandler() {
             @Override
@@ -235,6 +146,10 @@ public class Supervisor implements Runnable{
         };
 
         Bootstrap b = new Bootstrap();
+
+        supActor = system.actorOf(Props.create(SupActor.class, b, zk), "sup");
+
+        ReplyHandler handler = new ReplyHandler(supActor);
         b.group(group)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)

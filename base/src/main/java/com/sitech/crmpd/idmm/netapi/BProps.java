@@ -65,14 +65,6 @@ public final class BProps<T> {
      * 是否压缩
      */
     public static final BProps<Boolean> COMPRESS = systemValueOf("compress");
-    /**
-     * 是否Rest方式压缩
-     */
-    public static final BProps<Boolean> REST_COMPRESS = systemValueOf("rest-compress");
-    /**
-     * 是否压缩
-     */
-    public static final BProps<Boolean> ENCRYPT = systemValueOf("encrypt");
 
     /**
      * 目标主题分区id
@@ -170,6 +162,7 @@ public final class BProps<T> {
      * 分区ID， 全局唯一的分区id， 有mgr分配
      */
     public static final BProps<Integer> PART_ID = systemValueOf("part-id");
+    public static final BProps<String> BLE_ID = systemValueOf("ble-id");
     /**
      * 分区序号, 从0开始递增的， 在同一个
      */
