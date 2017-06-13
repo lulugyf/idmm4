@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
 
@@ -31,8 +31,8 @@ public class BrkActor extends AbstractActor {
     public static class PartChg{
         public int part_id;
         public ActorRef ref;
-        public PartitionStatus status;
-        public PartChg(int part_id, ActorRef ref, PartitionStatus status) {
+        public PartStatus status;
+        public PartChg(int part_id, ActorRef ref, PartStatus status) {
             this.part_id = part_id;
             this.ref = ref;
             this.status = status;

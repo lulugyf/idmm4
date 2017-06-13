@@ -25,14 +25,13 @@ package com.sitech.crmpd.idmm.util;
  */
 
 import com.sitech.crmpd.idmm.cfg.PartConfig;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.transaction.CuratorOp;
 import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
-import org.apache.curator.framework.api.transaction.TransactionOp;
 import org.apache.curator.retry.RetryOneTime;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -155,7 +154,7 @@ public class BZK {
      * @param p
      */
     public void chgPartStatus(PartConfig p) {
-//            String topic, String client, int partnum, int partid, PartitionStatus status){
+//            String topic, String client, int partnum, int partid, PartStatus status){
         String path = prefix + "/partitions/" + p.getQid() +"/" + p.getPartId();
 
         try {
@@ -209,7 +208,7 @@ public class BZK {
                 //- (part_id):  (part_num)~(part_status)~(ble_id)
                 String path = basePath + "/" + partid ++;
                 ops.add(zkClient.transactionOp().create().forPath(path,
-                        ((i+1)+"~"+ PartitionStatus.SHUT.name()+"~none").getBytes())
+                        ((i+1)+"~"+ PartStatus.SHUT.name()+"~none").getBytes())
                 );
             }
             List<CuratorTransactionResult> rets = zkClient.transaction().forOperations(ops);

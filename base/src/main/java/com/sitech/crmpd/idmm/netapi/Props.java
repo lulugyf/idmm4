@@ -4,7 +4,7 @@
 package com.sitech.crmpd.idmm.netapi;
 
 import com.google.common.collect.Maps;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 
 import java.util.Map;
 
@@ -181,7 +181,7 @@ public final class Props<T> {
     /**
      * 分区状态， 1-ready 2-joining 3-leaving 9-shut
      */
-    public static final Props<PartitionStatus> PART_STATUS = systemValueOf("part-status");
+    public static final Props<PartStatus> PART_STATUS = systemValueOf("part-status");
     /**
      * broker 标识id
      */

@@ -8,19 +8,26 @@ import com.sitech.crmpd.idmm.netapi.JSONSerializable;
  */
 public class PartConfig extends JSONSerializable{
     private String qid;
-    private int maxOnWay;
     private int partNum;
     private int partId;
-    private PartitionStatus status;
-    private String[] relatedPart; // leave 状态分区的关联 join 分区
+    private PartStatus status;
+    private int[] relatedPart; // leave 状态分区的关联 join 分区id
     private long leaveTime;      // 状态变为 leave 的时间, 用于检测是否超时
     private String bleid;
 
-    public String[] getRelatedPart() {
+    // 从配置中继承过来的参数
+    private int maxRequest;
+    private int minTimeout;
+    private int maxTimeout;
+    private int consumeSpeedLimit;
+    private int maxMessages;
+    private int warnMessages;
+
+    public int[] getRelatedPart() {
         return relatedPart;
     }
 
-    public void setRelatedPart(String[] relatedPart) {
+    public void setRelatedPart(int[] relatedPart) {
         this.relatedPart = relatedPart;
     }
 
@@ -46,12 +53,12 @@ public class PartConfig extends JSONSerializable{
 
     public void setQid(String qid) { this.qid = qid;    }
 
-    public int getMaxOnWay() {
-        return maxOnWay;
+    public int getMaxRequest() {
+        return maxRequest;
     }
 
-    public void setMaxOnWay(int maxOnWay) {
-        this.maxOnWay = maxOnWay;
+    public void setMaxRequest(int maxRequest) {
+        this.maxRequest = maxRequest;
     }
 
     public int getPartNum() {
@@ -70,12 +77,53 @@ public class PartConfig extends JSONSerializable{
         this.partId = partId;
     }
 
-    public PartitionStatus getStatus() {
+    public PartStatus getStatus() {
         return status;
     }
 
-    public void setStatus(PartitionStatus status) {
+    public void setStatus(PartStatus status) {
         this.status = status;
+    }
+
+
+    public int getMinTimeout() {
+        return minTimeout;
+    }
+
+    public void setMinTimeout(int minTimeout) {
+        this.minTimeout = minTimeout;
+    }
+
+    public int getMaxTimeout() {
+        return maxTimeout;
+    }
+
+    public void setMaxTimeout(int maxTimeout) {
+        this.maxTimeout = maxTimeout;
+    }
+
+    public int getConsumeSpeedLimit() {
+        return consumeSpeedLimit;
+    }
+
+    public void setConsumeSpeedLimit(int consumeSpeedLimit) {
+        this.consumeSpeedLimit = consumeSpeedLimit;
+    }
+
+    public int getMaxMessages() {
+        return maxMessages;
+    }
+
+    public void setMaxMessages(int maxMessages) {
+        this.maxMessages = maxMessages;
+    }
+
+    public int getWarnMessages() {
+        return warnMessages;
+    }
+
+    public void setWarnMessages(int warnMessages) {
+        this.warnMessages = warnMessages;
     }
 
     @Override
@@ -96,11 +144,15 @@ public class PartConfig extends JSONSerializable{
             return;
         }
         setPartNum(Integer.parseInt(d[0]));
-        setStatus(PartitionStatus.valueOf(d[1]));
+        setStatus(PartStatus.valueOf(d[1]));
         setBleid(d[2]);
         if(d.length > 3){
             // 有关联分区数据
-            setRelatedPart(d[3].split(","));
+            String[] v = d[3].split(",");
+            int[] r = new int[v.length];
+            for(int i=0; i<v.length; i++)
+                r[i] = Integer.parseInt(v[i]);
+            setRelatedPart(r);
         }
         if(d.length > 4){
             // leave_time
@@ -116,9 +168,9 @@ public class PartConfig extends JSONSerializable{
         char P = '~';
         StringBuilder sb = new StringBuilder();
         sb.append(partNum).append(P).append(status.toString()).append(P).append(bleid);
-        if(status == PartitionStatus.LEAVE){
+        if(status == PartStatus.LEAVE){
             sb.append(P);
-            for(String r: relatedPart)
+            for(int r: relatedPart)
                 sb.append(r).append(',');
             if(relatedPart.length > 0) sb.deleteCharAt(sb.length()-1);
             sb.append(P).append(leaveTime);
@@ -130,13 +182,61 @@ public class PartConfig extends JSONSerializable{
     public PartConfig clone() {
         PartConfig c = new PartConfig();
         c.qid = qid;
-        c.maxOnWay = maxOnWay;
+        c.maxRequest = maxRequest;
         c.partNum = partNum;
         c.partId = partId;
         c.status = status;
         c.bleid = bleid;
         c.relatedPart = relatedPart;
         c.leaveTime = leaveTime;
+        c.minTimeout = minTimeout;
+        c.maxTimeout = maxTimeout;
+        c.consumeSpeedLimit = consumeSpeedLimit;
+        c.maxMessages = maxMessages;
+        c.warnMessages = warnMessages;
+
         return c;
+    }
+
+    /**
+     * 从队列配置中copy参数
+     * @param qc
+     */
+    public void copyConf(QueueConfig qc){
+        maxRequest = qc.getMaxRequest();
+        minTimeout = qc.getMinTimeout();
+        maxTimeout = qc.getMaxTimeout();
+        consumeSpeedLimit = qc.getConsumeSpeedLimit();
+        maxMessages = qc.getMaxMessages();
+        warnMessages = qc.getWarnMessages();
+    }
+
+    /**
+     * 检查leave分区是否与指定分区关联
+     * @param partid
+     * @return
+     */
+    public boolean existsRelPart(int partid) {
+        if(status != PartStatus.LEAVE)
+            return false;
+        if(relatedPart == null)
+            return false;
+        for(int i: relatedPart)
+            if(i == partid) return true;
+        return false;
+    }
+
+    public void addRelPart(int partid) {
+        if(relatedPart == null)
+            relatedPart = new int[]{partid};
+        else{
+            int[] r = new int[relatedPart.length+1];
+            System.arraycopy(relatedPart, 0, r, 0, relatedPart.length);
+            r[r.length-1] = partid;
+        }
+    }
+
+    public String tag() {
+        return qid + " num:"+partNum + " id:"+partId;
     }
 }

@@ -35,6 +35,15 @@ public class ConsistentHash<T> {
         }
     }
 
+    /**
+     * 预判新加入节点 会影响到的节点, 暂时不考虑使用vnode(numberOfReplicas>1)的情况
+     * @param node
+     * @return
+     */
+    public T affected(T node) {
+        return get(node.toString()+0);
+    }
+
     public T get(Object key) {
         if (circle.isEmpty()) {
             return null;
@@ -74,17 +83,7 @@ public class ConsistentHash<T> {
             System.out.println(n + ":" + m.get(n));
         }
 
-        // test for json string-escape
-        JSONObject j = new JSONObject();
-        j.put("href", "http://google.com");
-        j.put("weight", 182);
-        System.out.println(j.toJSONString());
-
-        String s = "{\"weight\":182,\"href\":\"http:\\/\\/google.com\"}";
-
-        JSONObject j1 = JSONObject.parseObject(s);
-        System.out.println(s);
-        System.out.println(j1.get("href"));
+        ch.remove("hello");
     }
 
 }

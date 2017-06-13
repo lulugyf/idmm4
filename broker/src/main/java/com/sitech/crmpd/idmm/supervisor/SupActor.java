@@ -145,10 +145,27 @@ public class SupActor extends AbstractActor {
                     b.parts.add(p);
                 }
                 b.query_stat = System.currentTimeMillis(); // 已执行过查询， 更新状态
+
+                checkQueryDone();
+
             }
                 break;
 
         }
+
+    }
+
+    /**
+     * 检查是否全部BLE都查询过了
+     */
+    private void checkQueryDone() {
+        // TODO check if all query done, then start check parts
+        for(BLEState b: bles.values()){
+            if(b.query_stat == 0)
+                return;
+        }
+
+        log.info("begin check parts");
 
     }
 }

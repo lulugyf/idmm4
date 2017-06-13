@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * 分区状态
  */
-public enum PartitionStatus {
+public enum PartStatus {
     READY(1),
     JOIN(2),
     LEAVE(3),
@@ -15,22 +15,22 @@ public enum PartitionStatus {
     ;
 
     private int code;
-    private static final Map<Integer, PartitionStatus> intToTypeMap
+    private static final Map<Integer, PartStatus> intToTypeMap
             = new HashMap<>();
 
     static {
-        for (PartitionStatus type : PartitionStatus.values()) {
+        for (PartStatus type : PartStatus.values()) {
             intToTypeMap.put(type.code, type);
         }
     }
-    public static PartitionStatus valueOf(int i) {
-        PartitionStatus type = intToTypeMap.get(i);
+    public static PartStatus valueOf(int i) {
+        PartStatus type = intToTypeMap.get(i);
         if (type == null)
             return UNDEFINE;
         return type;
     }
 
-    private PartitionStatus(int i) {
+    private PartStatus(int i) {
         code = i;
     }
     public int code() {

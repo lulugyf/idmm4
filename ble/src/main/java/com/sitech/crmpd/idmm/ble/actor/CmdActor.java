@@ -7,7 +7,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.alibaba.fastjson.JSON;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 import com.sitech.crmpd.idmm.netapi.*;
 import com.sitech.crmpd.idmm.util.BZK;
 import io.netty.channel.Channel;
@@ -140,7 +140,7 @@ public class CmdActor extends AbstractActor {
     private BMessage chgPartStatus(BMessage m) {
         try {
             int part_id = m.p(BProps.PART_ID);
-            PartitionStatus status = m.getEnumProperty(BProps.PART_STATUS, PartitionStatus.class);
+            PartStatus status = m.getEnumProperty(BProps.PART_STATUS, PartStatus.class);
             if(!parts.containsKey(part_id)){
                 return BMessage.c()
                         .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)

@@ -9,7 +9,7 @@ import com.sitech.crmpd.idmm.ble.mem.JournalOP;
 import com.sitech.crmpd.idmm.ble.mem.MemQueue;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.netapi.*;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 import io.netty.channel.Channel;
 
 /**
@@ -23,7 +23,7 @@ public class MemActor extends AbstractActor {
     private int maxOnWay;
     private int part_num ;
     private int part_id;
-    private PartitionStatus status;
+    private PartStatus status;
     private PartConfig c;
     private MemQueue mq;
 
@@ -46,9 +46,9 @@ public class MemActor extends AbstractActor {
         this.part_num = c.getPartNum();
         this.part_id = c.getPartId();
         this.status = c.getStatus();
-        maxOnWay = c.getMaxOnWay();
+        maxOnWay = c.getMaxRequest();
         mq = new MemQueue(client_id, topic_id, maxOnWay);
-        if(status == PartitionStatus.READY) {
+        if(status == PartStatus.READY) {
             // TODO loading index data from store
             new Thread(){
                 public void run() {
@@ -96,7 +96,7 @@ public class MemActor extends AbstractActor {
                         log.error("receive oper failed", ex);
                     }
                 })
-                .match(PartitionStatus.class, s ->{
+                .match(PartStatus.class, s ->{
                     log.warning("part {} status changed, from {} to {}", part_id, status, s);
                     status = s;
                 })
@@ -142,14 +142,14 @@ public class MemActor extends AbstractActor {
         String desc = null;
         switch(tp){
             case BRK_SEND_COMMIT:
-                r = status == PartitionStatus.LEAVE;
+                r = status == PartStatus.LEAVE;
                 desc = "leaving not allow send";
                 break;
             case BRK_COMMIT:
             case BRK_PULL:
             case BRK_RETRY:
             case BRK_SKIP:
-                r = status == PartitionStatus.JOIN;
+                r = status == PartStatus.JOIN;
                 desc = "joining now allow consume";
                 break;
         }

@@ -2,11 +2,10 @@ package com.sitech.crmpd.idmm.supervisor;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Cancellable;
 import akka.actor.Props;
-import com.alibaba.fastjson.JSON;
+import com.sitech.crmpd.idmm.broker.config.Loader;
 import com.sitech.crmpd.idmm.util.BZK;
-import com.sitech.crmpd.idmm.cfg.PartConfig;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
 import com.sitech.crmpd.idmm.netapi.BMessage;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
 import com.sitech.crmpd.idmm.netapi.FramePacket;
@@ -22,13 +21,10 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import scala.concurrent.duration.Duration;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -43,10 +39,14 @@ public class Supervisor implements Runnable{
     private int partid_seed =  1;
     private int seq_seed = 1;
 
+    private ActorSystem system;
     private ActorRef supActor;
 
     @Resource
     private BZK zk;
+
+    @Resource
+    private Loader conf;
 
     private EventLoopGroup group = new NioEventLoopGroup(5);
     private Bootstrap bootstrap;
@@ -81,6 +81,13 @@ public class Supervisor implements Runnable{
                 }
             });
 
+            //启动定时器， 触发核对分区
+            Cancellable cancellable = system.scheduler().schedule(
+                    Duration.create(5, TimeUnit.SECONDS), // start with 5 sec
+                    Duration.create(5, TimeUnit.SECONDS), // every 5 sec
+                    supActor, "Tick",
+                    system.dispatcher(), null);
+
             // for test only
 //            startTopic("topic~client", 20, 10);
 
@@ -107,10 +114,10 @@ public class Supervisor implements Runnable{
 //
 //            PartConfig p = new PartConfig();
 //            p.setQid(qid);
-//            p.setMaxOnWay(maxOnway);
+//            p.setMaxRequest(maxOnway);
 //            p.setPartId(partid ++);
 //            p.setPartNum(i+1);
-//            p.setStatus(PartitionStatus.READY);
+//            p.setStatus(PartStatus.READY);
 //            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
 //                    BMessage.create(JSON.toJSONString(p)), seq_seed++ );
 //            b.ch.writeAndFlush(f);
@@ -128,7 +135,7 @@ public class Supervisor implements Runnable{
 
     private void init() throws  Exception {
 
-        ActorSystem system = ActorSystem.create("supervisor");
+        system = ActorSystem.create("supervisor");
 
         ChannelDuplexHandler idleHandler = new ChannelDuplexHandler() {
             @Override
@@ -188,10 +195,10 @@ public class Supervisor implements Runnable{
 //            PartConfig p = new PartConfig();
 //            p.setClientId("clientid");
 //            p.setQid("topic");
-//            p.setMaxOnWay(10);
+//            p.setMaxRequest(10);
 //            p.setPartId(12312312);
 //            p.setPartNum(1);
-//            p.setStatus(PartitionStatus.READY);
+//            p.setStatus(PartStatus.READY);
 //            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
 //                    BMessage.create(p.toString()) );
 //            ch.writeAndFlush(f);

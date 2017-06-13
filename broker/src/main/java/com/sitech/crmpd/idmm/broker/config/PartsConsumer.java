@@ -1,7 +1,7 @@
 package com.sitech.crmpd.idmm.broker.config;
 
 import com.sitech.crmpd.idmm.cfg.PartConfig;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,14 +30,14 @@ public class PartsConsumer {
         public String bleid;
         public int num;
         public int id;
-        public PartitionStatus status;
+        public PartStatus status;
 
         //下面是需要更新的数据, 用于综合计算后作为排序依据, 这些数据从pull的应答中获得
         protected int max_priority; // 分区积压消息的最大优先级
         protected int msg_count;    // 分区积压的消息数量
         protected int onway_left;   // 可用在途消息数
 
-        public SPart(String bleid, int num, int id, PartitionStatus status){
+        public SPart(String bleid, int num, int id, PartStatus status){
             this.bleid = bleid;
             this.num = num;
             this.id = id;
