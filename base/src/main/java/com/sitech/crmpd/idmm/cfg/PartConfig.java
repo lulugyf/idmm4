@@ -23,6 +23,20 @@ public class PartConfig extends JSONSerializable{
     private int maxMessages;
     private int warnMessages;
 
+    private int runStatus = 0; //运行状态 -1-等待关联分区启动 0-分配未启动 1-已启动 2-leave-done
+    public static final int RUN_STATUS_INIT = 0; //允许执行任务
+    public static final int RUN_STATUS_STARTED = 1; //执行完成
+    public static final int RUN_STATUS_LEAVEDONE = 2; //leave状态分区消费完成
+    public static final int RUN_STATUS_WAIT = -1; //不允许执行
+
+    public int getRunStatus() {
+        return runStatus;
+    }
+
+    public void setRunStatus(int runStatus) {
+        this.runStatus = runStatus;
+    }
+
     public int[] getRelatedPart() {
         return relatedPart;
     }
@@ -126,9 +140,20 @@ public class PartConfig extends JSONSerializable{
         this.warnMessages = warnMessages;
     }
 
+    /**
+     * this method is to ConsistentHash
+     * @return
+     */
     @Override
     public String toString() {
         return qid + "~" + partNum;
+    }
+
+
+    public void leave() {
+        status = PartStatus.LEAVE;
+        leaveTime = System.currentTimeMillis();
+        runStatus = RUN_STATUS_WAIT;
     }
 
     /**
@@ -167,8 +192,9 @@ public class PartConfig extends JSONSerializable{
     public String toZKString() {
         char P = '~';
         StringBuilder sb = new StringBuilder();
-        sb.append(partNum).append(P).append(status.toString()).append(P).append(bleid);
-        if(status == PartStatus.LEAVE){
+        sb.append(partNum).append(P).append(status.toString()).append(P).append(bleid==null?"":bleid);
+        if((status == PartStatus.LEAVE || status == PartStatus.JOIN)
+                && relatedPart != null){
             sb.append(P);
             for(int r: relatedPart)
                 sb.append(r).append(',');
@@ -226,6 +252,10 @@ public class PartConfig extends JSONSerializable{
         return false;
     }
 
+    /**
+     * 添加关联分区
+     * @param partid
+     */
     public void addRelPart(int partid) {
         if(relatedPart == null)
             relatedPart = new int[]{partid};
@@ -233,10 +263,39 @@ public class PartConfig extends JSONSerializable{
             int[] r = new int[relatedPart.length+1];
             System.arraycopy(relatedPart, 0, r, 0, relatedPart.length);
             r[r.length-1] = partid;
+            relatedPart = r;
         }
+    }
+    public boolean relPartExists(int partid){
+        if(relatedPart == null)
+            return false;
+        for(int i: relatedPart){
+            if(i == partid){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 删除关联分区
+     * @param partid
+     * @return
+     */
+    public boolean removeRelPart(int partid) {
+        boolean found = relPartExists(partid);
+        if(found){
+            int[] r = new int[relatedPart.length-1];
+            int j=0;
+            for(int i: relatedPart){
+                if(i!=partid) r[j++] = i;
+            }
+            relatedPart = r;
+        }
+        return found;
     }
 
     public String tag() {
-        return qid + " num:"+partNum + " id:"+partId;
+        return qid + " num:"+partNum + " id:"+partId + " "+status;
     }
 }

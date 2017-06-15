@@ -2,12 +2,11 @@ package com.sitech.crmpd.idmm.supervisor;
 
 import akka.actor.ActorRef;
 import com.sitech.crmpd.idmm.supervisor.stru.BLEState;
-import com.sitech.crmpd.idmm.util.BZK;
+import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.bootstrap.Bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +24,7 @@ public class Tools {
      * @param bootstrap
      * @return
      */
-    public static void bleListChg(Map<String, BLEState> bles, BZK zk, Bootstrap bootstrap, ActorRef ref) {
+    public static void bleListChg(Map<String, BLEState> bles, ZK zk, Bootstrap bootstrap, ActorRef ref) {
 //        bles.clear();
 
         Map<String, String> m = zk.getBLEList();
@@ -46,7 +45,9 @@ public class Tools {
             try{
                 String v = b.cmdaddr;
                 int p = v.indexOf(':');
+                log.debug("begin connect to ble {}", bleid);
                 b.ch = bootstrap.connect(v.substring(0, p), Integer.parseInt(v.substring(p+1))).sync().channel();
+                log.debug("ble {} connected", bleid);
                 b.isOk = true;
                 bles.put(bleid, b);
                 // done new ble online, send query for parts

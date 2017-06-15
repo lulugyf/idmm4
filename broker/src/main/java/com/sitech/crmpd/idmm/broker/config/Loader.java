@@ -38,7 +38,7 @@ public class Loader {
                     @Override
                     public void processRow(ResultSet rs) throws SQLException {
                         // select b.client_id, b.dest_topic_id, b.max_request, b.min_timeout,
-                        //b.max_timeout,b.consume_speed_limit, b.max_messages, b.warn_messages
+                        //b.max_timeout,b.consume_speed_limit, b.max_messages, b.warn_messages, b.part_count
                         //from tc_topic_sub_{version} b
                         QueueConfig c = new QueueConfig();
                         int idx = 0;
@@ -50,6 +50,7 @@ public class Loader {
                         c.setConsumeSpeedLimit(rs.getInt(++idx));
                         c.setMaxMessages(rs.getInt(++idx));
                         c.setWarnMessages(rs.getInt(++idx));
+                        c.setPartCount(rs.getInt(++idx));
 
                         ql.add(c);
                     }

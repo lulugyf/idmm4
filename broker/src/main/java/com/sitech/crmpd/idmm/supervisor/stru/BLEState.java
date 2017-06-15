@@ -18,7 +18,7 @@ public class BLEState implements Comparable<BLEState>{
 
     public List<PartConfig> parts = new LinkedList<>();
     public long lastHeartbeat; //最后心跳时间
-    public long query_stat = 0L; //查询时间， 为0则没有执行过查询
+    public int stat = -1; //状态： -1 - 初始化未连接 0-已连接成功 1-已执行查询
 
     @Override
     public int compareTo(BLEState o) {

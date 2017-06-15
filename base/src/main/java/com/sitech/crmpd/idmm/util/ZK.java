@@ -47,8 +47,8 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-public class BZK {
-    private static final Logger log = LoggerFactory.getLogger(BZK.class);
+public class ZK {
+    private static final Logger log = LoggerFactory.getLogger(ZK.class);
 
     @Value("${zk.addr}")
     private String zk_addr;

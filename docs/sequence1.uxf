@@ -304,7 +304,7 @@ change notify</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1377</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -315,7 +315,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1413</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>450</h>
     </coordinates>
@@ -326,7 +326,7 @@ change notify</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1512</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -337,7 +337,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>450</h>
     </coordinates>
@@ -348,7 +348,7 @@ change notify</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1647</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -359,7 +359,7 @@ change notify</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1782</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -370,7 +370,7 @@ change notify</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>2052</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -381,7 +381,7 @@ change notify</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>2187</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -392,7 +392,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1683</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>450</h>
     </coordinates>
@@ -403,7 +403,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1818</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>450</h>
     </coordinates>
@@ -414,7 +414,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2088</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>459</h>
     </coordinates>
@@ -425,7 +425,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2223</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>468</h>
     </coordinates>
@@ -436,7 +436,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1413</x>
-      <y>873</y>
+      <y>1008</y>
       <w>162</w>
       <h>36</h>
     </coordinates>
@@ -448,7 +448,7 @@ delete n part(s) from Q</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>918</y>
+      <y>1053</y>
       <w>297</w>
       <h>45</h>
     </coordinates>
@@ -461,7 +461,7 @@ delete n part(s) from Q</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1917</x>
-      <y>837</y>
+      <y>972</y>
       <w>90</w>
       <h>27</h>
     </coordinates>
@@ -472,7 +472,7 @@ delete n part(s) from Q</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1953</x>
-      <y>855</y>
+      <y>990</y>
       <w>27</w>
       <h>468</h>
     </coordinates>
@@ -483,7 +483,7 @@ delete n part(s) from Q</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>990</y>
+      <y>1125</y>
       <w>432</w>
       <h>45</h>
     </coordinates>
@@ -496,7 +496,7 @@ delete n part(s) from Q</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>1098</y>
+      <y>1233</y>
       <w>432</w>
       <h>36</h>
     </coordinates>
@@ -508,7 +508,7 @@ delete n part(s) from Q</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>1116</y>
+      <y>1251</y>
       <w>297</w>
       <h>36</h>
     </coordinates>
@@ -520,7 +520,7 @@ delete n part(s) from Q</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>1134</y>
+      <y>1269</y>
       <w>567</w>
       <h>36</h>
     </coordinates>
@@ -532,7 +532,7 @@ update zk data</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2088</x>
-      <y>1044</y>
+      <y>1179</y>
       <w>162</w>
       <h>36</h>
     </coordinates>
@@ -544,7 +544,7 @@ change notify</panel_attributes>
     <id>UMLFrame</id>
     <coordinates>
       <x>1377</x>
-      <y>801</y>
+      <y>936</y>
       <w>171</w>
       <h>27</h>
     </coordinates>
@@ -1660,7 +1660,7 @@ bg=red</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>891</y>
+      <y>1026</y>
       <w>135</w>
       <h>45</h>
     </coordinates>
@@ -1680,7 +1680,7 @@ bg=red</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>936</y>
+      <y>1071</y>
       <w>297</w>
       <h>36</h>
     </coordinates>
@@ -1692,7 +1692,7 @@ reply</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>954</y>
+      <y>1089</y>
       <w>162</w>
       <h>45</h>
     </coordinates>
@@ -1705,7 +1705,7 @@ reply</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>972</y>
+      <y>1107</y>
       <w>162</w>
       <h>36</h>
     </coordinates>
@@ -1717,7 +1717,7 @@ reply</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>1008</y>
+      <y>1143</y>
       <w>432</w>
       <h>36</h>
     </coordinates>
@@ -1729,7 +1729,7 @@ reply</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>1026</y>
+      <y>1161</y>
       <w>567</w>
       <h>36</h>
     </coordinates>
@@ -1741,7 +1741,7 @@ reply</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1917</x>
-      <y>1071</y>
+      <y>1206</y>
       <w>90</w>
       <h>36</h>
     </coordinates>
@@ -1755,7 +1755,7 @@ bg=yellow</panel_attributes>
     <id>UMLState</id>
     <coordinates>
       <x>1647</x>
-      <y>1179</y>
+      <y>1314</y>
       <w>90</w>
       <h>36</h>
     </coordinates>
@@ -1769,7 +1769,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1539</x>
-      <y>1215</y>
+      <y>1350</y>
       <w>180</w>
       <h>36</h>
     </coordinates>
@@ -1781,7 +1781,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1548</x>
-      <y>1233</y>
+      <y>1368</y>
       <w>567</w>
       <h>36</h>
     </coordinates>
@@ -1793,7 +1793,7 @@ update zk data</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2088</x>
-      <y>1152</y>
+      <y>1287</y>
       <w>162</w>
       <h>36</h>
     </coordinates>
@@ -1805,7 +1805,7 @@ change notify</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2088</x>
-      <y>1251</y>
+      <y>1386</y>
       <w>162</w>
       <h>36</h>
     </coordinates>
@@ -2416,5 +2416,50 @@ bg=blue</panel_attributes>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1377</x>
+      <y>1431</y>
+      <w>504</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>style=wordwrap
+fg=white
+bg=blue
+删除分区后的分区结构可能情况列举, ()内字段说明： partid partnum status [related partid(s)]
+1. 非连续的单个分区删除：
+     (id1 n JOIN) (id2 n LEAVE id1) (id3 m LEAVE id1)
+     其中要删除的是分区是id3, 关联分区保存在JOIN分区上
+
+2. 有环上连续超过一个分区被删除
+	(id1 n JOIN) (id2 n LEAVE id1) (id3 m LEAVE id1) (id4 j LEAVE id1) ...
+
+3. 全部分区都被删除
+   ((id1 m LEAVE) (id2 n LEAVE) (id3 o LEAVE) ...</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1377</x>
+      <y>756</y>
+      <w>504</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>style=wordwrap
+fg=white
+bg=blue
+增加分区后的分区结构可能情况列举, ()内字段说明： partid partnum status [related partid(s)]
+1. 非连续的单个分区添加(id1为新增分区)：
+   (id1 n JOIN) (id2 m JOIN) (id3 m LEAVE id1,id2)
+
+2. 有环上连续超过一个分区被添加
+	(id2 m LEAVE id1,id3,id4,id5...) (id1 m JOIN) (id3 n JOIN) (id4 o JOIN) (id5 p JOIN) ...
+
+3. 全部分区都是新添加的
+   ((id1 m READY) (id2 n READY) (id3 o READY) ...</panel_attributes>
+    <additional_attributes/>
   </element>
 </diagram>

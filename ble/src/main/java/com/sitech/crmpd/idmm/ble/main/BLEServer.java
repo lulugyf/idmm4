@@ -5,7 +5,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.ble.actor.*;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
-import com.sitech.crmpd.idmm.util.BZK;
+import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -42,7 +42,7 @@ public class BLEServer {
     private int persistentCount; //持久化actor数量
 
     @Resource
-    private BZK zk;
+    private ZK zk;
 
     private String bleid;
 

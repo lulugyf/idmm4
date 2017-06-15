@@ -1,6 +1,6 @@
 package com.sitech.crmpd.idmm.broker.config;
 
-import com.sitech.crmpd.idmm.util.BZK;
+import com.sitech.crmpd.idmm.util.ZK;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.util.ch.ConsistentHash;
 import com.sitech.crmpd.idmm.util.ch.StrHashFunction;
@@ -61,7 +61,7 @@ public class PartsProducer {
      * 从zk获取全部的分区数据
      * @param zk
      */
-    public void setAllParts(BZK zk, PartsConsumer cp) {
+    public void setAllParts(ZK zk, PartsConsumer cp) {
         for(String qid: zk.listQueue()) {
             Sub s = new Sub();
             List<PartConfig> pl = zk.getParts(qid);

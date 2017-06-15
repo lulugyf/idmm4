@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSON;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartStatus;
 import com.sitech.crmpd.idmm.netapi.*;
-import com.sitech.crmpd.idmm.util.BZK;
+import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.channel.Channel;
 
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class CmdActor extends AbstractActor {
     // 保存最后发送消息给本BLE的supervisor的channel, 以便进行状态通知(leaving的分区消费完毕)
     private Channel supervisor;
 
-    private BZK zk;
+    private ZK zk;
 
     public static class Msg {
         Channel channel;
@@ -74,15 +74,19 @@ public class CmdActor extends AbstractActor {
         }else if("reply".equals(s.name)){
             reply = s.ref;
         }else if("zk".equals(s.name)) {
-            zk = (BZK)s.obj;
+            zk = (ZK)s.obj;
         }
     }
 
     // 接收到从 MemActor 状态更改完成的消息， 此消息只用于修改zk状态
     private void onReceive(PartConfig s){
-        zk.chgPartStatus(s);
+        //zk.chgPartStatus(s);
     }
 
+    /**
+     * 处理从supervisor 过来的请求
+     * @param s
+     */
     private void onReceive(Msg s) {
         supervisor = s.channel;
 
@@ -120,7 +124,7 @@ public class CmdActor extends AbstractActor {
         FramePacket pr = new FramePacket(
                 FrameType.valueOfCode(p.getType().code()|0x80),
                 mr, p.getSeq());
-        reply.tell( new ReplyActor.Msg(s.channel, pr), getSelf());
+        s.channel.writeAndFlush(pr);
     }
 
     private BMessage query(BMessage m) {
@@ -180,6 +184,7 @@ public class CmdActor extends AbstractActor {
                         .p(BProps.RESULT_DESC, "part_id " + c.getPartId() + " dulplicated");
             }
 
+            // 创建分区 actor
             ActorRef mem = getContext().actorOf(
                     Props.create(MemActor.class, c, store, brk, reply, getSelf()),
                     String.valueOf(part_id));

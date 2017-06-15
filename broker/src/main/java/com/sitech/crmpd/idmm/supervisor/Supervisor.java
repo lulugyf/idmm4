@@ -5,7 +5,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.broker.config.Loader;
-import com.sitech.crmpd.idmm.util.BZK;
+import com.sitech.crmpd.idmm.util.ZK;
 import com.sitech.crmpd.idmm.netapi.BMessage;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
 import com.sitech.crmpd.idmm.netapi.FramePacket;
@@ -43,7 +43,7 @@ public class Supervisor implements Runnable{
     private ActorRef supActor;
 
     @Resource
-    private BZK zk;
+    private ZK zk;
 
     @Resource
     private Loader conf;
@@ -72,21 +72,30 @@ public class Supervisor implements Runnable{
 
             zk.initPartChange();
 
-            supActor.tell(new String[]{"blelist", null}, ActorRef.noSender()); //触发更新ble列表
+            //延迟2秒 触发更新ble列表
+            system.scheduler().scheduleOnce(Duration.create(2, TimeUnit.SECONDS),
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            supActor.tell(new String[]{"blelist", null}, ActorRef.noSender());
+                        }
+                    }, system.dispatcher());
 
-            zk.watchBLEChange(new BZK.CallBack() {
+
+            //zk上ble列表变化， 触发更新ble列表
+            zk.watchBLEChange(new ZK.CallBack() {
                 @Override
                 public void call() {
-                    supActor.tell(new String[]{"blelist", null}, ActorRef.noSender()); //触发更新ble列表
+                    supActor.tell(new String[]{"blelist", null}, ActorRef.noSender());
                 }
             });
 
-            //启动定时器， 触发核对分区
+            //启动定时器， 触发核对分区数据
             Cancellable cancellable = system.scheduler().schedule(
                     Duration.create(5, TimeUnit.SECONDS), // start with 5 sec
                     Duration.create(5, TimeUnit.SECONDS), // every 5 sec
-                    supActor, "Tick",
-                    system.dispatcher(), null);
+                    supActor, new String[]{"Tick", ""},
+                    system.dispatcher(), ActorRef.noSender());
 
             // for test only
 //            startTopic("topic~client", 20, 10);
@@ -154,7 +163,7 @@ public class Supervisor implements Runnable{
 
         Bootstrap b = new Bootstrap();
 
-        supActor = system.actorOf(Props.create(SupActor.class, b, zk), "sup");
+        supActor = system.actorOf(Props.create(SupActor.class, b, zk, conf), "sup");
 
         ReplyHandler handler = new ReplyHandler(supActor);
         b.group(group)

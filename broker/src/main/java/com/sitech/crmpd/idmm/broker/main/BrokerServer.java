@@ -6,7 +6,7 @@ import akka.actor.Props;
 import com.sitech.crmpd.idmm.broker.actor.*;
 import com.sitech.crmpd.idmm.broker.config.Config;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
-import com.sitech.crmpd.idmm.util.BZK;
+import com.sitech.crmpd.idmm.util.ZK;
 import com.sitech.crmpd.idmm.client.api.Message;
 import com.sitech.crmpd.idmm.supervisor.Supervisor;
 import com.sitech.crmpd.idmm.transport.FrameCodeC;
@@ -55,7 +55,7 @@ public class BrokerServer {
     private LogicHandler logicHandler;
 
     @Resource
-    private BZK zk;
+    private ZK zk;
     private String bleid;
 
     @Resource
@@ -186,7 +186,7 @@ public class BrokerServer {
             partsGetter.tell(1, ActorRef.noSender()); //进行第一次延迟更新分区数据
 
             // DONE 已经添加了分区变化的更新监视, 但需要做延迟处理, 一个避免过于频繁的更新, 另一个避免漏掉更新
-            zk.watchPartChange(new BZK.CallBack() {
+            zk.watchPartChange(new ZK.CallBack() {
                 @Override
                 public void call() {
                     partsGetter.tell(1, ActorRef.noSender());
@@ -198,7 +198,7 @@ public class BrokerServer {
             logicHandler.setSubscribes(Config.getSub());
 
             refreshBLEList(bleActor, replyActor, system);
-            zk.watchBLEChange(new BZK.CallBack() {
+            zk.watchBLEChange(new ZK.CallBack() {
                 @Override
                 public void call() {
                     refreshBLEList(bleActor, replyActor, system);

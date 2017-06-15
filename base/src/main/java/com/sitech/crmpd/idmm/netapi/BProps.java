@@ -163,6 +163,7 @@ public final class BProps<T> {
      */
     public static final BProps<Integer> PART_ID = systemValueOf("part-id");
     public static final BProps<String> BLE_ID = systemValueOf("ble-id");
+    public static final BProps<String> QID = systemValueOf("qid");
     /**
      * 分区序号, 从0开始递增的， 在同一个
      */
