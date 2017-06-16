@@ -54,6 +54,8 @@ final public class MemQueue {
         public int minTimeoutMs;
         public int maxTimeoutMs;
         public int maxOnway;    //最大在途数
+        public int warnMsg;    //告警积压消息数
+        public int maxMsg;     //限制最大积压消息数
     }
     /////////////////////////////////////////////////
 
@@ -79,6 +81,10 @@ final public class MemQueue {
             min_timeout = c.minTimeoutMs;
         if(c.maxTimeoutMs > 0)
             max_timeout = c.maxTimeoutMs;
+        if(c.warnMsg > 0)
+            ;
+        if(c.maxMsg > 0)
+            ;
     }
     public Conf getConf() {
         Conf c = new Conf();

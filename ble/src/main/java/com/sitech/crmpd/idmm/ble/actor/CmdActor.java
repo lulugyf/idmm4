@@ -25,6 +25,9 @@ public class CmdActor extends AbstractActor {
     private ActorRef store;
     private ActorRef brk;
     private HashMap<Integer, Mem> parts = new HashMap<>();
+
+    private int seq_seed = 0;
+    private HashMap<Integer, Msg> toMem = new HashMap<>(); //发往MemActor的操作, 等待通知后应答Supervisor
 //    private LinkedList<Mem> list = new LinkedList<>();
 
     // 保存最后发送消息给本BLE的supervisor的channel, 以便进行状态通知(leaving的分区消费完毕)
@@ -32,12 +35,31 @@ public class CmdActor extends AbstractActor {
 
     private ZK zk;
 
+    /**
+     * 接收的命令消息类型
+     */
     public static class Msg {
         Channel channel;
         FramePacket packet;
         long create_time;
         public Msg(Channel c, FramePacket p) {
             channel = c;packet = p; create_time=System.currentTimeMillis();
+        }
+    }
+    public static class Notify{
+        int seq;
+        String s;
+        public Notify(int seq, String s){
+            this.seq = seq;
+            this.s = s;
+        }
+    }
+    public static class LeaveDone{
+        String qid;
+        int partid;
+        public LeaveDone(String qid, int pid) {
+            this.qid = qid;
+            this.partid = pid;
         }
     }
 
@@ -59,11 +81,26 @@ public class CmdActor extends AbstractActor {
                 .match(RefMsg.class, s -> {
                     onReceive(s);
                 })
-                .match(PartConfig.class, s -> {
+                .match(Notify.class, s -> {
+                    onReceive(s);
+                })
+                .match(LeaveDone.class, s -> {
                     onReceive(s);
                 })
                 .matchAny(o -> log.info("received unknown message:{}", o))
                 .build();
+    }
+
+    /**
+     * leave 分区消费完成通知, 来自MemActor, 用于向Supervisor 发起通知
+     * @param s
+     */
+    private void onReceive(LeaveDone s) {
+        FramePacket pr = new FramePacket(
+                FrameType.CMD_PT_LEAVE_DONE,
+                BMessage.c().p(BProps.QID, s.qid).p(BProps.PART_ID, s.partid),
+                seq_seed++);
+        supervisor.writeAndFlush(pr);
     }
 
     private void onReceive(RefMsg s){
@@ -78,9 +115,24 @@ public class CmdActor extends AbstractActor {
         }
     }
 
-    // 接收到从 MemActor 状态更改完成的消息， 此消息只用于修改zk状态
-    private void onReceive(PartConfig s){
+    /**
+     * 接收到从 MemActor 状态更改/启动完成的消息， 用于触发应答supervisor
+      */
+    private void onReceive(Notify n){
+        Msg s = toMem.remove(n.seq);
+        BMessage mr = null;
         //zk.chgPartStatus(s);
+        if("ok".equals(n.s)) {
+            mr = BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
+        }else{
+            mr = BMessage.c().p(BProps.RESULT_CODE, RetCode.INTERNAL_SERVER_ERROR)
+                .p(BProps.RESULT_DESC, "notify failed: "+n.s);
+        }
+        FramePacket p = s.packet;
+        FramePacket pr = new FramePacket(
+                FrameType.valueOfCode(p.getType().code() | 0x80),
+                mr, p.getSeq());
+        s.channel.writeAndFlush(pr);
     }
 
     /**
@@ -100,31 +152,38 @@ public class CmdActor extends AbstractActor {
                 break;
             case CMD_PT_START:
                 log.info("CMD_PT_START, {}", System.currentTimeMillis());
-                mr = startPart(m);
+                mr = startPart(s);
                 break;
             case CMD_PT_CHANGE:
                 log.info("CMD_PT_CHANGE, {}", System.currentTimeMillis());
-                mr = chgPartStatus(m);
+                mr = chgPartStatus(s);
                 break;
             case CMD_PT_QUERY:
                 log.info("CMD_PT_QUERY, {}", System.currentTimeMillis());
                 mr = query(m);
+                break;
+            case CMD_PT_LEAVE_DONE_ACK:
+                log.info("leave done notify answered");
                 break;
             default:
                 log.error("unknown command {}", p.getType().code());
                 break;
         }
 
-        if(mr == null){
-            mr = BMessage.c()
-                    .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)
-                    .p(BProps.RESULT_DESC, "invalid request");
-        }
+        // 需要等待MemActor 通知完成后再应答
 
-        FramePacket pr = new FramePacket(
-                FrameType.valueOfCode(p.getType().code()|0x80),
-                mr, p.getSeq());
-        s.channel.writeAndFlush(pr);
+//        if(mr == null){
+//            mr = BMessage.c()
+//                    .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)
+//                    .p(BProps.RESULT_DESC, "invalid request");
+//        }
+
+        if(mr != null) {
+            FramePacket pr = new FramePacket(
+                    FrameType.valueOfCode(p.getType().code() | 0x80),
+                    mr, p.getSeq());
+            s.channel.writeAndFlush(pr);
+        }
     }
 
     private BMessage query(BMessage m) {
@@ -138,67 +197,79 @@ public class CmdActor extends AbstractActor {
 
     /**
      * 修改代码分区状态
-     * @param m
+     * @param s
      * @return
      */
-    private BMessage chgPartStatus(BMessage m) {
+    private BMessage chgPartStatus(Msg s) {
+        FramePacket p = s.packet;
+        BMessage m = p.getMessage();
         try {
             int part_id = m.p(BProps.PART_ID);
-            PartStatus status = m.getEnumProperty(BProps.PART_STATUS, PartStatus.class);
+            PartConfig pc = JSONSerializable.fromJson(m.getContentAsString(), PartConfig.class);
+            PartStatus status = pc.getStatus();
             if(!parts.containsKey(part_id)){
                 return BMessage.c()
                         .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)
                         .p(BProps.RESULT_DESC, "part not found");
             }
             Mem x = parts.get(part_id);
-            if(status == x.c.getStatus()){
-                return BMessage.c()
-                        .p(BProps.RESULT_CODE, RetCode.OK)
-                        .p(BProps.RESULT_DESC, "status not changed");
-            }
-            x.c.setStatus(status);
-            brk.tell(new BrkActor.PartChg(part_id, x.ref, status), getSelf());
-            x.ref.tell(status, getSelf());
+            x.c = pc;
 
+            // 把分区的引用和配置都交给 brkActor
+            brk.tell(new BrkActor.PartState(x.ref, pc), getSelf());
+
+            int seq = seq_seed++;
+            toMem.put(seq, s);
+            x.ref.tell(new MemActor.PartChg(seq, pc), getSelf());
         }catch(NoSuchPropertyException ex){
             return BMessage.c()
                     .p(BProps.RESULT_CODE, RetCode.REQUIRED_PARAMETER_MISSING)
                     .p(BProps.RESULT_DESC, ""+ex.toString());
         }
-        return BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
-
+        return null; //BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
     }
 
-    private BMessage startPart(BMessage m) {
+    private BMessage startPart(Msg s) {
+        FramePacket f = s.packet;
+        BMessage m = f.getMessage();
         // props: TARGET_TOPIC  CLIENT_ID， PART_NUM, PART_ID, PART_STATUS
 
         try {
             String body = m.getContentAsString();
             System.out.println("===="+body);
-            PartConfig c = JSONSerializable.fromJson(body, PartConfig.class);
-            int part_id = c.getPartId();
+            PartConfig pc = JSONSerializable.fromJson(body, PartConfig.class);
+            int part_id = pc.getPartId();
 
-            if (parts.containsKey(c.getPartId())) {
+            if (parts.containsKey(pc.getPartId())) {
                 return BMessage.c()
                         .p(BProps.RESULT_CODE, RetCode.INTERNAL_SERVER_ERROR)
-                        .p(BProps.RESULT_DESC, "part_id " + c.getPartId() + " dulplicated");
+                        .p(BProps.RESULT_DESC, "part_id " + pc.getPartId() + " dulplicated");
             }
 
             // 创建分区 actor
+            int seq = seq_seed ++;
+            toMem.put(seq, s);
             ActorRef mem = getContext().actorOf(
-                    Props.create(MemActor.class, c, store, brk, reply, getSelf()),
+                    Props.create(MemActor.class, pc, store, brk, reply, getSelf(), seq),
                     String.valueOf(part_id));
 
             Mem x = new Mem();
-            x.c = c;
+            x.c = pc;
             x.ref = mem;
             parts.put(part_id, x);
             log.info("create part for:{}", mem.path().toString());
 
-            return BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
+            // 把分区的引用和配置都交给 brkActor, 这里是由MemActor来通知的
+            //brk.tell(new BrkActor.PartState(x.ref, pc), getSelf());
+
+            return null; //BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
         }catch(NoSuchPropertyException ex){
             return BMessage.c()
                     .p(BProps.RESULT_CODE, RetCode.REQUIRED_PARAMETER_MISSING)
+                    .p(BProps.RESULT_DESC, ""+ex.toString());
+        }catch(Exception ex){
+            return BMessage.c()
+                    .p(BProps.RESULT_CODE, RetCode.INTERNAL_SERVER_ERROR)
                     .p(BProps.RESULT_DESC, ""+ex.toString());
         }
     }

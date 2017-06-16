@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartStatus;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
@@ -13,10 +14,11 @@ import java.util.LinkedHashMap;
 
 /**
  * Created by gyf on 5/1/2017.
+ * 处理由broker发来的报文, 业务通讯的关键管道
  */
 public class BrkActor extends AbstractActor {
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
-    private HashMap<Integer, PartChg> parts = new LinkedHashMap<>();
+    private HashMap<Integer, PartState> parts = new LinkedHashMap<>();
 
 
     public static class Msg {
@@ -28,14 +30,17 @@ public class BrkActor extends AbstractActor {
         }
     }
     // 分区状态通知
-    public static class PartChg{
+    public static class PartState{
         public int part_id;
-        public ActorRef ref;
         public PartStatus status;
-        public PartChg(int part_id, ActorRef ref, PartStatus status) {
-            this.part_id = part_id;
+        public ActorRef ref;
+        public PartConfig pc;
+
+        public PartState(ActorRef ref, PartConfig pc) {
+            this.part_id = pc.getPartId();
             this.ref = ref;
-            this.status = status;
+            this.status = pc.getStatus();
+            this.pc = pc;
         }
     }
 
@@ -49,14 +54,15 @@ public class BrkActor extends AbstractActor {
                         throwable.printStackTrace();
                     }
                 })
-                .match(PartChg.class, s-> {
+                .match(PartState.class, s-> {
                     onReceive(s);
                 })
                 .matchAny(o -> log.info("received unknown message:{}", o))
                 .build();
     }
 
-    private void onReceive(PartChg s){
+    // 更新分区配置数据, 在通讯繁忙的情况下可能无法及时更新到
+    private void onReceive(PartState s){
         parts.put(s.part_id, s);
     }
     private void onReceive(Msg s) {

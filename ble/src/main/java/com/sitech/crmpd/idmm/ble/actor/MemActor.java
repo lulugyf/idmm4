@@ -18,8 +18,7 @@ import io.netty.channel.Channel;
 public class MemActor extends AbstractActor {
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
-    private String topic_id;
-    private String client_id;
+    private String qid;
     private int maxOnWay;
     private int part_num ;
     private int part_id;
@@ -34,39 +33,40 @@ public class MemActor extends AbstractActor {
 
     private int default_priority = 200; //TODO 默认优先级从配置中获取
 
-    public MemActor(PartConfig c, ActorRef persistent, ActorRef brk,  ActorRef reply, ActorRef cmd) {
+    public MemActor(PartConfig c,
+                    ActorRef persistent, ActorRef brk,  ActorRef reply, ActorRef cmd,
+                    int seq) {
         this.c = c;
         this.persistent = persistent;
         this.brk = brk;
         this.reply = reply;
         this.cmd = cmd;
 
-        this.topic_id = c.getQid();
-        this.client_id = c.getClientId();
+        this.qid = c.getQid();
         this.part_num = c.getPartNum();
         this.part_id = c.getPartId();
         this.status = c.getStatus();
         maxOnWay = c.getMaxRequest();
-        mq = new MemQueue(client_id, topic_id, maxOnWay);
-        if(status == PartStatus.READY) {
+        mq = new MemQueue("", qid, maxOnWay);
+        if(status == PartStatus.LEAVE) {
             // TODO loading index data from store
             new Thread(){
                 public void run() {
-                    _startFinished();
+                    _startFinished(seq);
                 }
             }.start();
 
         }else {
-            _startFinished();
+            _startFinished(seq);
         }
     }
 
-    private void _startFinished() {
+    private void _startFinished(int seq) {
         // 通知brkActor 有新的part上线了
-        brk.tell(new BrkActor.PartChg(part_id, getSelf(), status), getSelf());
+        brk.tell(new BrkActor.PartState(getSelf(), c), getSelf());
 
-        // 然后告知 cmdActor 更新zk数据
-        cmd.tell(c, ActorRef.noSender());
+        // 然后告知 cmdActor 启动完成, 以便应答Supervisor
+        cmd.tell(new CmdActor.Notify(seq, "ok"), ActorRef.noSender());
     }
 
     public static class Msg
@@ -76,6 +76,14 @@ public class MemActor extends AbstractActor {
         public long create_time;
         public Msg(Channel c, FramePacket p) {
             channel = c;packet = p; create_time=System.currentTimeMillis();
+        }
+    }
+    public static class PartChg{
+        int seq;
+        PartConfig pc;
+        public PartChg(int seq, PartConfig pc) {
+            this.seq = seq;
+            this.pc = pc;
         }
     }
 
@@ -96,13 +104,35 @@ public class MemActor extends AbstractActor {
                         log.error("receive oper failed", ex);
                     }
                 })
-                .match(PartStatus.class, s ->{
+                .match(PartChg.class, s ->{
                     log.warning("part {} status changed, from {} to {}", part_id, status, s);
-                    status = s;
+                    partChg(s);
                 })
                 .matchAny(o -> log.info("received unknown message:{}", o))
                 .build();
     }
+
+    private void partChg(PartChg pc) {
+        this.c = pc.pc;
+        MemQueue.Conf conf = new MemQueue.Conf();
+        conf.maxOnway = c.getMaxRequest();
+        conf.minTimeoutMs = c.getMinTimeout()*1000;
+        conf.maxTimeoutMs = c.getMaxTimeout()*1000;
+        conf.warnMsg = c.getWarnMessages();
+        conf.maxMsg = c.getMaxMessages();
+
+        this.status = c.getStatus();
+
+        mq.setConf(conf);
+
+        cmd.tell(new CmdActor.Notify(pc.seq, "ok"), ActorRef.noSender());
+
+        if(status == PartStatus.LEAVE && mq.size() == 0){
+            // 发起leavedone通知
+            cmd.tell(new CmdActor.LeaveDone(qid, part_id), getSelf());
+        }
+    }
+
     private void onReceive(Oper s) {
         FramePacket fr = null;
         switch (s.type) {
@@ -125,6 +155,10 @@ public class MemActor extends AbstractActor {
                     log.info("commit success {}", s.msgid);
                     fr = new FramePacket(FrameType.BRK_COMMIT_ACK,
                             BMessage.c().p(BProps.RESULT_CODE, RetCode.OK), s.seq );
+
+                    if(status == PartStatus.LEAVE && mq.size() == 0){ // leave分区消费完成
+                        cmd.tell(new CmdActor.LeaveDone(qid, part_id), getSelf());
+                    }
                 }
             }
                 break;
@@ -138,27 +172,27 @@ public class MemActor extends AbstractActor {
     }
 
     private boolean _checkStatus(FrameType tp, Channel ch, int seq) {
-        boolean r = false;
+        boolean refuse = false;
         String desc = null;
         switch(tp){
             case BRK_SEND_COMMIT:
-                r = status == PartStatus.LEAVE;
+                refuse = status == PartStatus.LEAVE;
                 desc = "leaving not allow send";
                 break;
             case BRK_COMMIT:
             case BRK_PULL:
             case BRK_RETRY:
             case BRK_SKIP:
-                r = status == PartStatus.JOIN;
-                desc = "joining now allow consume";
+                refuse = status == PartStatus.JOIN;
+                desc = "join now allow consume";
                 break;
         }
-        if(r){
+        if(refuse){
             ch.writeAndFlush(new FramePacket(FrameType.BRK_RETRY_ACK,
                     BMessage.c().p(BProps.RESULT_CODE, RetCode.REQUEST_REFUSE)
                             .p(BProps.RESULT_DESC, "leaving not allow send"), seq ) );
         }
-        return r;
+        return refuse;
     }
 
     private void onReceive(Msg s) {

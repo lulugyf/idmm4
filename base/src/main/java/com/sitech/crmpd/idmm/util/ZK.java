@@ -30,8 +30,8 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
-import org.apache.curator.framework.api.transaction.CuratorOp;
-import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
+//import org.apache.curator.framework.api.transaction.CuratorOp;
+//import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
 import org.apache.curator.retry.RetryOneTime;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -115,9 +115,16 @@ public class ZK {
 
         final String path_b = prefix + "/" + "ble" + "/" + bleid;
         try {
-            zkClient.create().creatingParentsIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL)
-                    .forPath(path_b, cmdAddr.getBytes());
+            if(zkClient.checkExists().forPath(path_b) == null){
+                zkClient.create().creatingParentsIfNeeded()
+                        //.withMode(CreateMode.EPHEMERAL)
+                        .forPath(path_b, cmdAddr.getBytes());
+            }else{
+                zkClient.setData()
+                        //.withMode(CreateMode.EPHEMERAL)
+                        .forPath(path_b, cmdAddr.getBytes());
+            }
+
             log.info("bleid node register succ {}", path_b);
         } catch (Exception e) {
             log.error("create bleid node path[{}] failed", path_b, e);
@@ -192,30 +199,30 @@ public class ZK {
         }
     }
 
-    public void createInitialQueue(String qid, int partCount, int partid){
-        String basePath = prefix + "/partitions/" + qid;
-
-        try {
-//            if(zkClient.checkExists().forPath(basePath) != null){
-//                //delete all children
-//                for(String c: zkClient.getChildren().forPath(basePath))
-//                    zkClient.delete().forPath(basePath + "/" + c);
-//            }else{
-                zkClient.create().creatingParentsIfNeeded().forPath(basePath);
+//    public void createInitialQueue(String qid, int partCount, int partid){
+//        String basePath = prefix + "/partitions/" + qid;
+//
+//        try {
+////            if(zkClient.checkExists().forPath(basePath) != null){
+////                //delete all children
+////                for(String c: zkClient.getChildren().forPath(basePath))
+////                    zkClient.delete().forPath(basePath + "/" + c);
+////            }else{
+//                zkClient.create().creatingParentsIfNeeded().forPath(basePath);
+////            }
+//            List<CuratorOp> ops = new LinkedList<>();
+//            for(int i=0; i<partCount; i++) {
+//                //- (part_id):  (part_num)~(part_status)~(ble_id)
+//                String path = basePath + "/" + partid ++;
+//                ops.add(zkClient.transactionOp().create().forPath(path,
+//                        ((i+1)+"~"+ PartStatus.SHUT.name()+"~none").getBytes())
+//                );
 //            }
-            List<CuratorOp> ops = new LinkedList<>();
-            for(int i=0; i<partCount; i++) {
-                //- (part_id):  (part_num)~(part_status)~(ble_id)
-                String path = basePath + "/" + partid ++;
-                ops.add(zkClient.transactionOp().create().forPath(path,
-                        ((i+1)+"~"+ PartStatus.SHUT.name()+"~none").getBytes())
-                );
-            }
-            List<CuratorTransactionResult> rets = zkClient.transaction().forOperations(ops);
-        } catch (Exception e) {
-            log.error("", e);
-        }
-    }
+//            List<CuratorTransactionResult> rets = zkClient.transaction().forOperations(ops);
+//        } catch (Exception e) {
+//            log.error("", e);
+//        }
+//    }
 
     public int getMaxPartid() {
         String path = prefix + "/maxpartid";
