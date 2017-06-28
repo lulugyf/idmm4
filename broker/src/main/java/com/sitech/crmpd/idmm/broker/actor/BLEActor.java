@@ -1,14 +1,8 @@
 package com.sitech.crmpd.idmm.broker.actor;
 
 import akka.actor.AbstractActor;
-import akka.actor.Actor;
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
-import com.sitech.crmpd.idmm.broker.config.ConsumeParts;
-import com.sitech.crmpd.idmm.cfg.PartConfig;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.broker.config.PartsConsumer;
 import com.sitech.crmpd.idmm.client.api.*;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
@@ -16,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -35,7 +28,7 @@ public class BLEActor extends AbstractActor {
     private Map<Integer, Msg> seqs = new HashMap<>(); // 报文序列号 对应  客户端channel
 
     private Map<String, ActorRef> bles = new HashMap<>();
-    private ConsumeParts cp;
+    private PartsConsumer cp;
 
     private int max_pull_time = 5; // 客户端一次pull请求, 最多遍历分区的次数
 
@@ -88,14 +81,14 @@ public class BLEActor extends AbstractActor {
                         throwable.printStackTrace();
                     }
                 })
-                .match(ConsumeParts.class, s -> {
+                .match(PartsConsumer.class, s -> {
                     onReceive(s);
                 })
                 .matchAny(o -> log.info("received unknown message:{}", o))
                 .build();
     }
 
-    private void onReceive(ConsumeParts cp) {
+    private void onReceive(PartsConsumer cp) {
         if(this.cp != null)
             cp.copyStatus(this.cp);
         log.info("reset consume partitions");
@@ -127,7 +120,7 @@ public class BLEActor extends AbstractActor {
                 BMessage bm = s.fm.getMessage();
                 String topic = bm.p(BProps.TARGET_TOPIC);
                 String client = bm.p(BProps.CLIENT_ID);
-                ConsumeParts.SPart p = cp.nextPart(topic, client);
+                PartsConsumer.SPart p = cp.nextPart(topic, client);
                 if(p == null){
                     log.error("can not found consume partition {} {}", topic, client);
                     Message answer = Message.create();
@@ -272,7 +265,7 @@ public class BLEActor extends AbstractActor {
                     answer.setProperty(PropertyOption.CONSUMER_RETRY, bm.p(BProps.CONSUMER_RETRY));
                     FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
                     // DONE redirect pull_reply to persistent, and find message body, then reply
-                    // DONE get status of queue and save to ConsumeParts
+                    // DONE get status of queue and save to PartsConsumer
                     BMessage bm1 = s.fm.getMessage();
                     int[] state = bm.p(BProps.QSTATE);
                     cp.setStatus(bm1.p(BProps.TARGET_TOPIC), bm1.p(BProps.CLIENT_ID), s.partnum,

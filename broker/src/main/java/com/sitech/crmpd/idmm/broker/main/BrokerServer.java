@@ -5,8 +5,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.broker.actor.*;
 import com.sitech.crmpd.idmm.broker.config.Config;
-import com.sitech.crmpd.idmm.broker.config.ConsumeParts;
-import com.sitech.crmpd.idmm.broker.config.Parts;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
 import com.sitech.crmpd.idmm.util.BZK;
 import com.sitech.crmpd.idmm.client.api.Message;
@@ -33,9 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
 public class BrokerServer {
