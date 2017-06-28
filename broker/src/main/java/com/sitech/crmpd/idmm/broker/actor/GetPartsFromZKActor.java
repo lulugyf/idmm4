@@ -6,7 +6,11 @@ import akka.actor.ActorSystem;
 import com.sitech.crmpd.idmm.broker.config.PartsConsumer;
 import com.sitech.crmpd.idmm.broker.config.PartsProducer;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
+<<<<<<< HEAD
 import com.sitech.crmpd.idmm.util.BZK;
+=======
+import com.sitech.crmpd.idmm.util.ZK;
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
@@ -20,13 +24,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GetPartsFromZKActor extends AbstractActor {
     private static final Logger log = LoggerFactory.getLogger(GetPartsFromZKActor.class);
 
-    private BZK zk;
+    private ZK zk;
     private ActorRef ble;
     private LogicHandler logicHandler;
     private AtomicInteger partsChanged = new AtomicInteger(0);
 
 
-    public GetPartsFromZKActor(BZK zk, ActorRef ble, LogicHandler logicHandler) {
+    public GetPartsFromZKActor(ZK zk, ActorRef ble, LogicHandler logicHandler) {
         this.zk = zk;
         this.ble = ble;
         this.logicHandler = logicHandler;

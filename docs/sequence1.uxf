@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="14.2">
-  <zoom_level>11</zoom_level>
+<diagram program="umlet" version="14.3.0-SNAPSHOT">
+  <zoom_level>9</zoom_level>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>0</x>
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1377</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>Commander</panel_attributes>
     <additional_attributes/>
@@ -15,24 +22,35 @@
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>44</x>
       <y>99</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1413</x>
+      <y>81</y>
+      <w>27</w>
+      <h>684</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;740.0</additional_attributes>
   </element>
   <element>
     <id>UMLFrame</id>
     <coordinates>
+<<<<<<< HEAD
       <x>0</x>
+=======
+      <x>1377</x>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
       <y>0</y>
-      <w>209</w>
-      <h>55</h>
+      <w>171</w>
+      <h>45</h>
     </coordinates>
-    <panel_attributes>新增分区序列图
-//
+    <panel_attributes>向队列添加分区(s)序列图
+// 基本原则: 任何一个中间状态仍要保持结构的完整性
 // 这是添加1个分区的过程, 如果要为一个队列一次添加50个分区, 
 // 这个过程每次单个添加分区 是相互交错的, 时间和空间上都是, 怎么处理?
 // pt1 的状态可能是 leaving / joining / ready, 每种情况有不同的过程
@@ -42,32 +60,54 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>165</x>
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1512</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
-    <panel_attributes>Supervisor</panel_attributes>
+    <panel_attributes>Supervisor
+bg=green</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>99</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1548</x>
+      <y>81</y>
+      <w>27</w>
+      <h>684</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;740.0</additional_attributes>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>330</x>
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1647</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>BLE x</panel_attributes>
     <additional_attributes/>
@@ -75,10 +115,17 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>495</x>
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1782</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>BLE y</panel_attributes>
     <additional_attributes/>
@@ -86,10 +133,17 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>825</x>
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>2052</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>zookeeper</panel_attributes>
     <additional_attributes/>
@@ -97,10 +151,17 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>990</x>
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>2187</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>broker x</panel_attributes>
     <additional_attributes/>
@@ -108,90 +169,140 @@
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>374</x>
       <y>99</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1683</x>
+      <y>81</y>
+      <w>27</w>
+      <h>684</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;740.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>539</x>
       <y>99</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1818</x>
+      <y>81</y>
+      <w>27</w>
+      <h>684</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;740.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>869</x>
       <y>99</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>2088</x>
+      <y>81</y>
+      <w>27</w>
+      <h>711</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;770.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>1034</x>
       <y>99</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>2223</x>
+      <y>81</y>
+      <w>27</w>
+      <h>711</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;770.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>44</x>
       <y>121</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>1413</x>
+      <y>99</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-add 1 part of Q</panel_attributes>
+add n part(s) to Q</panel_attributes>
     <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>143</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>153</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-create pt2
-// 1 增加分区的序号在最大num上加1
-// 2 根据consistent-hash 计算受到影响的现有分区序号 p1, id为pt1
-// 3 为 p1 创建一个相同 num 的 joining 状态的分区, id为pt2
-//   joining 状态的分区只生产</panel_attributes>
+建立替代分区
+// 创建受影响分区的替代分区, 异步处理应答, 多个请求可一并发出
+// 增加分区的序号在最大num上累加
+// 在哪一个BLE上建立新分区, 按照新建队列时的分配规则
+// 目标可能是多个BLE</panel_attributes>
     <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>165</y>
       <w>363</w>
       <h>55</h>
+=======
+      <x>1548</x>
+      <y>171</y>
+      <w>297</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-create pt3
+建立新分区
 // 4 创建新增num的分区, id为pt3
 </panel_attributes>
     <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
   </element>
   <element>
+<<<<<<< HEAD
     <id>Relation</id>
     <coordinates>
       <x>209</x>
@@ -214,13 +325,22 @@ change pt1 to leaving
       <y>77</y>
       <w>110</w>
       <h>33</h>
+=======
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1917</x>
+      <y>63</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
-    <panel_attributes>BLE y</panel_attributes>
+    <panel_attributes>BLE z</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>704</x>
       <y>99</y>
       <w>33</w>
@@ -280,23 +400,39 @@ produce request again
 reply
 </panel_attributes>
     <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+=======
+      <x>1953</x>
+      <y>81</y>
+      <w>27</w>
+      <h>684</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;740.0</additional_attributes>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>352</y>
       <w>528</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>441</y>
+      <w>432</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=&lt;-
-consume finished notify
-// leaving 状态的分区pt1消费完成后</panel_attributes>
+发送消费完成通知(包含对应join状态分区列表)</panel_attributes>
     <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>704</x>
       <y>198</y>
       <w>198</w>
@@ -315,26 +451,40 @@ update zk data
       <y>374</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>504</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-change pt2 to ready</panel_attributes>
+修改分区状态为ready</panel_attributes>
     <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>418</y>
       <w>363</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>540</y>
+      <w>297</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-change pt3 to ready</panel_attributes>
+修改分区状态为ready</panel_attributes>
     <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>374</x>
       <y>396</y>
       <w>528</w>
@@ -351,30 +501,52 @@ update zk data</panel_attributes>
       <y>440</y>
       <w>363</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>576</y>
+      <w>567</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-update zk data</panel_attributes>
-    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
+update zk data
+// BLE指令应答后立刻更新对应的zk数据</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>44</x>
       <y>209</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>189</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=&lt;-
-reply</panel_attributes>
+reply
+// 异步收到应答后触发下一步任务</panel_attributes>
     <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>869</x>
       <y>462</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>2088</x>
+      <y>729</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
 change notify</panel_attributes>
@@ -383,10 +555,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>869</x>
       <y>418</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>2088</x>
+      <y>297</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
 change notify</panel_attributes>
@@ -395,10 +574,17 @@ change notify</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>0</x>
       <y>737</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1377</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>Commander</panel_attributes>
     <additional_attributes/>
@@ -406,10 +592,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>44</x>
       <y>759</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1413</x>
+      <y>990</y>
+      <w>27</w>
+      <h>450</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
@@ -417,10 +610,17 @@ change notify</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>165</x>
       <y>737</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1512</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>Supervisor</panel_attributes>
     <additional_attributes/>
@@ -428,10 +628,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>759</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1548</x>
+      <y>990</y>
+      <w>27</w>
+      <h>450</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
@@ -439,10 +646,17 @@ change notify</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>330</x>
       <y>737</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1647</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>BLE x</panel_attributes>
     <additional_attributes/>
@@ -450,10 +664,17 @@ change notify</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>495</x>
       <y>737</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>1782</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>BLE y</panel_attributes>
     <additional_attributes/>
@@ -461,10 +682,17 @@ change notify</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>825</x>
       <y>737</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>2052</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>zookeeper</panel_attributes>
     <additional_attributes/>
@@ -472,10 +700,17 @@ change notify</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
+<<<<<<< HEAD
       <x>990</x>
       <y>737</y>
       <w>110</w>
       <h>33</h>
+=======
+      <x>2187</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>broker x</panel_attributes>
     <additional_attributes/>
@@ -483,10 +718,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>374</x>
       <y>759</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1683</x>
+      <y>990</y>
+      <w>27</w>
+      <h>450</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
@@ -494,10 +736,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>539</x>
       <y>759</y>
       <w>33</w>
       <h>550</h>
+=======
+      <x>1818</x>
+      <y>990</y>
+      <w>27</w>
+      <h>450</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;480.0</additional_attributes>
@@ -505,10 +754,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>869</x>
       <y>759</y>
       <w>33</w>
       <h>561</h>
+=======
+      <x>2088</x>
+      <y>990</y>
+      <w>27</w>
+      <h>459</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;490.0</additional_attributes>
@@ -516,10 +772,17 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>1034</x>
       <y>759</y>
       <w>33</w>
       <h>572</h>
+=======
+      <x>2223</x>
+      <y>990</y>
+      <w>27</w>
+      <h>468</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;500.0</additional_attributes>
@@ -527,68 +790,49 @@ change notify</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>44</x>
       <y>781</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>1413</x>
+      <y>1008</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-delete 1 part of Q</panel_attributes>
+delete n part(s) from Q</panel_attributes>
     <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>209</x>
       <y>803</y>
       <w>198</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>1053</y>
+      <w>297</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
-create pt2
-// 1 增加分区的序号在最大num上加1
-// 2 根据consistent-hash 计算受到影响的现有分区序号 p1, id为pt1
-// 3 为 p1 创建一个相同 num 的 joining 状态的分区, id为pt2
-//   joining 状态的分区只生产</panel_attributes>
-    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>209</x>
-      <y>825</y>
-      <w>363</w>
-      <h>55</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-create pt3
-// 4 创建新增num的分区, id为pt3
+建立受影响分区的替代join分区
 </panel_attributes>
     <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
   </element>
   <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>209</x>
-      <y>847</y>
-      <w>528</w>
-      <h>55</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-change pt1 to leaving
-// 5 修改受影响的分区 pt1 的状态为 leaving
-
-// 该修改状态请求中, 包含pt2, pt2 的id, 以便在该分区拒绝生产时报错应答中回送分区数据
-// 以及 在本分区消费完成后 发送通知以更改 pt2 pt3 的状态为ready</panel_attributes>
-    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>660</x>
-      <y>737</y>
-      <w>110</w>
-      <h>33</h>
+      <x>1917</x>
+      <y>972</y>
+      <w>90</w>
+      <h>27</h>
     </coordinates>
     <panel_attributes>BLE y</panel_attributes>
     <additional_attributes/>
@@ -596,10 +840,17 @@ change pt1 to leaving
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>704</x>
-      <y>759</y>
-      <w>33</w>
-      <h>572</h>
+<<<<<<< HEAD
+      <x>209</x>
+      <y>825</y>
+      <w>363</w>
+      <h>55</h>
+=======
+      <x>1953</x>
+      <y>990</y>
+      <w>27</w>
+      <h>468</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;500.0</additional_attributes>
@@ -607,161 +858,94 @@ change pt1 to leaving
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
+      <x>209</x>
+      <y>847</y>
+      <w>528</w>
+      <h>55</h>
+=======
+      <x>1548</x>
+      <y>1125</y>
+      <w>432</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+修改受影响分区为leave
+</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>660</x>
+      <y>737</y>
+      <w>110</w>
+      <h>33</h>
+=======
+      <x>1548</x>
+      <y>1233</y>
+      <w>432</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+发送消费完成通知(包含对应join状态分区列表)</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>704</x>
+      <y>759</y>
+      <w>33</w>
+      <h>572</h>
+=======
+      <x>1548</x>
+      <y>1251</y>
+      <w>297</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+修改关联join分区为ready</panel_attributes>
+    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
       <x>704</x>
       <y>902</y>
       <w>363</w>
       <h>44</h>
+=======
+      <x>1548</x>
+      <y>1269</y>
+      <w>567</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
-    <panel_attributes>lt=&lt;-
-produce request</panel_attributes>
-    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
+    <panel_attributes>lt=-&gt;
+update zk data</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
+<<<<<<< HEAD
       <x>704</x>
       <y>924</y>
       <w>363</w>
       <h>55</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-refuse
-// 拒绝请求中回送对应 joining状态的分区id, 要求broker更新该队列的分区数据
-</panel_attributes>
-    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>539</x>
-      <y>946</y>
-      <w>528</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-produce request again
-// 更新分区状态后重新发送请求</panel_attributes>
-    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>539</x>
-      <y>968</y>
-      <w>528</w>
-      <h>55</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-reply
-</panel_attributes>
-    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>209</x>
-      <y>1012</y>
-      <w>528</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-consume finished notify
-// leaving 状态的分区pt1消费完成后</panel_attributes>
-    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>704</x>
-      <y>858</y>
-      <w>198</w>
-      <h>55</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-update zk data
-// 3个分区的变更, 包括前面两个joining分区的创建, 都由y更新到zk上
-</panel_attributes>
-    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>209</x>
-      <y>1034</y>
-      <w>198</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-change pt2 to ready</panel_attributes>
-    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>209</x>
-      <y>1078</y>
-      <w>363</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-change pt3 to ready</panel_attributes>
-    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>374</x>
-      <y>1056</y>
-      <w>528</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-update zk data</panel_attributes>
-    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>539</x>
-      <y>1100</y>
-      <w>363</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-update zk data</panel_attributes>
-    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>44</x>
-      <y>869</y>
-      <w>198</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-reply</panel_attributes>
-    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>869</x>
-      <y>1122</y>
-      <w>198</w>
-      <h>44</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;
-change notify</panel_attributes>
-    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>869</x>
-      <y>1078</y>
-      <w>198</w>
-      <h>44</h>
+=======
+      <x>2088</x>
+      <y>1179</y>
+      <w>162</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     </coordinates>
     <panel_attributes>lt=-&gt;
 change notify</panel_attributes>
@@ -770,12 +954,2007 @@ change notify</panel_attributes>
   <element>
     <id>UMLFrame</id>
     <coordinates>
+      <x>1377</x>
+      <y>936</y>
+      <w>171</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>减少分区(s)序列图
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>539</x>
+      <y>946</y>
+      <w>528</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>207</y>
+      <w>297</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>539</x>
+      <y>968</y>
+      <w>528</w>
+      <h>55</h>
+=======
+      <x>1548</x>
+      <y>243</y>
+      <w>432</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+更改受影响分区状态为leave
+// 1 目标可能是多个
+// 2 每个受影响分区, 都有一个对应的joinning状态分区的对应列表
+// 该修改状态请求中, 包含pt2, pt2 的id, 以便在该分区拒绝生产时报错应答中回送分区数据
+// 以及 在本分区消费完成后 发送通知以更改 pt2 pt3 的状态为ready</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>209</x>
+      <y>1012</y>
+      <w>528</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>117</y>
+      <w>135</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+创建任务清单
+// 先在一致性hash表中模拟建立新分区, 确定会影响哪些分区, 
+// 根据这个排出任务清单, 包括
+// 1 为受影响分区建立替代分区
+// 2 建立新分区
+// 3 修改受影响分区为leaving状态
+// 4 在处理任务中的队列不允许接收新的任务
+// 5 每一组影响和受影响的分区的状态变更为一个任务清单,
+//         所以一次添加多个分区时可能 产生多个清单</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;30.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>261</y>
+      <w>432</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>704</x>
+      <y>858</y>
+      <w>198</w>
+      <h>55</h>
+=======
+      <x>1548</x>
+      <y>306</y>
+      <w>162</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+循环下一任务清单</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;30.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>209</x>
+      <y>1034</y>
+      <w>198</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>279</y>
+      <w>567</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+修改分区状态即触发标记
+// 收到BLE应答后立刻修改对应的zk数据</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1917</x>
+      <y>414</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>leave
+分区消费完
+type=receiver
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>522</y>
+      <w>162</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>209</x>
+      <y>1078</y>
+      <w>363</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>468</y>
+      <w>135</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+创建任务清单</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;30.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>558</y>
+      <w>297</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>374</x>
+      <y>1056</y>
+      <w>528</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>603</y>
+      <w>225</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+清单中修改状态部分全部完成</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;30.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>539</x>
+      <y>1100</y>
+      <w>363</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>630</y>
+      <w>432</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+关闭leaving状态的分区</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>44</x>
+      <y>869</y>
+      <w>198</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>648</y>
+      <w>432</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>869</x>
+      <y>1122</y>
+      <w>198</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>666</y>
+      <w>567</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+update zk data
+// BLE指令应答后立刻更新对应的zk数据</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
+      <x>869</x>
+      <y>1078</y>
+      <w>198</w>
+      <h>44</h>
+=======
+      <x>1548</x>
+      <y>693</y>
+      <w>135</w>
+      <h>45</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+任务清单完成</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;30.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+<<<<<<< HEAD
       <x>0</x>
       <y>693</y>
       <w>209</w>
       <h>33</h>
+=======
+      <x>1548</x>
+      <y>711</y>
+      <w>567</w>
+      <h>45</h>
     </coordinates>
-    <panel_attributes>减少分区序列图</panel_attributes>
+    <panel_attributes>lt=-&gt;
+修改触发更新分区数据的标记
+</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1341</x>
+      <y>180</y>
+      <w>144</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>基本原则:
+任何一个中间状态都需要保持结构的完整性
+
+supervisor需要实现任务清单机制, 各任务是异步处理协调的
+
+style=wordwrap</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>801</x>
+      <y>27</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>801</x>
+      <y>18</y>
+      <w>18</w>
+      <h>18</h>
+    </coordinates>
+    <panel_attributes>type=initial</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>756</x>
+      <y>99</y>
+      <w>108</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>获取在线BLE列表
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>801</x>
+      <y>180</y>
+      <w>207</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>210.0;90.0;210.0;60.0;10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>954</x>
+      <y>306</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>取一个队列配置
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>954</x>
+      <y>432</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>比较在线分区情况
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>999</x>
+      <y>333</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>882</x>
+      <y>99</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>设定列表watcher
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>855</x>
+      <y>108</y>
+      <w>45</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>30.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>882</x>
+      <y>153</y>
+      <w>90</w>
+      <h>36</h>
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+    </coordinates>
+    <panel_attributes>列表变更
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>801</x>
+      <y>54</y>
+      <w>207</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+</panel_attributes>
+    <additional_attributes>10.0;10.0;210.0;10.0;210.0;180.0;140.0;180.0;140.0;150.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLTimer</id>
+    <coordinates>
+      <x>1134</x>
+      <y>54</y>
+      <w>90</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>定时更新配置
+bg=gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1035</x>
+      <y>126</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>获取配置BLE列表
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1089</x>
+      <y>63</y>
+      <w>108</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0;100.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSyncBarHorizontal</id>
+    <coordinates>
+      <x>972</x>
+      <y>252</y>
+      <w>72</w>
+      <h>18</h>
+    </coordinates>
+    <panel_attributes>lw=5
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1017</x>
+      <y>153</y>
+      <w>99</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;120.0;10.0;90.0;90.0;90.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1053</x>
+      <y>234</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>{joinSpec=在线BLE数量超过配置数量的80%}
+style=wordwrap</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>756</x>
+      <y>153</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>向新增BLE
+建立状态连接
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>801</x>
+      <y>117</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>999</x>
+      <y>252</y>
+      <w>27</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>990</x>
+      <y>495</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1125</x>
+      <y>495</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>向BLE集群
+分配缺失的分区
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1017</x>
+      <y>495</y>
+      <w>126</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+有分区缺失</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>999</x>
+      <y>459</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>882</x>
+      <y>279</y>
+      <w>144</w>
+      <h>324</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>140.0;10.0;10.0;10.0;10.0;340.0;140.0;340.0;140.0;280.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>999</x>
+      <y>522</y>
+      <w>198</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;200.0;40.0;200.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>990</x>
+      <y>369</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>945</x>
+      <y>630</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>sleep循环
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>999</x>
+      <y>396</y>
+      <w>54</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+还有</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>990</x>
+      <y>378</y>
+      <w>279</w>
+      <h>270</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+配置队列遍历结束</panel_attributes>
+    <additional_attributes>10.0;280.0;10.0;250.0;290.0;250.0;290.0;10.0;40.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>387</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>BLE状态
+连接中断
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>945</x>
+      <y>693</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>向各BLE连接
+发送心跳
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>990</x>
+      <y>657</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>306</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>新队列
+配置生效
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>684</x>
+      <y>315</y>
+      <w>288</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>300.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>846</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>命令：为队列
+增加分区
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>918</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>命令：为队列
+减少分区
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>1332</x>
+      <y>360</y>
+      <w>189</w>
+      <h>252</h>
+    </coordinates>
+    <panel_attributes>问题1： 如果任务清单完成之前， supervisor被中断， 
+新的supervisor接管的时候， 如何重建清单？
+&gt;&gt;leave关联的分区,保存到zk中
+
+问题2: 在分区改为leave状态到更新zk之间, 
+向leave分区生产会被拒绝?
+&gt;&gt;拒绝的报文中包含了关联join分区信息, broker把这个放入本地hash表后重新选择part然后重试
+style=wordwrap
+fg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>387</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>取得BLE上
+已有分区列表
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>684</x>
+      <y>396</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>909</x>
+      <y>603</y>
+      <w>108</w>
+      <h>216</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0;10.0;220.0;100.0;220.0;100.0;200.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>450</y>
+      <w>108</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>向BLE集群分配
+中断的分区
+状态join
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>783</x>
+      <y>414</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>522</y>
+      <w>108</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>向BLE集群分配
+中断的分区
+状态leave
+bg=red
+// 此类分区启动后会先恢复数据
+// 恢复数据完成后才会对外暴露</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>783</x>
+      <y>486</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>630</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>leaving分区
+消费完毕
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>675</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>更新对应joining分区
+状态为ready
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>738</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>关闭此leaving
+分区
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>684</x>
+      <y>639</y>
+      <w>126</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>120.0;40.0;120.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>783</x>
+      <y>702</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>981</x>
+      <y>747</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>990</x>
+      <y>720</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1008</x>
+      <y>747</y>
+      <w>81</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+心跳异常</panel_attributes>
+    <additional_attributes>70.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1179</x>
+      <y>747</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>触发BLE状态
+连接终端
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1071</x>
+      <y>747</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>断开连接
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1152</x>
+      <y>756</y>
+      <w>45</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>30.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>783</x>
+      <y>801</y>
+      <w>18</w>
+      <h>18</h>
+    </coordinates>
+    <panel_attributes>type=flow_final</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>783</x>
+      <y>765</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>837</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>为受影响分区
+建立替代joining分区
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>900</x>
+      <y>837</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>为新分区建立
+joining分区
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1062</x>
+      <y>837</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>修改受影响分区
+为leaving状态
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>684</x>
+      <y>855</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>846</x>
+      <y>855</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1008</x>
+      <y>855</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>738</x>
+      <y>909</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>为受影响分区
+建立替代joining分区
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>900</x>
+      <y>909</y>
+      <w>117</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>修改受影响分区
+和将离线分区
+为leaving状态
+bg=blue
+// 受影响分区leaving状态关联了替代分区
+// 将离线分区则无关联分区</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>684</x>
+      <y>927</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>846</x>
+      <y>927</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLObject</id>
+    <coordinates>
+      <x>711</x>
+      <y>0</y>
+      <w>567</w>
+      <h>981</h>
+    </coordinates>
+    <panel_attributes>Supervisor活动图
+valign=top</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>225</y>
+      <w>567</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+同一清单内的多个join分区同时更新zk</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLFrame</id>
+    <coordinates>
+      <x>1503</x>
+      <y>153</y>
+      <w>756</w>
+      <h>198</h>
+    </coordinates>
+    <panel_attributes>清单循环
+bg=#eeeeff
+fg=#ff0000</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2178</x>
+      <y>243</y>
+      <w>153</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>这一状态时启动的broker
+有冲突的joinning-ready
+以joining为准
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1026</y>
+      <w>135</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+创建任务清单
+// 先在一致性hash表中模拟删除分区, 确定会影响哪些分区, 
+// 根据这个排出任务清单, 包括
+// 1 为受影响分区建立替代分区
+// 2 修改受影响分区为leaving状态
+// 3 修改要删除的分区为leaving状态
+// 4 在处理任务中的队列不允许接收新的任务
+// 5 每一组影响和受影响的分区的状态变更为一个任务清单,
+//         所以一次添加多个分区时可能 产生多个清单</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;30.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1071</y>
+      <w>297</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;310.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1089</y>
+      <w>162</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+修改离线分区leave
+</panel_attributes>
+    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1107</y>
+      <w>162</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1143</y>
+      <w>432</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+reply</panel_attributes>
+    <additional_attributes>10.0;20.0;460.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1161</y>
+      <w>567</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+合并更新join和leave分区到zk, 以及触发标记</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1917</x>
+      <y>1206</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>leave
+分区消费完
+type=receiver
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1647</x>
+      <y>1314</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>leave
+分区消费完
+type=receiver
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1539</x>
+      <y>1350</y>
+      <w>180</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+消费完成通知(无关联join分区)</panel_attributes>
+    <additional_attributes>20.0;20.0;170.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1368</y>
+      <w>567</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+update zk data</panel_attributes>
+    <additional_attributes>10.0;20.0;610.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2088</x>
+      <y>1287</y>
+      <w>162</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+change notify</panel_attributes>
+    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2088</x>
+      <y>1386</y>
+      <w>162</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+change notify</panel_attributes>
+    <additional_attributes>10.0;20.0;160.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLFrame</id>
+    <coordinates>
+      <x>621</x>
+      <y>1044</y>
+      <w>171</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>supervisor的定时任务流程
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>612</x>
+      <y>1179</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>取得在线BLE列表
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>612</x>
+      <y>1242</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>BLE列表按分区
+数量倒排序
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>612</x>
+      <y>1116</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>向zk创建分区列表
+SHUT状态
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>612</x>
+      <y>1305</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>循环向BLE列表
+分配分区READY
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>495</x>
+      <y>1359</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>BLE建立
+分区完成
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>648</x>
+      <y>1359</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>612</x>
+      <y>1440</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>更新zk分区状态
+为READY
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>657</x>
+      <y>1386</y>
+      <w>99</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+队列全部分区
+建立完成</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>576</x>
+      <y>1368</y>
+      <w>90</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>657</x>
+      <y>1143</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>657</x>
+      <y>1206</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>657</x>
+      <y>1269</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>927</x>
+      <y>1188</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLTimer</id>
+    <coordinates>
+      <x>1098</x>
+      <y>1017</y>
+      <w>72</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>time signal</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1008</x>
+      <y>1026</y>
+      <w>144</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;140.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>711</x>
+      <y>1125</y>
+      <w>234</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+zk中无队列数据
+</panel_attributes>
+    <additional_attributes>10.0;10.0;100.0;10.0;100.0;90.0;240.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>891</x>
+      <y>1080</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>取得队列配置
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1161</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1215</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>927</x>
+      <y>1242</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>954</x>
+      <y>1242</y>
+      <w>126</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+有分区不在线</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>936</x>
+      <y>1530</y>
+      <w>18</w>
+      <h>18</h>
+    </coordinates>
+    <panel_attributes>type=final</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>927</x>
+      <y>1296</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>927</x>
+      <y>1350</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>954</x>
+      <y>1296</y>
+      <w>126</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+运行分区比配置少</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>954</x>
+      <y>1350</y>
+      <w>126</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+运行分区比配置多</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1269</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1323</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1377</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>927</x>
+      <y>1458</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1485</y>
+      <w>45</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+last</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>819</x>
+      <y>1089</y>
+      <w>126</w>
+      <h>405</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+next队列</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0;10.0;430.0;120.0;430.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1062</x>
+      <y>1242</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>按BLE down掉
+流程处理
+bg=gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1062</x>
+      <y>1296</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>按增加分区
+流程处理
+bg=gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1062</x>
+      <y>1350</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>按减少分区
+流程处理
+bg=gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>927</x>
+      <y>1404</y>
+      <w>36</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>bg=green
+type=decision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1431</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>954</x>
+      <y>1404</y>
+      <w>126</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+leave分区超时</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1062</x>
+      <y>1404</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>告警
+bg=gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>891</x>
+      <y>1134</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>取得在线队列情况
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1107</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>180</y>
+      <w>90</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>zk BLE
+列表变更
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>0</x>
+      <y>18</y>
+      <w>531</w>
+      <h>540</h>
+    </coordinates>
+    <panel_attributes>style=wordwrap
+fg=white
+bg=blue
+### zk 里的数据结构:
+
+/(prefix)
+ - ble
+   - (bleaddr) (cmdaddr)
+   - (bleaddr) (cmdaddr)
+ - partitions_change  `这个用于触发broker更新分区数据, 值为时间戳记`
+ - partitions
+   - (target_topic_id) ~ (client_id)
+     - (part_id) (part_num)~(part_status)~(ble_id)
+     - (part_id) (part_num)~leave~(ble_id)[~(part_id)[,(part_id)]~(leaveTime)]
+     - (part_id) (part_num)~(part_status)~(ble_id)
+   - (target_topic_id) ~ (client_id)
+     - ...
+   - (target_topic_id) ~ (client_id)
+     - ... 
+
+各broker watch partitions_change 节点来获得分区调整的变更通知
+   要求supervisor把需要同时生效的变化, 修改完成后在更新该标记, 可实现多个变更一次生效
+   
+   如果分区状态为leave, 则可能带有关联分区id, 其对应的join分区列表
+   
+
+### 命令的交互过程
+supervisor都以异步方式向ble发送命令, ble完成操作后异步回送应答, supervisor收到应答后, 
+根据任务情况再更新zookeeper分区数据
+    如此的话, 有一个问题就是因为broker获得状态是延迟的, 就会有被拒绝的报错
+      (要求修改ready -&gt; leaving 操作是在最后进行， broker生产被拒绝的时候立刻同步更新该主题的分区数据， 然后重发请求, 更新过程会阻塞其他请求， 但应该值得）
+    
+### 只有一种情况BLE上启动的分区要从存储加载数据 start-leave</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>0</x>
+      <y>594</y>
+      <w>459</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>style=wordwrap
+fontsize=18
+fg=black
+bg=gray
+
+目标：
+持续压力测试情况下， 下面的情况只允许出现tps暂时下降， 消息不能丢
+1. 向测试的主题增加分区， 增加后tps应提升
+2. 从测试主题减少分区， 减少完成后tps下降
+3. 其中一个BLE掉线
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>873</x>
+      <y>1008</y>
+      <w>144</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>核对zk与ble查询
+的分区数据差异
+以查询结果为准修正
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>1053</y>
+      <w>27</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1377</x>
+      <y>1431</y>
+      <w>504</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>style=wordwrap
+fg=white
+bg=blue
+删除分区后的分区结构可能情况列举, ()内字段说明： partid partnum status [related partid(s)]
+1. 非连续的单个分区删除：
+     (id1 n JOIN) (id2 n LEAVE id1) (id3 m LEAVE id1)
+     其中要删除的是分区是id3, 关联分区保存在JOIN分区上
+
+2. 有环上连续超过一个分区被删除
+	(id1 n JOIN) (id2 n LEAVE id1) (id3 m LEAVE id1) (id4 j LEAVE id1) ...
+
+3. 全部分区都被删除
+   ((id1 m LEAVE) (id2 n LEAVE) (id3 o LEAVE) ...</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1377</x>
+      <y>756</y>
+      <w>504</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>style=wordwrap
+fg=white
+bg=blue
+增加分区后的分区结构可能情况列举, ()内字段说明： partid partnum status [related partid(s)]
+1. 非连续的单个分区添加(id1为新增分区)：
+   (id1 n JOIN) (id2 m JOIN) (id3 m LEAVE id1,id2)
+
+2. 有环上连续超过一个分区被添加
+	(id2 m LEAVE id1,id3,id4,id5...) (id1 m JOIN) (id3 n JOIN) (id4 o JOIN) (id5 p JOIN) ...
+
+3. 全部分区都是新添加的
+   ((id1 m READY) (id2 n READY) (id3 o READY) ...</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>

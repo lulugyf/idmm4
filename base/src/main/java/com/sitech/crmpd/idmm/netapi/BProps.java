@@ -4,7 +4,7 @@
 package com.sitech.crmpd.idmm.netapi;
 
 import com.google.common.collect.Maps;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import com.sitech.crmpd.idmm.cfg.PartStatus;
 
 import java.util.Map;
 
@@ -65,14 +65,6 @@ public final class BProps<T> {
      * 是否压缩
      */
     public static final BProps<Boolean> COMPRESS = systemValueOf("compress");
-    /**
-     * 是否Rest方式压缩
-     */
-    public static final BProps<Boolean> REST_COMPRESS = systemValueOf("rest-compress");
-    /**
-     * 是否压缩
-     */
-    public static final BProps<Boolean> ENCRYPT = systemValueOf("encrypt");
 
     /**
      * 目标主题分区id
@@ -170,6 +162,8 @@ public final class BProps<T> {
      * 分区ID， 全局唯一的分区id， 有mgr分配
      */
     public static final BProps<Integer> PART_ID = systemValueOf("part-id");
+    public static final BProps<String> BLE_ID = systemValueOf("ble-id");
+    public static final BProps<String> QID = systemValueOf("qid");
     /**
      * 分区序号, 从0开始递增的， 在同一个
      */
@@ -177,7 +171,7 @@ public final class BProps<T> {
     /**
      * 分区状态， 1-ready 2-joining 3-leaving 9-shut
      */
-    public static final BProps<PartitionStatus> PART_STATUS = systemValueOf("part-status");
+    public static final BProps<PartStatus> PART_STATUS = systemValueOf("part-status");
 
     /**
      * 队列状态,  暂定3个元素 size max_priority onway_left, 用于消费者分区扫描排序, 减少空闲扫描

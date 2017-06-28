@@ -11,6 +11,8 @@ import java.util.Map;
  * 消息类型，便于逻辑处理时易于调用对应的处理流程 <br/>
  * 仅在解包时封装到 {@link BMessage} 对象实例中，封包时作为框架前缀的一部分
  *
+ * 请求与应答标识id的取值规则: ???_ACK = ??? | 0x80
+ *
  * 传输中使用1字节， 最高位为1的是应答, 应答都默认必须带属性 RESULT_CODE, 可选属性 RESULT_DESC
  *
  */
@@ -45,6 +47,19 @@ public enum FrameType {
 	 */
 	CMD_PT_QUERY(0x12),
 	CMD_PT_QUERY_ACK(0x92),
+
+
+	/*******************
+	 * BLE 向 mgr 发送的通知消息
+	 *******************/
+	/**
+	 * 查询分区状态
+	 * 请求参数：
+	 * 应答参数： 分区状态列表， 包含字段： TARGET_TOPIC  CLIENT_ID， PART_NUM, PART_ID, PART_STATUS, total, size
+	 */
+	CMD_PT_LEAVE_DONE(0x31),
+	CMD_PT_LEAVE_DONE_ACK(0xb1),
+
 
 
 

@@ -58,6 +58,7 @@ public class PersistentActor extends AbstractActor {
                 }
                     break;
                 case getOP:
+                    // nothing to to for getop
                     break;
                 case failOP:
                     // store and no next message

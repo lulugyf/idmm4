@@ -1,9 +1,11 @@
 package com.sitech.crmpd.idmm.supervisor;
 
-import com.alibaba.fastjson.JSON;
-import com.sitech.crmpd.idmm.util.BZK;
-import com.sitech.crmpd.idmm.cfg.PartConfig;
-import com.sitech.crmpd.idmm.cfg.PartitionStatus;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Cancellable;
+import akka.actor.Props;
+import com.sitech.crmpd.idmm.broker.config.Loader;
+import com.sitech.crmpd.idmm.util.ZK;
 import com.sitech.crmpd.idmm.netapi.BMessage;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
 import com.sitech.crmpd.idmm.netapi.FramePacket;
@@ -13,20 +15,19 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import scala.concurrent.duration.Duration;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
- * http://www.codeceo.com/article/netty-create-thread-pools.html
  * Created by guanyf on 2017/1/24.
  */
 @Configuration
@@ -38,25 +39,17 @@ public class Supervisor implements Runnable{
     private int partid_seed =  1;
     private int seq_seed = 1;
 
-    @Resource
-    private BZK zk;
+    private ActorSystem system;
+    private ActorRef supActor;
 
-    private ArrayBlockingQueue<FramePacket> wait = new ArrayBlockingQueue<>(100);
-    private ReplyHandler handler = new ReplyHandler(wait);
+    @Resource
+    private ZK zk;
+
+    @Resource
+    private Loader conf;
+
     private EventLoopGroup group = new NioEventLoopGroup(5);
     private Bootstrap bootstrap;
-
-    private List<BLEState> bles = new LinkedList<>();
-    private Map<String, List<PartConfig>> parts = new HashMap<>(); //以 topic~client 为key的分区数据
-
-    static class BLEState{
-        Channel ch;
-        String id;
-        String cmdaddr;
-        boolean isOk;
-
-        int part_count;
-    }
 
     public void startup(){
         new Thread(this).start();
@@ -74,127 +67,105 @@ public class Supervisor implements Runnable{
                     Thread.sleep(5000L);
             }
 
+
             log.info("starting supvisor");
 
-            getList();
+            zk.initPartChange();
 
-            zk.watchBLEChange(new BZK.CallBack() {
+            //延迟2秒 触发更新ble列表
+            system.scheduler().scheduleOnce(Duration.create(2, TimeUnit.SECONDS),
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            supActor.tell(new String[]{"blelist", null}, ActorRef.noSender());
+                        }
+                    }, system.dispatcher());
+
+
+            //zk上ble列表变化， 触发更新ble列表
+            zk.watchBLEChange(new ZK.CallBack() {
                 @Override
                 public void call() {
-                    getList();
+                    supActor.tell(new String[]{"blelist", null}, ActorRef.noSender());
                 }
             });
 
-            query();
+            //启动定时器， 触发核对分区数据
+            Cancellable cancellable = system.scheduler().schedule(
+                    Duration.create(5, TimeUnit.SECONDS), // start with 5 sec
+                    Duration.create(5, TimeUnit.SECONDS), // every 5 sec
+                    supActor, new String[]{"Tick", ""},
+                    system.dispatcher(), ActorRef.noSender());
 
             // for test only
-            startTopic("topic", "client", 20, 10);
+//            startTopic("topic~client", 20, 10);
 
         }catch(Exception ex){
             log.error("init failed", ex);
         }
     }
 
-    // 查询分区数据
-    private void query() {
-        log.info("query -----");
-        parts.clear();
-        for(BLEState b: bles){
-            FramePacket f = new FramePacket(FrameType.CMD_PT_QUERY,
-                    BMessage.c(), seq_seed++ );
-            b.ch.writeAndFlush(f);
+//    private void startTopic(String qid, int maxOnway, int partCount) {
+//        // TODO sort the ble list
+//
+//        if(parts.containsKey(qid)){
+//            log.info("queue {} already started", qid);
+//            return;
+//        }
+//
+//        // and start partitions
+//        int partid = partid_seed;
+//        partid_seed += partCount;
+//        zk.createInitialQueue(qid, partCount, partid);
+//
+//        for(int i=0; i<partCount; i++) {
+//            BLEState b = bles.get(i % bles.size());
+//
+//            PartConfig p = new PartConfig();
+//            p.setQid(qid);
+//            p.setMaxRequest(maxOnway);
+//            p.setPartId(partid ++);
+//            p.setPartNum(i+1);
+//            p.setStatus(PartStatus.READY);
+//            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
+//                    BMessage.create(JSON.toJSONString(p)), seq_seed++ );
+//            b.ch.writeAndFlush(f);
+//
+//            try {
+//                log.info("reply from BLE: {}", wait.take().toString());
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//        zk.setMaxPartid(partid_seed);
+//    }
 
-            try {
-                FramePacket fr = wait.take();
-                String body = fr.getMessage().getContentAsString();
-                log.debug("query reply from BLE: {}", body);
-
-                List<PartConfig> l = JSON.parseArray(body, PartConfig.class);
-                for(PartConfig p: l){
-                    String k = p.getTopicId() + "~" + p.getClientId();
-                    List<PartConfig> pl = parts.getOrDefault(k, new LinkedList<>());
-                    if(pl.size() == 0)
-                        parts.put(k, pl);
-                    pl.add(p);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
-    private void startTopic(String topic, String client, int maxOnway, int partCount) {
-        // TODO sort the ble list
-
-        String k = topic + "~" + client;
-        if(parts.containsKey(k)){
-            log.info("topic {} already started", k);
-            return;
-        }
-
-        // and start partitions
-        int partid = partid_seed;
-        partid_seed += partCount;
-        zk.createOneTopic(topic, client, partCount, partid);
-
-        for(int i=0; i<partCount; i++) {
-            BLEState b = bles.get(i % bles.size());
-
-            PartConfig p = new PartConfig();
-            p.setClientId(client);
-            p.setTopicId(topic);
-            p.setMaxOnWay(maxOnway);
-            p.setPartId(partid ++);
-            p.setPartNum(i+1);
-            p.setStatus(PartitionStatus.READY);
-            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
-                    BMessage.create(JSON.toJSONString(p)), seq_seed++ );
-            b.ch.writeAndFlush(f);
-
-            try {
-                log.info("reply from BLE: {}", wait.take().toString());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-        zk.setMaxPartid(partid_seed);
-    }
-
-    /**
-     * 与BLE的cmd端口建立连接
-     */
-    private void getList() {
-//        bles.clear();
-
-        for(String[] x: zk.getBLEList()) {
-            String bleid = x[1];
-            boolean found = false;
-            for(BLEState y: bles){
-                if(bleid.equals(y.id)){
-                    found = true;
-                    break;
-                }
-            }
-            if(found) continue;
-            BLEState b = new BLEState();
-            b.id = x[1];
-            b.cmdaddr = x[0];
-            try{
-                String v = b.cmdaddr;
-                int p = v.indexOf(':');
-                b.ch = bootstrap.connect(v.substring(0, p), Integer.parseInt(v.substring(p+1))).sync().channel();
-                b.isOk = true;
-                bles.add(b);
-            }catch(Exception ex){
-                log.error("", ex);
-            }
-        }
-    }
 
     private void init() throws  Exception {
+
+        system = ActorSystem.create("supervisor");
+
+        ChannelDuplexHandler idleHandler = new ChannelDuplexHandler() {
+            @Override
+            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                if (evt instanceof IdleStateEvent) {
+                    IdleStateEvent e = (IdleStateEvent) evt;
+                    if (e.state() == IdleState.READER_IDLE) {
+                        ctx.close();
+                    } else if (e.state() == IdleState.WRITER_IDLE) {
+                        log.info("write a heartbeat to {}", ctx.channel().remoteAddress());
+                        ctx.writeAndFlush(new FramePacket(FrameType.HEARTBEAT, BMessage.c(), 0));
+                    }
+                }
+            }
+        };
+
         Bootstrap b = new Bootstrap();
+
+        supActor = system.actorOf(Props.create(SupActor.class, b, zk, conf), "sup");
+
+        ReplyHandler handler = new ReplyHandler(supActor);
         b.group(group)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
@@ -202,7 +173,8 @@ public class Supervisor implements Runnable{
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline p = ch.pipeline();
-
+                        p.addLast("idleStateHandler", new IdleStateHandler(60, 30, 0));
+                        p.addLast("idleHandler", idleHandler);
                         p.addLast(new FrameCoder());
                         p.addLast(handler);
                     }
@@ -231,11 +203,11 @@ public class Supervisor implements Runnable{
 //
 //            PartConfig p = new PartConfig();
 //            p.setClientId("clientid");
-//            p.setTopicId("topic");
-//            p.setMaxOnWay(10);
+//            p.setQid("topic");
+//            p.setMaxRequest(10);
 //            p.setPartId(12312312);
 //            p.setPartNum(1);
-//            p.setStatus(PartitionStatus.READY);
+//            p.setStatus(PartStatus.READY);
 //            FramePacket f = new FramePacket(FrameType.CMD_PT_START,
 //                    BMessage.create(p.toString()) );
 //            ch.writeAndFlush(f);

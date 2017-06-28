@@ -9,7 +9,7 @@ public class ConsistentHash<T> {
 
     private final HashFunction hashFunction;
     private final int numberOfReplicas;
-    private final SortedMap<Integer, T> circle = new TreeMap<Integer, T>();
+    private final SortedMap<Integer, T> circle = new TreeMap();
 
     public ConsistentHash(HashFunction hashFunction, int numberOfReplicas,
                           Collection<T> nodes) {
@@ -48,6 +48,31 @@ public class ConsistentHash<T> {
     }
 
 
+    /**
+     * 预判新加入节点 会影响到的节点, 暂时不考虑使用vnode(numberOfReplicas>1)的情况
+     * @param node
+     * @return
+     */
+    public T affected(T node) {
+        return get(node.toString()+0);
+    }
+
+    /**
+     * 获得按顺序的列表， 以便打印验证
+     * @return
+     */
+    public List<T> getCircle() {
+        List<T> r = new LinkedList<>();
+
+        SortedMap<Integer, T> c = circle;
+        while(!c.isEmpty()){
+            int hash = c.firstKey();
+            r.add(c.get(hash));
+            c = c.tailMap(hash+1);
+        }
+        return r;
+    }
+
     public static void main(String[] args) {
 
         // 测试一致性hash的分布均匀性
@@ -74,6 +99,7 @@ public class ConsistentHash<T> {
             System.out.println(n + ":" + m.get(n));
         }
 
+<<<<<<< HEAD
         // test for json string-escape
         JSONObject j = new JSONObject();
         j.put("href", "http://google.com");
@@ -85,6 +111,9 @@ public class ConsistentHash<T> {
         JSONObject j1 = JSONObject.parseObject(s);
         System.out.println(s);
         System.out.println(j1.get("href"));
+=======
+        ch.remove("hello");
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     }
 
 }

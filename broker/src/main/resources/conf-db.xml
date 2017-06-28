@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+
+              ">
+
+    <bean id="dsConfig" class="org.apache.tomcat.jdbc.pool.DataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${jdbc.cfg.driverClassName}" />
+        <property name="url" value="${jdbc.cfg.url}" />
+        <property name="username" value="${jdbc.cfg.username}" />
+        <property name="password" value="${jdbc.cfg.password}" />
+        <!-- 下面druid 和 dbcp 连接池通用的 -->
+        <!--maxActive: 最大连接数量 -->
+        <property name="maxActive" value="${jdbc.cfg.maxActive}" />
+        <!--initialSize: 初始化连接 -->
+        <property name="initialSize" value="${jdbc.cfg.initialSize}" />
+        <!-- <property name="testOnBorrow" value="true" /> -->
+        <property name="testWhileIdle" value="true" />
+        <property name="validationQuery" value="select 1 from dual" />
+    </bean>
+
+    <!-- 用于访问配置存储的数据库连接 -->
+    <bean id="jdbcConfig" class="org.springframework.jdbc.core.JdbcTemplate"
+          lazy-init="true">
+        <constructor-arg ref="dsConfig" />
+    </bean>
+
+    <!--
+    -- 主题订阅关系表 : 用于描述消费者客户端接收主题消息的关系；topic_subscribe_rel_8 => tc_topic_sub_8
+CREATE TABLE tc_topic_sub_8 (
+  client_id varchar(32) NOT NULL,
+  dest_topic_id varchar(32) NOT NULL,
+  client_pswd char(32) DEFAULT NULL ,
+  max_request int DEFAULT NULL,
+  min_timeout int DEFAULT NULL,
+  max_timeout int DEFAULT NULL,
+  use_status char(1) NOT NULL,
+  login_no char(32) DEFAULT NULL ,
+  opr_time datetime DEFAULT NULL,
+  note varchar(2048) DEFAULT NULL ,
+  consume_speed_limit int DEFAULT 0,
+  max_messages int DEFAULT 10000,
+  warn_messages int DEFAULT 1000,
+  part_count int DEFAULT 1,
+  PRIMARY KEY (client_id,dest_topic_id)
+);
+
+INSERT INTO tc_topic_sub_8 (client_id, dest_topic_id, client_pswd,
+    max_request, min_timeout, max_timeout, use_status, login_no, opr_time, note,
+    consume_speed_limit, max_messages, warn_messages, part_count) VALUES
+	('notice_sub_1', 'notice_1', '_null', 20, 60, 600, '1', 'admin', now(), NULL, 0, 10000, 1000, 20);
+
+INSERT INTO tc_topic_sub_8 VALUES
+	('Sub108', 'TUrStatusToOboss', '_null', 20, 60, 600, '1', 'admin', now(), NULL, 0, 10000, 1000, 10);
+INSERT INTO tc_topic_sub_8 VALUES
+	('Sub119Opr', 'TRecOprCnttDest', '1', 10, 60, 600, '1', 'a', now(), 'aa', 0, 300, 100, 1);
+
+-->
+    <util:map id="cfg_sqls">
+        <entry key="getQueues">
+            <value><![CDATA[select b.client_id, b.dest_topic_id, b.max_request, b.min_timeout,
+		  	b.max_timeout,b.consume_speed_limit, b.max_messages, b.warn_messages, b.part_count
+				from tc_topic_sub_8 b
+				where b.use_status='1']]></value>
+        </entry>
+    </util:map>
+
+</beans>

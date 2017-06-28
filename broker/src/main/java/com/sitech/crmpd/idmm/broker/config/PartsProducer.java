@@ -1,6 +1,10 @@
 package com.sitech.crmpd.idmm.broker.config;
 
+<<<<<<< HEAD:broker/src/main/java/com/sitech/crmpd/idmm/broker/config/PartsProducer.java
 import com.sitech.crmpd.idmm.util.BZK;
+=======
+import com.sitech.crmpd.idmm.util.ZK;
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b:broker/src/main/java/com/sitech/crmpd/idmm/broker/config/PartsProducer.java
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.util.ch.ConsistentHash;
 import com.sitech.crmpd.idmm.util.ch.StrHashFunction;
@@ -30,7 +34,7 @@ public class PartsProducer {
             for(PartConfig p: l) {
                 switch (p.getStatus()){
                     case READY:
-                    case JOINING:
+                    case JOIN:
                     case SHUT:
                         ch.add(p);
                         break;
@@ -38,7 +42,7 @@ public class PartsProducer {
 
                 switch(p.getStatus()){
                     case READY:
-                    case LEAVING:
+                    case LEAVE:
                         num2Part[p.getPartNum()] = p;
                         break;
                 }
@@ -61,6 +65,7 @@ public class PartsProducer {
      * 从zk获取全部的分区数据
      * @param zk
      */
+<<<<<<< HEAD:broker/src/main/java/com/sitech/crmpd/idmm/broker/config/PartsProducer.java
     public void setAllParts(BZK zk, PartsConsumer cp) {
         for(String topic: zk.listTotic()) {
             Map<String, Sub> clients = new HashMap<>();
@@ -73,6 +78,17 @@ public class PartsProducer {
                 if(cp != null)
                     cp.addSub(topic, client, pl);
             }
+=======
+    public void setAllParts(ZK zk, PartsConsumer cp) {
+        for(String qid: zk.listQueue()) {
+            Sub s = new Sub();
+            List<PartConfig> pl = zk.getParts(qid);
+            s.addParts(pl);
+            subs.put(qid, s);
+
+            if(cp != null)
+                cp.addSub(qid, pl);
+>>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b:broker/src/main/java/com/sitech/crmpd/idmm/broker/config/PartsProducer.java
 
         }
     }
