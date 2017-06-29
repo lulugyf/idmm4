@@ -43,5 +43,6 @@ public class ReplyHandler extends SimpleChannelInboundHandler<FramePacket> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         log.warn("{} disconnected", ctx.channel().remoteAddress());
+        ref.tell(ctx.channel(), ActorRef.noSender());
     }
 }

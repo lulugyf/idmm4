@@ -93,7 +93,7 @@ public class Supervisor implements Runnable{
             //启动定时器， 触发核对分区数据
             Cancellable cancellable = system.scheduler().schedule(
                     Duration.create(5, TimeUnit.SECONDS), // start with 5 sec
-                    Duration.create(5, TimeUnit.SECONDS), // every 5 sec
+                    Duration.create(15, TimeUnit.SECONDS), // every 5 sec
                     supActor, new String[]{"Tick", ""},
                     system.dispatcher(), ActorRef.noSender());
 
@@ -146,20 +146,7 @@ public class Supervisor implements Runnable{
 
         system = ActorSystem.create("supervisor");
 
-        ChannelDuplexHandler idleHandler = new ChannelDuplexHandler() {
-            @Override
-            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-                if (evt instanceof IdleStateEvent) {
-                    IdleStateEvent e = (IdleStateEvent) evt;
-                    if (e.state() == IdleState.READER_IDLE) {
-                        ctx.close();
-                    } else if (e.state() == IdleState.WRITER_IDLE) {
-                        log.info("write a heartbeat to {}", ctx.channel().remoteAddress());
-                        ctx.writeAndFlush(new FramePacket(FrameType.HEARTBEAT, BMessage.c(), 0));
-                    }
-                }
-            }
-        };
+        ChannelDuplexHandler idleHandler = new IdleHandler();
 
         Bootstrap b = new Bootstrap();
 
@@ -173,8 +160,8 @@ public class Supervisor implements Runnable{
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast("idleStateHandler", new IdleStateHandler(60, 30, 0));
-                        p.addLast("idleHandler", idleHandler);
+//                        p.addLast("idleStateHandler", new IdleStateHandler(60, 30, 0));
+//                        p.addLast("idleHandler", idleHandler);
                         p.addLast(new FrameCoder());
                         p.addLast(handler);
                     }

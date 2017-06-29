@@ -57,8 +57,16 @@ public class BrkActor extends AbstractActor {
                 .match(PartState.class, s-> {
                     onReceive(s);
                 })
+                .match(Integer.class, s-> {
+                    onReceive(s);
+                })
                 .matchAny(o -> log.info("received unknown message:{}", o))
                 .build();
+    }
+
+    // 删除分区， 该分区已经离线
+    private void onReceive(Integer partid){
+        parts.remove(partid);
     }
 
     // 更新分区配置数据, 在通讯繁忙的情况下可能无法及时更新到

@@ -33,11 +33,16 @@ public class QueueState {
         this.qid = qid;
     }
 
+    public int size() {
+        return parts.size();
+    }
+
     /**
      * 从BLE查询的结果更新到结构中, 构建一致性hash
      * @param pc
      */
     public void qryAdd(PartConfig pc) {
+        pc.setRunStatus(PartConfig.RUN_STATUS_STARTED);
         if(pc.getPartNum() > num)
             num = pc.getPartNum();
 
@@ -69,6 +74,7 @@ public class QueueState {
      * @param zk zookeeper连接工具
      */
     public void compareZK(ZK zk){
+        log.info("comparing parts between zk and ble qid:{}", qid);
         List<PartConfig> zpts = zk.getParts(qid);
         Map<Integer, PartConfig> mz = new HashMap<>();
         for(PartConfig pc: zpts)
@@ -87,18 +93,25 @@ public class QueueState {
         }
 
         //2 检查记录缺失， 删zk
+//        List<Integer> delPart = new LinkedList<>();
         for(Integer pid: mz.keySet()){
             if(!ml.containsKey(pid)){
                 changed = true;
                 zk.delPart(mz.get(pid));
-                mz.remove(pid);
+//                mz.remove(pid);
+//                delPart.add(pid);
                 log.warn("compareZK remove from zk: qid: {}, partid: {}", qid, pid);
             }
         }
+//        for(Integer pid: delPart) mz.remove(pid);
 
         //3 检查分区数据不一致
         for(PartConfig pl: ml.values()){
             PartConfig pz = mz.get(pl.getPartId());
+            if(pz == null){
+                log.error("partid {} not on zk", pl.getPartId());
+                continue;
+            }
             if(pl.getPartNum() != pz.getPartNum() ||
                     pl.getStatus() != pz.getStatus() ||
                     !pl.getBleid().equals(pz.getBleid())){
@@ -112,6 +125,8 @@ public class QueueState {
 
         if(changed)
             zk.partChanged();
+        else
+            log.info("nothing changed");
     }
 
     /**
@@ -133,7 +148,7 @@ public class QueueState {
      *     1. 每个分区num, 必须存在有对应ready或 join 状态分区, 否则不完整, 添加
      *     2. 每个join状态的分区, 必须有对应leave状态分区; 改为ready状态
      *     3. 多出的分区, 需进行分区的减少操作
-     *     4. 重复num的分区, 回头想下该怎么搞 TODO duplicated part number? how to process
+     *     4. 重复num的分区, 回头想下该怎么搞 TODO duplicated part number? how to deal with
      *
      * 要新启动的分区， bleid 由后续的分配动作设定
      *
@@ -183,6 +198,7 @@ public class QueueState {
                     }
                 }
             }
+//            log.debug("part num {} found {}", i, found);
             if(!found){
                 // 不存在， 则需要启动
                 PartConfig pc = new PartConfig();
@@ -197,6 +213,7 @@ public class QueueState {
                     // 空的, 以 ready 状态启动
                     pc.setStatus(PartStatus.READY);
                     ret.add(new PartOP(PartOP.START, pc));
+//                    log.debug("add new ready part {}", pc.getPartId());
                 }else{
                     if(pa.getStatus() == PartStatus.LEAVE){
                         // 添加的连续分区
@@ -466,6 +483,35 @@ public class QueueState {
         return ret;
     }
 
+    /**
+     * BLE 终止后， 为每个之前在其上承载的分区分别启动 JOIN LEAVE 替代
+     * @param pc
+     * @param pidSeed
+     * @param ol
+     */
+    public void partShut(PartConfig pc, AtomicInteger pidSeed, List<PartOP> ol) {
+        parts.remove(pc.getPartId());
+        ch.remove(pc);
+
+        PartConfig pcj = pc.clone();
+        pcj.setRunStatus(PartConfig.RUN_STATUS_INIT);
+        pcj.setStatus(PartStatus.JOIN);
+        pcj.setPartId(pidSeed.addAndGet(1));
+        ol.add(new PartOP(PartOP.START, pcj));
+
+        PartConfig pcl = pc.clone();
+        pcl.setRunStatus(PartConfig.RUN_STATUS_INIT);
+        pcl.setStatus(PartStatus.LEAVE);
+        pcl.setPartId(pidSeed.addAndGet(1));
+        pcl.addRelPart(pcj.getPartId());
+        ol.add(new PartOP(PartOP.START, pcl));
+
+        parts.put(pcj.getPartId(), pcj);
+        parts.put(pcl.getPartId(), pcl);
+        ch.add(pcj);
+    }
+
+
 
     /**
      * some test methods
@@ -542,4 +588,5 @@ public class QueueState {
         System.out.printf("is ready: %s\n", qs.isReady());
 
     }
+
 }

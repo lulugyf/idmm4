@@ -71,6 +71,10 @@ public class ZK {
         public void call();
     }
 
+    public String getZkAddr() {
+        return zk_addr;
+    }
+
     public void init() {
         RetryPolicy RETRYPOLICY = new RetryOneTime(10);
         CuratorFramework zkClient = CuratorFrameworkFactory.builder().connectString(zk_addr)
@@ -109,8 +113,8 @@ public class ZK {
      */
     public String createBLE(String mainAddr, String cmdAddr) {
 //        String localip = Util.getlocalip();
-        mainAddr = mainAddr.substring(1);
-        cmdAddr = cmdAddr.substring(1);
+//        mainAddr = mainAddr.substring(1);
+//        cmdAddr = cmdAddr.substring(1);
         String bleid = mainAddr;
 
         final String path_b = prefix + "/" + "ble" + "/" + bleid;
@@ -142,6 +146,19 @@ public class ZK {
         });
         this.bleid = bleid;
         return bleid;
+    }
+
+    public void removeBLE(String bleid) {
+        final String path_b = prefix + "/" + "ble" + "/" + bleid;
+        try {
+            if(zkClient.checkExists().forPath(path_b) != null){
+                zkClient.delete().forPath(path_b);
+            }
+            log.info("bleid node removed {}", path_b);
+        } catch (Exception e) {
+            log.error("create bleid node path[{}] failed", path_b, e);
+        }
+
     }
 
     public void createBroker(String addr) {
@@ -256,20 +273,21 @@ public class ZK {
 
 //    public CuratorFramework getZkClient() { return zkClient; }
     public List<String> listQueue() {
+        LinkedList<String> r = new LinkedList<>();
         String basePath = prefix + "/partitions";
         try {
             if (zkClient.checkExists().forPath(basePath) == null) {
-                return null;
+                return r;
             }
-            LinkedList<String> r = new LinkedList<>();
+
             for(String q: zkClient.getChildren().forPath(basePath)){
                 if(q.indexOf('~') > 0)
                     r.add(q);
             }
             return r;
         } catch (Exception e) {
-            log.error("", e);
-            return null;
+            log.error("listQueue failed", e);
+            return r;
         }
     }
 
@@ -280,12 +298,13 @@ public class ZK {
      * @return
      */
     public List<PartConfig> getParts(String qid) {
+        List<PartConfig> r = new LinkedList<>();
         String basePath = prefix + "/partitions/" + qid;
         try {
             if(zkClient.checkExists().forPath(basePath) == null){
-                return null;
+                return r;
             }
-            List<PartConfig> r = new LinkedList<>();
+
             PartConfig c1 = new PartConfig();
             c1.setQid(qid);
             for(String partid: zkClient.getChildren().forPath(basePath)) {
@@ -300,7 +319,7 @@ public class ZK {
             return r;
         } catch (Exception e) {
             log.error("", e);
-            return null;
+            return r;
         }
     }
 
@@ -346,7 +365,7 @@ public class ZK {
         String path = prefix + "/partitions/" + pc.getQid() + "/" + pc.getPartId();
         try{
             if(zkClient.checkExists().forPath(path) == null){
-                zkClient.create().forPath(path,
+                zkClient.create().creatingParentsIfNeeded().forPath(path,
                         pc.toZKString().getBytes());
             }else{
                 zkClient.setData().forPath(path,
@@ -360,7 +379,7 @@ public class ZK {
     public void delPart(PartConfig pc) {
         String path = prefix + "/partitions/" + pc.getQid() + "/" + pc.getPartId();
         try{
-            if(zkClient.checkExists().forPath(path) == null){
+            if(zkClient.checkExists().forPath(path) != null){
                 zkClient.delete().forPath(path);
             }
         }catch (Exception ex) {
@@ -381,6 +400,12 @@ public class ZK {
             }else{
                 zkClient.setData().forPath(path,
                         String.valueOf(System.currentTimeMillis()).getBytes());
+            }
+
+            path = prefix + "/" + "partitions";
+            if(zkClient.checkExists().forPath(path) == null) {
+                zkClient.create().forPath(path,
+                        "0".getBytes());
             }
         }catch (Exception ex) {
             log.error("", ex);
@@ -417,6 +442,32 @@ public class ZK {
             }).forPath(path);
         }catch (Exception ex) {
             log.error("", ex);
+        }
+    }
+
+    /**
+     * 清除全部的分区数据
+     */
+    public void clearParts() {
+        String basePath = prefix + "/partitions";
+        try {
+            if (zkClient.checkExists().forPath(basePath) == null) {
+                return;
+            }
+
+            for(String q: zkClient.getChildren().forPath(basePath)){
+                if(q.indexOf('~') <= 0)
+                    continue;
+                String path = basePath + "/" + q;
+                for(String p: zkClient.getChildren().forPath(path)) {
+                    String pathp = path + "/" + p;
+                    zkClient.delete().forPath(pathp);
+                }
+                zkClient.delete().forPath(path);
+            }
+            partChanged();
+        } catch (Exception e) {
+            log.error("clearParts failed", e);
         }
     }
 

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class CmdServerHandler extends SimpleChannelInboundHandler<FramePacket> {
 
-    private static final Logger logger = LoggerFactory.getLogger(CmdServerHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(CmdServerHandler.class);
 
     private ActorRef actor;
 
@@ -22,6 +22,7 @@ public class CmdServerHandler extends SimpleChannelInboundHandler<FramePacket> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final FramePacket framemessage) throws Exception {
+//        log.debug("new packet received: {}", framemessage.getType());
         actor.tell(new CmdActor.Msg(ctx.channel(), framemessage), ActorRef.noSender());
     }
 
@@ -33,6 +34,6 @@ public class CmdServerHandler extends SimpleChannelInboundHandler<FramePacket> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        logger.info("cmd channel active:{}", ctx.channel().remoteAddress());
+        log.info("cmd channel active:{}", ctx.channel().remoteAddress());
     }
 }

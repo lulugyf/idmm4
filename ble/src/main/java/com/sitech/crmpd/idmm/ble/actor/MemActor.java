@@ -11,13 +11,15 @@ import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.netapi.*;
 import com.sitech.crmpd.idmm.cfg.PartStatus;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by gyf on 5/1/2017.
  */
 public class MemActor extends AbstractActor {
-    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
-
+//    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    private static final Logger log = LoggerFactory.getLogger(MemActor.class);
     private String qid;
     private int maxOnWay;
     private int part_num ;
@@ -67,6 +69,11 @@ public class MemActor extends AbstractActor {
 
         // 然后告知 cmdActor 启动完成, 以便应答Supervisor
         cmd.tell(new CmdActor.Notify(seq, "ok"), ActorRef.noSender());
+
+        if(status == PartStatus.LEAVE && mq.size() == 0) {
+            // 以 LEAVE 状态启动的， 启动完成后立刻检查是否 LEAVE_DONE
+            cmd.tell(new CmdActor.LeaveDone(qid, part_id), getSelf());
+        }
     }
 
     public static class Msg
@@ -105,7 +112,6 @@ public class MemActor extends AbstractActor {
                     }
                 })
                 .match(PartChg.class, s ->{
-                    log.warning("part {} status changed, from {} to {}", part_id, status, s);
                     partChg(s);
                 })
                 .matchAny(o -> log.info("received unknown message:{}", o))
@@ -113,6 +119,8 @@ public class MemActor extends AbstractActor {
     }
 
     private void partChg(PartChg pc) {
+//        log.warn("part {} status changed, from {} to {}",
+//                part_id, status, pc.pc.getStatus());
         this.c = pc.pc;
         MemQueue.Conf conf = new MemQueue.Conf();
         conf.maxOnway = c.getMaxRequest();
@@ -130,6 +138,8 @@ public class MemActor extends AbstractActor {
         if(status == PartStatus.LEAVE && mq.size() == 0){
             // 发起leavedone通知
             cmd.tell(new CmdActor.LeaveDone(qid, part_id), getSelf());
+
+
         }
     }
 

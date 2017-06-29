@@ -5,6 +5,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.ble.actor.*;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
+import com.sitech.crmpd.idmm.util.Util;
 import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -20,21 +21,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.annotation.Resource;
+import java.net.InetSocketAddress;
 
 @Configuration
 public class BLEServer {
     private static final Logger log = LoggerFactory.getLogger(BLEServer.class);
 
-    @Value("${netty.bossCount:1}")
+    @Value("${netty.bossCount:3}")
     private int nt_bossCount;
 
     @Value("${netty.workerCount:10}")
     private int nt_workerCount;
 
-    @Value("${netty.brk.addr}")
-    private String nt_brk_addr;
-    @Value("${netty.cmd.addr}")
-    private String nt_cmd_addr;
+//    @Value("${netty.brk.addr}")
+//    private String nt_brk_addr;
+//    @Value("${netty.cmd.addr}")
+//    private String nt_cmd_addr;
 
     @Value("${actor.replyCount:20}")
     private int replyCount; //tcp 应答actor数量
@@ -104,9 +106,11 @@ public class BLEServer {
                     });
 
 
-            int port1 = Integer.parseInt(nt_brk_addr.substring(nt_brk_addr.indexOf(':')+1));
-            String brk_host = nt_brk_addr.substring(0, nt_brk_addr.indexOf(':'));
-            Channel ch = bootstrap.bind(brk_host, port1).sync().channel();
+//            int port1 = Integer.parseInt(nt_brk_addr.substring(nt_brk_addr.indexOf(':')+1));
+//            String brk_host = nt_brk_addr.substring(0, nt_brk_addr.indexOf(':'));
+//            Channel ch = bootstrap.bind(brk_host, port1).sync().channel();
+            Channel ch = bootstrap.bind("", 0).sync().channel();
+            int port1 = ((InetSocketAddress) ch.localAddress()).getPort();
             ChannelFuture cf = ch.closeFuture();
 
             ServerBootstrap bootstrap1 = new ServerBootstrap();
@@ -124,17 +128,21 @@ public class BLEServer {
                         }
                     });
 
-            int port2 = Integer.parseInt(nt_cmd_addr.substring(nt_cmd_addr.indexOf(':')+1));
-            String cmd_host = nt_cmd_addr.substring(0, nt_cmd_addr.indexOf(':'));
-            Channel ch1 = bootstrap1.bind(cmd_host, port2).sync().channel();
+//            int port2 = Integer.parseInt(nt_cmd_addr.substring(nt_cmd_addr.indexOf(':')+1));
+//            String cmd_host = nt_cmd_addr.substring(0, nt_cmd_addr.indexOf(':'));
+            Channel ch1 = bootstrap1.bind("", 0).sync().channel();
+            int port2 = ((InetSocketAddress) ch1.localAddress()).getPort();
             ChannelFuture cf1 = ch1.closeFuture();
 
             zk.init();
 
+            String hostAddr = Util.getMyAddr(zk.getZkAddr());
+
             // 把zk传送给CmdActor
             cmdactor.tell(new RefMsg("zk", null, zk), ActorRef.noSender());
 
-            bleid = zk.createBLE(ch.localAddress().toString(), ch1.localAddress().toString());
+            bleid = zk.createBLE(hostAddr+":"+port1,
+                    hostAddr+":"+port2);
             if(bleid != null) {
                 log.warn("startup successfully!");
 

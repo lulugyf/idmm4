@@ -3,10 +3,7 @@ package com.sitech.crmpd.idmm.util;
 import java.io.FileWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -76,8 +73,43 @@ public final class Util {
 	        	return Integer.parseInt(name);
 	    }
 	 
-	 public static void main(String[] args){
-		 System.out.println(genMsgid());
+	 public static void main(String[] args) throws Exception{
+//		 System.out.println(genMsgid());
+//		 System.out.println(ManagementFactory.getRuntimeMXBean().getName());
+
+//		 DatagramSocket ds = new DatagramSocket();
+//		 DatagramPacket dp = new DatagramPacket("123".getBytes(), 0, 3);
+//		 dp.setAddress(InetAddress.getByAddress(new byte[]{10, 1, 1, 106}));
+//		 dp.setPort(1056);
+//		 ds.send(dp);
+//		 System.out.println(ds.getLocalAddress().getHostAddress()); // 0.0.0.0
+
+//		 Socket s = new Socket("172.21.3.187", 22);
+//		 System.out.println(s.getLocalAddress().getHostAddress());
+//		 s.close();
+	 }
+
+	/**
+	 * 通过连接一个外部地址， 获取连接上的本地ip地址
+	 * @param remoteAddr
+	 * @return
+	 */
+	 public static String getMyAddr(String remoteAddr) {
+		String r = remoteAddr;
+		if(r.indexOf(',') > 0){
+			r = r.substring(0, r.indexOf(','));
+		}
+		int p = r.indexOf(':');
+		String addr = null;
+		try{
+			Socket s = new Socket(r.substring(0, p), Integer.parseInt(r.substring(p+1)));
+			addr = s.getLocalAddress().getHostAddress();
+			s.close();
+			return addr;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
 	 }
 	 
 	 /**

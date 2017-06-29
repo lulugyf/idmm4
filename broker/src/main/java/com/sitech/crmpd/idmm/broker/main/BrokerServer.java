@@ -6,6 +6,7 @@ import akka.actor.Props;
 import com.sitech.crmpd.idmm.broker.actor.*;
 import com.sitech.crmpd.idmm.broker.config.Config;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
+import com.sitech.crmpd.idmm.util.Util;
 import com.sitech.crmpd.idmm.util.ZK;
 import com.sitech.crmpd.idmm.client.api.Message;
 import com.sitech.crmpd.idmm.supervisor.Supervisor;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.annotation.Resource;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,14 +39,14 @@ import java.util.Map;
 public class BrokerServer {
     private static final Logger log = LoggerFactory.getLogger(BrokerServer.class);
 
-    @Value("${netty.bossCount:1}")
+    @Value("${netty.bossCount:3}")
     private int nt_bossCount;
 
     @Value("${netty.workerCount:10}")
     private int nt_workerCount;
 
-    @Value("${netty.local.addr}")
-    private String nt_local_addr;
+//    @Value("${netty.local.addr}")
+//    private String nt_local_addr;
 
     @Value("${actor.replyCount:20}")
     private int replyCount; //tcp 应答actor数量
@@ -170,12 +172,16 @@ public class BrokerServer {
                     });
 
 
-            int port1 = Integer.parseInt(nt_local_addr.substring(nt_local_addr.indexOf(':')+1));
-            String brk_host = nt_local_addr.substring(0, nt_local_addr.indexOf(':'));
-            Channel ch = bootstrap.bind(brk_host, port1).sync().channel();
+//            int port1 = Integer.parseInt(nt_local_addr.substring(nt_local_addr.indexOf(':')+1));
+//            String brk_host = nt_local_addr.substring(0, nt_local_addr.indexOf(':'));
+            Channel ch = bootstrap.bind("", 0).sync().channel();
             ChannelFuture cf = ch.closeFuture();
 
             zk.init();
+
+            String hostAddr = Util.getMyAddr(zk.getZkAddr());
+            int port1 = ((InetSocketAddress) ch.localAddress()).getPort();
+
             spv.startup(); // 尝试启动supervisor, 通过zk竞争
 
             //TODO 获取BLE列表, 并添加监视更改并更新列表
@@ -205,7 +211,7 @@ public class BrokerServer {
                 }
             });
 
-            zk.createBroker(nt_local_addr); //向zk注册broker地址
+            zk.createBroker(hostAddr+":"+port1); //向zk注册broker地址
 
             cf.sync(); //阻塞调用
         } finally {

@@ -27,7 +27,7 @@ public class BLEActor extends AbstractActor {
     private Map<Channel, Integer> jobs = new HashMap<>(); // 用于保存需要多请求然后合并应答的情况
     private Map<Integer, Msg> seqs = new HashMap<>(); // 报文序列号 对应  客户端channel
 
-    private Map<String, ActorRef> bles = new HashMap<>();
+    private Map<String, ActorRef> bles = new HashMap<>(); // bleid 对应 actor
     private PartsConsumer cp;
 
     private int max_pull_time = 5; // 客户端一次pull请求, 最多遍历分区的次数
@@ -134,6 +134,7 @@ public class BLEActor extends AbstractActor {
                 s.bleid = p.bleid;
                 s.partnum = p.num;
             } // 这里没有break, 发送请求到ble 是走的下面的代码
+
             case BRK_SEND_COMMIT:
             case BRK_ROLLBACK:
             case BRK_SKIP:
@@ -141,7 +142,7 @@ public class BLEActor extends AbstractActor {
             case BRK_COMMIT:
             {
                 if(!bles.containsKey(s.bleid)) {
-                    log.error("ble {}  not found");
+                    log.error("ble {}  not found", s.bleid);
                     Message answer = Message.create();
                     answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.SERVICE_ADDRESS_NOT_FOUND);
                     answer.setProperty(PropertyOption.CODE_DESCRIPTION, "no matched ble found");
@@ -191,7 +192,7 @@ public class BLEActor extends AbstractActor {
             if(bm.existProperty(BProps.RESULT_DESC))
                 desc = bm.p(BProps.RESULT_DESC);
             log.error("ble reply failed, {} {}", rcode, desc);
-            // TODO 多包请求, 部分成功怎么处理?
+            // TODO 多包请求, 部分成功怎么处理?  原来的broker就没有处理， 呵呵
         }
         int i = jobs.getOrDefault(ch, -1);
         if(i >= 2) {

@@ -32,9 +32,7 @@ import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @author heihuwudi@gmail.com</br> Created By: 2015年3月24日 下午8:11:10
- */
+
 @Sharable
 @Configuration
 public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> implements
@@ -59,8 +57,8 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
     @Resource
     private Cache<String, Message> messageCache;
 
-    private Map<String, List<TopicMapping>> topicMapping;
-    private Map<String, List<String>> subscribes;
+    private Map<String, List<TopicMapping>> topicMapping; //主题映射配置数据
+    private Map<String, List<String>> subscribes;        //目标主题订阅关系配置数据
     private PartsProducer parts;
 	public void setTopicMapping(Map<String, List<TopicMapping>> m) { this.topicMapping = m;}
 	public void setSubscribes(Map<String, List<String>> s) { this.subscribes = s; }

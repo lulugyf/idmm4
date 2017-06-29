@@ -11,6 +11,8 @@ import com.sitech.crmpd.idmm.cfg.PartStatus;
 import com.sitech.crmpd.idmm.netapi.*;
 import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,7 +22,8 @@ import java.util.List;
  * Created by gyf on 5/1/2017.
  */
 public class CmdActor extends AbstractActor {
-    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+//    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    private static final Logger log = LoggerFactory.getLogger(CmdActor.class);
     private ActorRef reply;
     private ActorRef store;
     private ActorRef brk;
@@ -96,11 +99,21 @@ public class CmdActor extends AbstractActor {
      * @param s
      */
     private void onReceive(LeaveDone s) {
+        // 1. 先删除保存的该分区， （查询的返回结果）
+        parts.remove(s.partid);
+        log.warn("leave done partid: {}, removed", s.partid);
+
         FramePacket pr = new FramePacket(
                 FrameType.CMD_PT_LEAVE_DONE,
                 BMessage.c().p(BProps.QID, s.qid).p(BProps.PART_ID, s.partid),
                 seq_seed++);
         supervisor.writeAndFlush(pr);
+
+        // 通知BrkActor 删除该分区
+        brk.tell(new Integer(s.partid), getSelf());
+
+        // 并终止该actor
+        getContext().stop(getSender());
     }
 
     private void onReceive(RefMsg s){
@@ -146,20 +159,21 @@ public class CmdActor extends AbstractActor {
         BMessage m = p.getMessage();
         BMessage mr = null;
 
+//        log.info("receive package {}", p.getType());
         switch(p.getType() ) {
             case HEARTBEAT:
-                mr = BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
+                mr = BMessage.c();
                 break;
             case CMD_PT_START:
-                log.info("CMD_PT_START, {}", System.currentTimeMillis());
+//                log.info("receive CMD_PT_START, {}", System.currentTimeMillis());
                 mr = startPart(s);
                 break;
             case CMD_PT_CHANGE:
-                log.info("CMD_PT_CHANGE, {}", System.currentTimeMillis());
+//                log.info("CMD_PT_CHANGE, {}", System.currentTimeMillis());
                 mr = chgPartStatus(s);
                 break;
             case CMD_PT_QUERY:
-                log.info("CMD_PT_QUERY, {}", System.currentTimeMillis());
+//                log.info("CMD_PT_QUERY, {}", System.currentTimeMillis());
                 mr = query(m);
                 break;
             case CMD_PT_LEAVE_DONE_ACK:
@@ -213,6 +227,8 @@ public class CmdActor extends AbstractActor {
                         .p(BProps.RESULT_DESC, "part not found");
             }
             Mem x = parts.get(part_id);
+            log.info("change part {} from {} to {}",
+                    part_id,  x.c.getStatus(), pc.getStatus());
             x.c = pc;
 
             // 把分区的引用和配置都交给 brkActor
@@ -236,7 +252,7 @@ public class CmdActor extends AbstractActor {
 
         try {
             String body = m.getContentAsString();
-            System.out.println("===="+body);
+//            System.out.println("===="+body);
             PartConfig pc = JSONSerializable.fromJson(body, PartConfig.class);
             int part_id = pc.getPartId();
 
@@ -257,7 +273,8 @@ public class CmdActor extends AbstractActor {
             x.c = pc;
             x.ref = mem;
             parts.put(part_id, x);
-            log.info("create part for:{}", mem.path().toString());
+            log.info("create part qid={} num={} id={} status={}",
+                    pc.getQid(), pc.getPartNum(), pc.getPartId(), pc.getStatus());
 
             // 把分区的引用和配置都交给 brkActor, 这里是由MemActor来通知的
             //brk.tell(new BrkActor.PartState(x.ref, pc), getSelf());

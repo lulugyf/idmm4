@@ -53,7 +53,9 @@ public class Tools {
                 // done new ble online, send query for parts
                 ref.tell(new String[]{"ble", bleid}, ActorRef.noSender());
             }catch(Exception ex){
-                log.error("", ex);
+                log.error("create ble connection failed", ex);
+                // TODO need to remove the ble item
+                zk.removeBLE(bleid);
             }
         }
 

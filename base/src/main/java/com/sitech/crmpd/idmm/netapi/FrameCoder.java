@@ -104,10 +104,10 @@ public class FrameCoder extends ByteToMessageCodec<FramePacket> {
 		final int typeCode = header[12] & 0xff;
 //		LOGGER.info("properties-length : {} type-code: {}", propertiesLength, typeCode);
 		final FrameType type = FrameType.valueOfCode(typeCode);
-		if (type == FrameType.HEARTBEAT) {
-			/* 心跳消息，不用进行后续处理，进入下一次读取 */
-			return;
-		}
+//		if (type == FrameType.HEARTBEAT) {
+//			/* 心跳消息，不用进行后续处理，进入下一次读取 */
+//			return;
+//		}
 
 		final byte[] propertiesData = new byte[propertiesLength];
 		if (propertiesLength > 0) {
