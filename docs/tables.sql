@@ -1,3 +1,20 @@
+create database idmm;
+
+CREATE USER idmm@'%' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON idmm.* TO idmm@'%';
+CREATE USER idmm@'localhost' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON idmm.* TO idmm@'localhost';
+
+alter user idmm@'%' identified by 'pass';
+alter user idmm@localhost identified by 'pass';
+set password for idmm@'%'=password('pass');
+set password for idmm@'localhost'=password('pass');
+
+mysql -h localhost -P 3306 -u root -p
+
+mysql -h localhost -P 3306 -u idmm -ppass  idmm
+
+
 -- 目标主题订阅关系表 : 用于描述消费者客户端接收主题消息的关系；topic_subscribe_rel_8 => tc_topic_sub_8
 CREATE TABLE tc_topic_sub_8 (
   client_id varchar(32) NOT NULL,
@@ -20,7 +37,7 @@ CREATE TABLE tc_topic_sub_8 (
 
 INSERT INTO tc_topic_sub_8 (client_id, dest_topic_id, client_pswd,
     max_request, min_timeout, max_timeout, use_status, login_no, opr_time, note,
-    consume_speed_limit, max_messages, warn_messages, part_count) VALUES
+    consume_speed_limit, max_messages, warn_messages, part_count, part_num_start) VALUES
 	('notice_sub_1', 'notice_1', '_null', 20, 60, 600, '1', 'admin', now(), NULL, 0, 10000, 1000, 1, 1);
 
 INSERT INTO tc_topic_sub_8 VALUES

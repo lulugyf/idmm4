@@ -396,6 +396,24 @@ public class BMessage extends JSONSerializable implements Serializable {
 		throw new NoSuchPropertyException(keyString);
 	}
 
+	public int[] getIntArray(BProps<int[]> key){
+		final String keyString = key.toString();
+		JSONArray ja = null;
+		if (properties.containsKey(keyString)) {
+			ja = properties.getJSONArray(keyString);
+
+		} else if (systemProperties.containsKey(keyString)) {
+			ja = systemProperties.getJSONArray(keyString);
+		}
+		if(ja != null){
+			int[] r = new int[ja.size()];
+			for(int i=0; i<r.length; i++)
+				r[i] = (int)ja.getIntValue(i);
+			return r;
+		}
+		throw new NoSuchPropertyException(keyString);
+	}
+
 	/**
 	 * 获取指定属性的<code>Boolean</code>形式的值
 	 *

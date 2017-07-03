@@ -7,6 +7,7 @@ import com.sitech.crmpd.idmm.client.api.PropertyOption;
 import com.sitech.crmpd.idmm.client.api.PullCode;
 import com.sitech.crmpd.idmm.client.api.ResultCode;
 import com.sitech.crmpd.idmm.client.pool.PooledMessageContextFactory;
+import org.apache.commons.cli.*;
 import org.apache.commons.pool2.KeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 
@@ -26,18 +27,35 @@ public class T {
          * @param args
          *           测试生产者
          */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
+        Options options = new Options();
+        options.addOption("s", "source", false, "source topic id");
+        options.addOption("p", "publisher", false, "publisher id");
+        options.addOption("t", "targer", false, "target topic id");
+        options.addOption("c", "consumer", false, "consumer id");
+        options.addOption("v", false, "message count");
+        options.addOption("z", "zkaddr", true, "zookeeper address");
+
+        options.addOption("h", "help", false, "print this message");
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse( options, args);
+        if(cmd.hasOption('h')) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("idmm test client", options);
+            return;
+        }
+
 //        if(args.length < 3)
 //            usage();
-        String zk_addr = "127.0.0.1:2181/idmm4/broker"; //args[0];
-        String pub_client_id  = "client"; //args[1];
-        String src_topic = "topic"; //args[2];
+        String zk_addr = cmd.getOptionValue('z', "127.0.0.1:2181/idmm4/broker");
+        String pub_client_id  = cmd.getOptionValue('p', "Pub101");
+        String src_topic = cmd.getOptionValue('s',"TRecOprCntt");
 
-        String taret_topic = "topic";
-        String sub_client_id = "client";
-        int count = 10;
-        if(args.length > 3)
-            count = Integer.parseInt(args[3]);
+        String taret_topic = cmd.getOptionValue('t',"TRecOprCnttDest");
+        String sub_client_id = cmd.getOptionValue('s',"Sub119Opr");
+        int count = Integer.parseInt(cmd.getOptionValue('v', "10"));
+
         System.out.println("-----------------------begin....");
         final KeyedObjectPool<String, MessageContext> pool = new GenericKeyedObjectPool<String, MessageContext>(
                 new PooledMessageContextFactory(zk_addr, //"127.0.0.1:2181/idmm2/broker",

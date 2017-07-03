@@ -6,11 +6,9 @@ import akka.actor.ActorSystem;
 import com.sitech.crmpd.idmm.broker.config.PartsConsumer;
 import com.sitech.crmpd.idmm.broker.config.PartsProducer;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
-<<<<<<< HEAD
-import com.sitech.crmpd.idmm.util.BZK;
-=======
+
 import com.sitech.crmpd.idmm.util.ZK;
->>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;

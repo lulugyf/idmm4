@@ -59,6 +59,8 @@ public class PartsConsumer {
         protected SPart[] parts;
         private int cur;
         private int setCount = 0; //更新状态的次数
+        private boolean curNot0; // 当前分区是否还有消息， 通过 setStatus 设置
+
         public SSub(List<PartConfig> pl) {
             parts = new SPart[pl.size()+1];
             list = new ArrayList<>(pl.size());
@@ -93,10 +95,14 @@ public class PartsConsumer {
             s.onway_left = onway;
             setCount ++;
 
-            if(setCount >= parts.length){
+            if(setCount >= parts.length && count == 0){
                 setCount = 0;
                 Collections.sort(list); //更新次数超过元素个数时, 重新排序
                 cur = 0;
+            }
+            if(count > 0) { // 如果消息数据还有， 下一步则继续使用当前分区
+                if(--cur < 0)
+                    cur = list.size()-1;
             }
         }
         public SPart nextPart() {

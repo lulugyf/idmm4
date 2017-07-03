@@ -109,7 +109,7 @@ public class BLEServer {
 //            int port1 = Integer.parseInt(nt_brk_addr.substring(nt_brk_addr.indexOf(':')+1));
 //            String brk_host = nt_brk_addr.substring(0, nt_brk_addr.indexOf(':'));
 //            Channel ch = bootstrap.bind(brk_host, port1).sync().channel();
-            Channel ch = bootstrap.bind("", 0).sync().channel();
+            Channel ch = bootstrap.bind("0.0.0.0", 0).sync().channel();
             int port1 = ((InetSocketAddress) ch.localAddress()).getPort();
             ChannelFuture cf = ch.closeFuture();
 
@@ -130,7 +130,7 @@ public class BLEServer {
 
 //            int port2 = Integer.parseInt(nt_cmd_addr.substring(nt_cmd_addr.indexOf(':')+1));
 //            String cmd_host = nt_cmd_addr.substring(0, nt_cmd_addr.indexOf(':'));
-            Channel ch1 = bootstrap1.bind("", 0).sync().channel();
+            Channel ch1 = bootstrap1.bind("0.0.0.0", 0).sync().channel();
             int port2 = ((InetSocketAddress) ch1.localAddress()).getPort();
             ChannelFuture cf1 = ch1.closeFuture();
 

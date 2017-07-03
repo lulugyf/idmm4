@@ -7,6 +7,7 @@ import com.sitech.crmpd.idmm.broker.actor.BLEActor;
 import com.sitech.crmpd.idmm.broker.actor.PersistActor;
 import com.sitech.crmpd.idmm.broker.actor.ReplyActor;
 import com.sitech.crmpd.idmm.broker.config.PartsProducer;
+import com.sitech.crmpd.idmm.broker.config.TopicConf;
 import com.sitech.crmpd.idmm.broker.config.TopicMapping;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.client.api.*;
@@ -54,15 +55,19 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 	private MessageIdGenerator messageIdGenerator;
 	private AtomicLong messageIdSequence = new AtomicLong();
 
+	private TopicConf tconf;
+
     @Resource
     private Cache<String, Message> messageCache;
 
     private Map<String, List<TopicMapping>> topicMapping; //主题映射配置数据
     private Map<String, List<String>> subscribes;        //目标主题订阅关系配置数据
     private PartsProducer parts;
-	public void setTopicMapping(Map<String, List<TopicMapping>> m) { this.topicMapping = m;}
-	public void setSubscribes(Map<String, List<String>> s) { this.subscribes = s; }
+//	public void setTopicMapping(Map<String, List<TopicMapping>> m) { this.topicMapping = m;}
+//	public void setSubscribes(Map<String, List<String>> s) { this.subscribes = s; }
 	public void setParts(PartsProducer p) {this.parts = p;}
+
+	public void setTopicConf(TopicConf tc) { this.tconf = tc; }
 	
 	/**
 	 * @see ApplicationContextAware#setApplicationContext(ApplicationContext)
@@ -126,6 +131,17 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			case SEND:
             {
                 Message message = msg.getMessage();
+                final String src_topic_id = message.getStringProperty(PropertyOption.TOPIC);
+                final String client_id = message.getStringProperty(PropertyOption.CLIENT_ID);
+                if(!tconf.checkPub(client_id, src_topic_id)){
+					Message answer = Message.create();
+					answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.BAD_REQUEST);
+					answer.setProperty(PropertyOption.CODE_DESCRIPTION, "publish to topic not allowed");
+					FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
+					reply.tell(new ReplyActor.Msg(ctx.channel(), fr), ActorRef.noSender());
+					break;
+				}
+
                 final SocketAddress address = ctx.channel().remoteAddress();
                 final MessageId id = messageIdGenerator.generate((InetSocketAddress) address, message,
                         messageIdSequence.incrementAndGet());
@@ -240,49 +256,45 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			String src_topic = message.getStringProperty(PropertyOption.TOPIC);
 			String producer_client = message.getStringProperty(PropertyOption.CLIENT_ID);
 
-			String group = mq.existProperty(PropertyOption.GROUP) ?
-					mq.getStringProperty(PropertyOption.GROUP) : String.valueOf(rand.nextDouble());
-			int priority = mq.existProperty(PropertyOption.PRIORITY) ?
-					mq.getIntegerProperty(PropertyOption.PRIORITY) : -1;
-			long expire = mq.existProperty(PropertyOption.EXPIRE_TIME) ?
-					mq.getLongProperty(PropertyOption.EXPIRE_TIME) : -1;
+			String group = message.existProperty(PropertyOption.GROUP) ?
+					message.getStringProperty(PropertyOption.GROUP) : String.valueOf(rand.nextDouble());
+			int priority = message.existProperty(PropertyOption.PRIORITY) ?
+					message.getIntegerProperty(PropertyOption.PRIORITY) : -1;
+			long expire = message.existProperty(PropertyOption.EXPIRE_TIME) ?
+					message.getLongProperty(PropertyOption.EXPIRE_TIME) : -1;
 
 			// 主题映射 & 消费订阅 & 确定分区
-			for(TopicMapping tm: topicMapping.get(src_topic)) {
-				// TODO 对表达式求值, 或者值匹配, 暂时认为全部都有效
-				if("_all_".equals(tm.getPropertyValue()) || "_default_".equals(tm.getPropertyValue()))
-				{}else{
-					continue;
-				}
-				String target_topic = tm.getTargetTopicId();
-				for(String consume_client: subscribes.get(target_topic)){
-					PartConfig part = parts.findPart(target_topic, consume_client, group);
-					switch(part.getStatus()){
-						case READY:
-						case JOIN:
-						{
-							BMessage bm = BMessage.c()
-									.p(BProps.MESSAGE_ID, msgid)
-									.p(BProps.GROUP, group)
-									.p(BProps.PART_ID, part.getPartId());
-							if(priority > 0)
-								bm.p(BProps.PRIORITY, priority);
-							if(expire > 0)
-								bm.p(BProps.EXPIRE_TIME, expire);
-							FramePacket fp = new FramePacket(FrameType.BRK_SEND_COMMIT, bm);
-							BLEActor.Msg am = new BLEActor.Msg(ctx.channel(), fp);
-							am.bleid = part.getBleid();
-							am.req_seq = seq ++;
-							req.add(am);
-							log.debug("group {} to part_num {} part_id {}",
-									group, part.getPartNum(), part.getPartId());
-						}
-						break;
-						default:
-							log.error("part {} status not allow send-commit", part);
-							refuse = true;
-							break OUTERLOOP;
+			for(String[] vv: tconf.getMapping(src_topic, mq)) {
+
+				String target_topic = vv[0];
+				String consume_client = vv[1];
+
+				PartConfig part = parts.findPart(target_topic, consume_client, group);
+				switch(part.getStatus()){
+					case READY:
+					case JOIN:
+					{
+						BMessage bm = BMessage.c()
+								.p(BProps.MESSAGE_ID, msgid)
+								.p(BProps.GROUP, group)
+								.p(BProps.PART_ID, part.getPartId());
+						if(priority > 0)
+							bm.p(BProps.PRIORITY, priority);
+						if(expire > 0)
+							bm.p(BProps.EXPIRE_TIME, expire);
+						FramePacket fp = new FramePacket(FrameType.BRK_SEND_COMMIT, bm);
+						BLEActor.Msg am = new BLEActor.Msg(ctx.channel(), fp);
+						am.bleid = part.getBleid();
+						am.req_seq = seq ++;
+						req.add(am);
+						log.debug("group {} to part_num {} part_id {} mid: {}",
+								group, part.getPartNum(), part.getPartId(), msgid);
 					}
+					break;
+					default:
+						log.error("part {} status not allow send-commit", part);
+						refuse = true;
+						break OUTERLOOP;
 				}
 			}
 

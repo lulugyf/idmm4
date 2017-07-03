@@ -8,9 +8,11 @@ import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.duration.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by gyf on 5/1/2017.
@@ -19,7 +21,7 @@ public class BLEActor extends AbstractActor {
 //    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private static final Logger log = LoggerFactory.getLogger(BLEActor.class);
     private ActorRef reply;
-    private ActorRef store;
+    private ActorRef persist;
     private ActorRef brk;
 
 
@@ -29,6 +31,7 @@ public class BLEActor extends AbstractActor {
 
     private Map<String, ActorRef> bles = new HashMap<>(); // bleid 对应 actor
     private PartsConsumer cp;
+    private int nomsgDelay = 100 ; // 没有消息时, 延迟应答客户端, 单位ms
 
     private int max_pull_time = 5; // 客户端一次pull请求, 最多遍历分区的次数
 
@@ -99,7 +102,7 @@ public class BLEActor extends AbstractActor {
         if("brk".equals(s.name))
             brk = s.ref;
         else if("persist".equals(s.name)){
-            store = s.ref;
+            persist = s.ref;
         }else if("reply".equals(s.name)){
             reply = s.ref;
         }else if("ble".equals(s.name)) {
@@ -154,7 +157,7 @@ public class BLEActor extends AbstractActor {
 
                 s.fm.setSeq(seq);
                 seqs.put(seq, s);
-                log.debug("send packet seq {}", seq);
+//                log.debug("send packet seq {}", seq);
 
                 if(s.req_total > 1 && s.req_seq == 0) {
                     // 多包请求
@@ -176,7 +179,7 @@ public class BLEActor extends AbstractActor {
      */
     private void onReceive(RMsg rMsg) {
         int seq = rMsg.fm.getSeq();
-        log.debug("receive packet seq {}", seq);
+//        log.debug("receive packet seq {}", seq);
         Msg s = seqs.remove(seq);
         if(s == null) {
             log.error("seq not found {}", seq);
@@ -187,11 +190,12 @@ public class BLEActor extends AbstractActor {
         FramePacket fm = rMsg.fm;
         BMessage bm = fm.getMessage();
         RetCode rcode = bm.getEnumProperty(BProps.RESULT_CODE, RetCode.class);
-        if( rcode != RetCode.OK){
+        if( rcode != RetCode.OK && rcode != RetCode.NO_MORE_MESSAGE){
             String desc = "[null]";
             if(bm.existProperty(BProps.RESULT_DESC))
                 desc = bm.p(BProps.RESULT_DESC);
-            log.error("ble reply failed, {} {}", rcode, desc);
+            log.error("ble reply failed, {} {} partnum={}",
+                    rcode, desc, s != null?s.partnum : null);
             // TODO 多包请求, 部分成功怎么处理?  原来的broker就没有处理， 呵呵
         }
         int i = jobs.getOrDefault(ch, -1);
@@ -268,10 +272,14 @@ public class BLEActor extends AbstractActor {
                     // DONE redirect pull_reply to persistent, and find message body, then reply
                     // DONE get status of queue and save to PartsConsumer
                     BMessage bm1 = s.fm.getMessage();
-                    int[] state = bm.p(BProps.QSTATE);
-                    cp.setStatus(bm1.p(BProps.TARGET_TOPIC), bm1.p(BProps.CLIENT_ID), s.partnum,
-                            state[0], state[1], state[2]);
-                    store.tell(new PersistActor.Msg(ch, fr), ActorRef.noSender());
+                    try {
+                        int[] state = bm.getIntArray(BProps.QSTATE);
+                        cp.setStatus(bm1.p(BProps.TARGET_TOPIC), bm1.p(BProps.CLIENT_ID), s.partnum,
+                                state[0], state[1], state[2]);
+                    }catch(Exception ex){
+                        log.error("set status of part {} failed", s.partnum, ex);
+                    }
+                    persist.tell(new PersistActor.Msg(ch, fr), ActorRef.noSender());
                 }else if(rcode == RetCode.NO_MORE_MESSAGE) {
                     BMessage bm1 = s.fm.getMessage();
                     cp.setStatus(bm1.p(BProps.TARGET_TOPIC), bm1.p(BProps.CLIENT_ID), s.partnum,
@@ -282,6 +290,15 @@ public class BLEActor extends AbstractActor {
                         Message answer = Message.create();
                         answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.NO_MORE_MESSAGE);
                         FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
+
+                        // 延迟应答客户端
+//                        getContext().getSystem().scheduler().scheduleOnce(Duration.create(nomsgDelay, TimeUnit.MICROSECONDS),
+//                                new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        reply.tell(new String[]{"blelist", null}, ActorRef.noSender());
+//                                    }
+//                                }, getContext().dispatcher());
                         reply.tell(new ReplyActor.Msg(ch, fr), ActorRef.noSender());
                     }else{
                         //累加计数器, 继续遍历分区

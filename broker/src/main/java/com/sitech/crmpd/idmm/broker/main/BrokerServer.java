@@ -5,6 +5,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.sitech.crmpd.idmm.broker.actor.*;
 import com.sitech.crmpd.idmm.broker.config.Config;
+import com.sitech.crmpd.idmm.broker.config.Loader;
+import com.sitech.crmpd.idmm.broker.config.TopicConf;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
 import com.sitech.crmpd.idmm.util.Util;
 import com.sitech.crmpd.idmm.util.ZK;
@@ -55,6 +57,9 @@ public class BrokerServer {
 
     @Resource
     private LogicHandler logicHandler;
+
+    @Resource
+    private Loader conf;
 
     @Resource
     private ZK zk;
@@ -152,6 +157,7 @@ public class BrokerServer {
 //        cmdactor.tell(new RefMsg("store", storeActor), system.deadLetters());
 //        cmdactor.tell(new RefMsg("brk", brkactor), system.deadLetters());
         bleActor.tell(new RefMsg("reply", replyActor), ActorRef.noSender());
+        bleActor.tell(new RefMsg("persist", persistActor), ActorRef.noSender());
 //        brkactor.tell(new RefMsg("cmd", cmdactor), system.deadLetters());
         //brkactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
 
@@ -174,7 +180,7 @@ public class BrokerServer {
 
 //            int port1 = Integer.parseInt(nt_local_addr.substring(nt_local_addr.indexOf(':')+1));
 //            String brk_host = nt_local_addr.substring(0, nt_local_addr.indexOf(':'));
-            Channel ch = bootstrap.bind("", 0).sync().channel();
+            Channel ch = bootstrap.bind("0.0.0.0", 0).sync().channel();
             ChannelFuture cf = ch.closeFuture();
 
             zk.init();
@@ -200,8 +206,11 @@ public class BrokerServer {
             });
 
             // 两个配置数据的设置: 主题映射和订阅关系
-            logicHandler.setTopicMapping(Config.getMap());
-            logicHandler.setSubscribes(Config.getSub());
+            TopicConf tc = new TopicConf();
+            tc.loadData(conf);
+            logicHandler.setTopicConf(tc);
+//            logicHandler.setTopicMapping(Config.getMap());
+//            logicHandler.setSubscribes(Config.getSub());
 
             refreshBLEList(bleActor, replyActor, system);
             zk.watchBLEChange(new ZK.CallBack() {

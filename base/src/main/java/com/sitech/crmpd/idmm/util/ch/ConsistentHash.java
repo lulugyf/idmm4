@@ -99,21 +99,8 @@ public class ConsistentHash<T> {
             System.out.println(n + ":" + m.get(n));
         }
 
-<<<<<<< HEAD
-        // test for json string-escape
-        JSONObject j = new JSONObject();
-        j.put("href", "http://google.com");
-        j.put("weight", 182);
-        System.out.println(j.toJSONString());
 
-        String s = "{\"weight\":182,\"href\":\"http:\\/\\/google.com\"}";
-
-        JSONObject j1 = JSONObject.parseObject(s);
-        System.out.println(s);
-        System.out.println(j1.get("href"));
-=======
         ch.remove("hello");
->>>>>>> c7f45bc4a8aff46067c71787a303304e5b1ef72b
     }
 
 }
