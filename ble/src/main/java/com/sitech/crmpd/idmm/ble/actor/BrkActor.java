@@ -8,6 +8,8 @@ import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartStatus;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,7 +19,8 @@ import java.util.LinkedHashMap;
  * 处理由broker发来的报文, 业务通讯的关键管道
  */
 public class BrkActor extends AbstractActor {
-    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+//    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    private static final Logger log = LoggerFactory.getLogger(BrkActor.class);
     private HashMap<Integer, PartState> parts = new LinkedHashMap<>();
 
 

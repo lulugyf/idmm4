@@ -74,7 +74,7 @@ public class QueueState {
      * @param zk zookeeper连接工具
      */
     public void compareZK(ZK zk){
-        log.info("comparing parts between zk and ble qid:{}", qid);
+//        log.info("comparing parts between zk and ble qid:{}", qid);
         List<PartConfig> zpts = zk.getParts(qid);
         Map<Integer, PartConfig> mz = new HashMap<>();
         for(PartConfig pc: zpts)
@@ -123,10 +123,11 @@ public class QueueState {
             }
         }
 
-        if(changed)
+        if(changed) {
             zk.partChanged();
-        else
-            log.info("nothing changed");
+            log.info("partChanged");
+
+        }
     }
 
     /**

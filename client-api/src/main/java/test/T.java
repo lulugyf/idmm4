@@ -29,11 +29,11 @@ public class T {
          */
     public static void main(String[] args) throws Exception{
         Options options = new Options();
-        options.addOption("s", "source", false, "source topic id");
-        options.addOption("p", "publisher", false, "publisher id");
-        options.addOption("t", "targer", false, "target topic id");
-        options.addOption("c", "consumer", false, "consumer id");
-        options.addOption("v", false, "message count");
+        options.addOption("s", "source", true, "source topic id");
+        options.addOption("p", "publisher", true, "publisher id");
+        options.addOption("t", "targer", true, "target topic id");
+        options.addOption("c", "consumer", true, "consumer id");
+        options.addOption("n", "count", true, "send message count");
         options.addOption("z", "zkaddr", true, "zookeeper address");
 
         options.addOption("h", "help", false, "print this message");
@@ -46,15 +46,13 @@ public class T {
             return;
         }
 
-//        if(args.length < 3)
-//            usage();
         String zk_addr = cmd.getOptionValue('z', "127.0.0.1:2181/idmm4/broker");
         String pub_client_id  = cmd.getOptionValue('p', "Pub101");
         String src_topic = cmd.getOptionValue('s',"TRecOprCntt");
 
         String taret_topic = cmd.getOptionValue('t',"TRecOprCnttDest");
         String sub_client_id = cmd.getOptionValue('s',"Sub119Opr");
-        int count = Integer.parseInt(cmd.getOptionValue('v', "10"));
+        int count = Integer.parseInt(cmd.getOptionValue('n', "10"));
 
         System.out.println("-----------------------begin....");
         final KeyedObjectPool<String, MessageContext> pool = new GenericKeyedObjectPool<String, MessageContext>(
@@ -70,7 +68,7 @@ public class T {
             pool.returnObject(pub_client_id, context);
 
             context = pool.borrowObject(sub_client_id);
-            consumAll(context, taret_topic);
+//            consumAll(context, taret_topic);
             pool.returnObject(sub_client_id, context);
 
             // context.close();
@@ -78,7 +76,7 @@ public class T {
             e.printStackTrace();
         }
         pool.close();
-        System.out.println("closed");
+        System.out.printf("closed, produce=%d\n", count);
     }
 
     private static void produce(MessageContext context, String src_topic, int count)

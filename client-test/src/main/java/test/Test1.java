@@ -1,4 +1,4 @@
-package t.jmeter;
+package test;
 
 import com.sitech.crmpd.idmm.client.MessageContext;
 import com.sitech.crmpd.idmm.client.api.Message;
@@ -6,23 +6,20 @@ import com.sitech.crmpd.idmm.client.api.PropertyOption;
 import com.sitech.crmpd.idmm.client.api.PullCode;
 import com.sitech.crmpd.idmm.client.api.ResultCode;
 import com.sitech.crmpd.idmm.client.pool.PooledMessageContextFactory;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-
+import org.apache.commons.cli.*;
 import org.apache.commons.pool2.KeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig;
-import org.apache.jmeter.config.Arguments;
-import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
-import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-import org.apache.jmeter.samplers.SampleResult;
 
-public class Subscriber extends AbstractJavaSamplerClient
-{
-//    private SampleResult results;
+import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
+
+/**
+ * Created by guanyf on 7/4/2017.
+ */
+public class Test1 {
     private String zookeeperAddr;
-    private int timeOut;
+    private int timeOut = 60;
     private String clientID;
     private String topic;
     private KeyedObjectPool<String, MessageContext> pool;
@@ -31,83 +28,66 @@ public class Subscriber extends AbstractJavaSamplerClient
 
     private PullCode code = null;
     private String description = "";
-    private long noMessageSleepMS = 0;
+    private long noMessageSleepMS = 1000;
     private int poolsize = 50;
 
     private static LinkedBlockingQueue<String> msgids = new LinkedBlockingQueue<String>();
 
-    public void init()
-    {
+    public void setupTest() {
+        topic = "TRecOprCnttDest";
+        clientID = "Sub119Opr";
+        zookeeperAddr = "127.0.0.1:2181/idmm4/broker";
         GenericKeyedObjectPoolConfig config = new GenericKeyedObjectPoolConfig();
         config.setMaxTotal(poolsize);
         config.setMaxTotalPerKey(poolsize);
         config.setMaxIdlePerKey(poolsize);
         pool = new GenericKeyedObjectPool(
-                new PooledMessageContextFactory(this.zookeeperAddr, timeOut*1000), config);
+                new PooledMessageContextFactory(zookeeperAddr, timeOut*1000), config);
+
     }
 
-    public void setupTest(JavaSamplerContext jsc)
-    {
-        this.zookeeperAddr = jsc.getParameter("zookeeperAddr", "");
-        timeOut = Integer.parseInt(jsc.getParameter("timeOut", "60") );
-        this.clientID = jsc.getParameter("clientID", "");
-        this.topic = jsc.getParameter("topic", "");
-        noMessageSleepMS = Long.parseLong(
-                jsc.getParameter("noMessageSleepMS", "0"));
-        poolsize = jsc.getIntParameter("poolsize", 50);
-
-        init();
-    }
-
-    public SampleResult runTest(JavaSamplerContext ctx)
-    {
-        boolean flag = true;
-        String err_msg = "";
-
-        long processingTime = timeOut;
-
-        SampleResult results = new SampleResult();
-        results.sampleStart();
+    public boolean consume() {
         String msgid = null;
+        boolean flag = false;
         MessageContext context = null;
         try
         {
             context = (MessageContext)pool.borrowObject(clientID);
-//            msgid = null;
-//            code = null;
             msgid = msgids.poll();
             code = msgid == null ? null : PullCode.COMMIT_AND_NEXT;
-            Message message = context.fetch(this.topic, processingTime,
+            Message message = context.fetch(this.topic, timeOut,
                     msgid, code, this.description, false);
             ResultCode resultCode = message.getEnumProperty(PropertyOption.RESULT_CODE, ResultCode.class);
             if (resultCode == ResultCode.OK ) //ResultCode.NO_MORE_MESSAGE)
             {
                 msgid = message.getId();
                 msgids.offer(msgid);
+                System.out.println(msgid);
 //                code = PullCode.COMMIT;
-//                Message reply = context.fetch(topic, processingTime,
+//                Message reply = context.fetch(topic, timeOut,
 //                        msgid, code, this.description, false);
 //                resultCode = reply.getEnumProperty(PropertyOption.RESULT_CODE, ResultCode.class);
 //                if(resultCode != ResultCode.OK) {
-//                    err_msg = reply.getStringProperty(PropertyOption.CODE_DESCRIPTION);
-//                    flag = false;
+//                    System.out.println(resultCode + "::"
+//                            +reply.getStringProperty(PropertyOption.CODE_DESCRIPTION) );
+//                }else{
+//                    flag = true;
 //                }
             }else if(resultCode == ResultCode.NO_MORE_MESSAGE){
-                if(noMessageSleepMS > 0) {
-                    try {
-                        Thread.sleep(noMessageSleepMS);
-                    } catch (Exception e) {
-                    }
-                }
+//                if(noMessageSleepMS > 0) {
+//                    try {
+//                        Thread.sleep(noMessageSleepMS);
+//                    } catch (Exception e) {
+//                    }
+//                }
+                System.out.println("no more message");
             }else{
-                flag = false;
+                System.out.println("fail:" + resultCode);
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            err_msg = e.getMessage();
-            flag = false;
         }finally{
             if(context != null) {
                 try {
@@ -117,15 +97,20 @@ public class Subscriber extends AbstractJavaSamplerClient
                 }
             }
         }
-        results.sampleEnd();
-        results.setDataEncoding("UTF-8");
-        results.setSuccessful(flag);
-        results.setResponseMessage(err_msg);
-
-        return results;
+        return flag;
     }
 
-    public void teardownTest(JavaSamplerContext arg0)
-    {
+    public static void main(String[] args) throws Exception{
+        Test1 t = new Test1();
+        t.setupTest();
+
+        int c = 0;
+        for(int i=0; i<70; i++){
+            if(t.consume())
+                c++;
+        }
+        System.out.println("count="+c);
     }
+
+
 }

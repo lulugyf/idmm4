@@ -46,7 +46,8 @@ public class BLEActor extends AbstractActor {
         public int req_total; //总包数
         public int req_seq;   //本包序号
         public boolean wantmsg; //是否需要拉取消息
-        protected int partnum; //用于记录当前访问的分区序号
+        public int partnum; //用于记录当前访问的分区序号
+        public int partid;
 
         public Msg(Channel c, FramePacket f) {
             channel = c;fm = f; create_time=System.currentTimeMillis();
@@ -135,6 +136,7 @@ public class BLEActor extends AbstractActor {
                 }
                 bm.p(BProps.PART_ID, p.id);
                 s.bleid = p.bleid;
+                s.partid = p.id;
                 s.partnum = p.num;
             } // 这里没有break, 发送请求到ble 是走的下面的代码
 
@@ -215,13 +217,50 @@ public class BLEActor extends AbstractActor {
                 }else{
                     answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
                     answer.setProperty(PropertyOption.CODE_DESCRIPTION,
-                            rcode + "~" + bm.p(BProps.RESULT_DESC));
+                            rcode + "~5" + bm.p(BProps.RESULT_DESC));
                 }
                 FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
                 reply.tell(new ReplyActor.Msg(ch, fr), ActorRef.noSender());
             }
                 break;
             case BRK_COMMIT_ACK:
+            {
+                Message answer = null;
+                if(s.wantmsg){
+                    if(rcode == RetCode.OK){
+                        answer = Message.create();
+                        answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
+                        String msgid = bm.p(BProps.MESSAGE_ID);
+                        msgid = msgid + "::" + s.partnum;
+                        answer.setProperty(PropertyOption.MESSAGE_ID, msgid);
+                    }else if(rcode == RetCode.NO_MORE_MESSAGE){
+                        log.info("no more message partid {}, num {}", s.partid, s.partnum);
+                        beginPull(s.fm.getMessage(), s.channel);
+                    }else{
+                        answer = Message.create();
+                        answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
+                        answer.setProperty(PropertyOption.CODE_DESCRIPTION,
+                                rcode + "~1" + bm.p(BProps.RESULT_DESC));
+                        log.error("BRK_COMMIT_ACK and wantmsg return failed, rcode={} {}"
+                                , rcode, rcode == RetCode.NO_MORE_MESSAGE);
+                    }
+                }else{
+                    if(rcode == RetCode.OK){
+                        answer = Message.create();
+                        answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.OK);
+                    }else{
+                        answer = Message.create();
+                        answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
+                        answer.setProperty(PropertyOption.CODE_DESCRIPTION,
+                                rcode + "~2" + bm.p(BProps.RESULT_DESC));
+                    }
+                 }
+                 if(answer != null) {
+                     FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
+                     reply.tell(new ReplyActor.Msg(ch, fr), ActorRef.noSender());
+                 }
+            }
+                break;
             case BRK_ROLLBACK_ACK:
             case BRK_SKIP_ACK:
             case BRK_RETRY_ACK: {
@@ -229,26 +268,13 @@ public class BLEActor extends AbstractActor {
                     Message answer = Message.create();
                     answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
                     answer.setProperty(PropertyOption.CODE_DESCRIPTION,
-                            rcode + "~" + bm.p(BProps.RESULT_DESC));
+                            rcode + "~3" + bm.p(BProps.RESULT_DESC));
                     FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
                     reply.tell(new ReplyActor.Msg(ch, fr), ActorRef.noSender());
                 }else {
                     if (s.wantmsg) {
                         // 需要进一步PULL消息, 另外发起PULL请求
-                        BMessage bml = s.fm.getMessage(); // 上次请求的报文
-                        String target_topicid = bml.p(BProps.TARGET_TOPIC);
-                        String clientid = bml.p(BProps.CLIENT_ID);
-                        BMessage mr = BMessage.c()
-                                .p(BProps.TARGET_TOPIC, target_topicid)
-                                .p(BProps.CLIENT_ID, clientid)
-                                .p(BProps.PROCESSING_TIME, bml.p(BProps.PROCESSING_TIME));
-                        FramePacket f = new FramePacket(FrameType.BRK_PULL, mr);
-                        BLEActor.Msg bmsg = new BLEActor.Msg(s.channel, f);
-                        bmsg.bleid = null; //需要在BLEActor中选择分区后再确定BLE
-                        bmsg.wantmsg = true;
-                        bmsg.req_total = 1;
-                        bmsg.req_seq = 0; // 第一次遍历, 分区数据需要提前推送给BLEActor
-                        getSelf().tell(bmsg, ActorRef.noSender());
+                        beginPull(s.fm.getMessage(), s.channel);
                     } else {
                         // 成功应答
                         Message answer = Message.create();
@@ -290,6 +316,7 @@ public class BLEActor extends AbstractActor {
                         Message answer = Message.create();
                         answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.NO_MORE_MESSAGE);
                         FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
+                        log.info("real no more message id {} num {}", s.partid, s.partnum);
 
                         // 延迟应答客户端
 //                        getContext().getSystem().scheduler().scheduleOnce(Duration.create(nomsgDelay, TimeUnit.MICROSECONDS),
@@ -310,7 +337,7 @@ public class BLEActor extends AbstractActor {
                     Message answer = Message.create();
                     answer.setProperty(PropertyOption.RESULT_CODE, ResultCode.INTERNAL_SERVER_ERROR);
                     answer.setProperty(PropertyOption.CODE_DESCRIPTION,
-                            rcode + "~" + bm.p(BProps.RESULT_DESC));
+                            rcode + "~4" + bm.p(BProps.RESULT_DESC));
                     FrameMessage fr = new FrameMessage(MessageType.ANSWER, answer);
                     reply.tell(new ReplyActor.Msg(ch, fr), ActorRef.noSender());
                 }
@@ -320,6 +347,28 @@ public class BLEActor extends AbstractActor {
                 log.error("unknown packet type {}", rMsg.fm.getType());
                 break;
         }
+    }
+
+    /**
+     * 复合操作前一步骤完成后, 第一轮发起pull请求
+     * @param bml
+     * @param ch
+     */
+    private void beginPull(BMessage bml, Channel ch) {
+        String target_topicid = bml.p(BProps.TARGET_TOPIC);
+        String clientid = bml.p(BProps.CLIENT_ID);
+        BMessage mr = BMessage.c()
+                .p(BProps.TARGET_TOPIC, target_topicid)
+                .p(BProps.CLIENT_ID, clientid)
+                .p(BProps.PROCESSING_TIME, bml.p(BProps.PROCESSING_TIME));
+        FramePacket f = new FramePacket(FrameType.BRK_PULL, mr);
+        BLEActor.Msg bmsg = new BLEActor.Msg(ch, f);
+        bmsg.bleid = null; //需要在BLEActor中选择分区后再确定BLE
+        bmsg.wantmsg = true;
+        bmsg.req_total = 1;
+        bmsg.req_seq = 0; // 第一次遍历, 分区数据需要提前推送给BLEActor
+        //getSelf().tell(bmsg, ActorRef.noSender());
+        onReceive(bmsg);
     }
 
 

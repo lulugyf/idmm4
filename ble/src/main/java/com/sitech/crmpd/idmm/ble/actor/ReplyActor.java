@@ -13,13 +13,16 @@ import akka.routing.Routee;
 import akka.routing.Router;
 import com.sitech.crmpd.idmm.netapi.FramePacket;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReplyActor extends AbstractActor {
-    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+//    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    private static final Logger log = LoggerFactory.getLogger(ReplyActor.class);
 
 
     private Router router;

@@ -160,7 +160,7 @@ public class SupActor extends AbstractActor {
         if(s.length < 2)
             return;
         final String tp = s[0];
-        log.warn("receive cmd message: {}", tp);
+//        log.warn("receive cmd message: {}", tp);
         if("blelist".equals(tp)){
             Tools.bleListChg(bles, zk, bootstrap, getSelf());
         }else if("ble".equals(tp)){
@@ -330,7 +330,7 @@ public class SupActor extends AbstractActor {
         }
         // 0. send heartbeat, and check if online
         for(BLEState b: bles.values()){
-            log.info("write a heartbeat to {}", b.ch.remoteAddress());
+//            log.info("write a heartbeat to {}", b.ch.remoteAddress());
             b.ch.writeAndFlush(new FramePacket(FrameType.HEARTBEAT,
                     BMessage.c(), seq++));
         }

@@ -8,7 +8,7 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="用户定义的变量" enabled="true">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
-      <stringProp name="TestPlan.user_define_classpath">/conherence/siteqi/mytest/idmm2/idmm-test-2.1.0-Release.jar</stringProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
       <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
@@ -17,7 +17,7 @@
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">70</stringProp>
+        <stringProp name="ThreadGroup.num_threads">10</stringProp>
         <stringProp name="ThreadGroup.ramp_time">10</stringProp>
         <longProp name="ThreadGroup.start_time">1484029410000</longProp>
         <longProp name="ThreadGroup.end_time">1484029410000</longProp>
@@ -31,12 +31,7 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="zookeeperAddr" elementType="Argument">
                 <stringProp name="Argument.name">zookeeperAddr</stringProp>
-                <stringProp name="Argument.value">10.113.183.36:4621</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="noMessageSleepSecs" elementType="Argument">
-                <stringProp name="Argument.name">noMessageSleepSecs</stringProp>
-                <stringProp name="Argument.value">1</stringProp>
+                <stringProp name="Argument.value">10.113.183.41:9781/idmm4/broker</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="timeOut" elementType="Argument">
@@ -46,17 +41,12 @@
               </elementProp>
               <elementProp name="clientID" elementType="Argument">
                 <stringProp name="Argument.name">clientID</stringProp>
-                <stringProp name="Argument.value">mon</stringProp>
+                <stringProp name="Argument.value">Sub119Opr</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="topic" elementType="Argument">
                 <stringProp name="Argument.name">topic</stringProp>
-                <stringProp name="Argument.value">T_mon</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="password" elementType="Argument">
-                <stringProp name="Argument.name">password</stringProp>
-                <stringProp name="Argument.value">123456</stringProp>
+                <stringProp name="Argument.value">TRecOprCnttDest</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="noMessageSleepMS" elementType="Argument">

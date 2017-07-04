@@ -56,7 +56,7 @@ public class Loader {
                         ql.add(c);
                     }
                 });
-        log.info("load queues count: {}", ql.size());
+//        log.info("load queues count: {}", ql.size());
         return ql;
     }
 

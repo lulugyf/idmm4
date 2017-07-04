@@ -196,7 +196,9 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			FrameType t = null;
 			switch (pcode) {
 				case COMMIT_AND_NEXT:
+					t = FrameType.BRK_COMMIT;
 					getNext = true;
+					break;
 				case COMMIT:
 					t = FrameType.BRK_COMMIT;
 					break;
@@ -220,7 +222,9 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 			bmsg.bleid = part.getBleid();
 			bmsg.wantmsg = getNext;
 			bmsg.req_total = 1;
-			if(m.existProperty(PropertyOption.PROCESSING_TIME))
+			bmsg.partnum = part_num;
+			bmsg.partid = part.getPartId();
+			if(getNext && m.existProperty(PropertyOption.PROCESSING_TIME))
 				mr.p(BProps.PROCESSING_TIME, m.getLongProperty(PropertyOption.PROCESSING_TIME).intValue());
 			ble.tell(bmsg, ActorRef.noSender());
 		}else{

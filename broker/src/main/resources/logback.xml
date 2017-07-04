@@ -4,7 +4,7 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>log/broker.debug</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>log/ble.debug.%d{yyyyMMdd}.gz</fileNamePattern>
+			<fileNamePattern>log/broker.debug.%d{yyyyMMdd}.gz</fileNamePattern>
 			<maxHistory>60</maxHistory>
 		</rollingPolicy>
 		<encoder>

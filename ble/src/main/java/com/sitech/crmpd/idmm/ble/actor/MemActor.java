@@ -163,8 +163,16 @@ public class MemActor extends AbstractActor {
                                 .p(BProps.RESULT_DESC, "ack to mem failed"), s.seq ) ;
                 }else{
                     log.info("commit success {}", s.msgid);
-                    fr = new FramePacket(FrameType.BRK_COMMIT_ACK,
-                            BMessage.c().p(BProps.RESULT_CODE, RetCode.OK), s.seq );
+                    if(s.next){
+
+                        fr = new FramePacket(FrameType.BRK_COMMIT_ACK,
+                                pull(s.process_time),
+                                s.seq);
+
+                    }else {
+                        fr = new FramePacket(FrameType.BRK_COMMIT_ACK,
+                                BMessage.c().p(BProps.RESULT_CODE, RetCode.OK), s.seq);
+                    }
 
                     if(status == PartStatus.LEAVE && mq.size() == 0){ // leave分区消费完成
                         cmd.tell(new CmdActor.LeaveDone(qid, part_id), getSelf());
@@ -221,7 +229,7 @@ public class MemActor extends AbstractActor {
                         return; //to store actor
                     break;
                 case BRK_PULL:
-                    mr = pull(m, s.channel, seq);
+                    mr = pull(m.p(BProps.PROCESSING_TIME));
                     break;
                 case BRK_COMMIT:
                 {
@@ -233,6 +241,11 @@ public class MemActor extends AbstractActor {
                         o.msgid = msgid;
                         o.channel = s.channel;
                         o.seq = p.getSeq();
+                        if(m.existProperty(BProps.PROCESSING_TIME)){
+                            // 作为 commit_and_next 的处理流程
+                            o.next = true;
+                            o.process_time = m.p(BProps.PROCESSING_TIME);
+                        }
                         persistent.tell(o, getSelf());
                         return;
                     }else{
@@ -334,8 +347,8 @@ public class MemActor extends AbstractActor {
         return null;
     }
 
-    private BMessage pull(BMessage m, Channel ch, int seq) {
-        int ptime = m.p(BProps.PROCESSING_TIME);
+    private BMessage pull(int ptime) {
+//        int ptime = m.p(BProps.PROCESSING_TIME);
         log.info("BRK_PULL, ptime: {}", ptime);
         while (true) {
             JournalOP op = mq.get("", ptime);
@@ -355,7 +368,7 @@ public class MemActor extends AbstractActor {
                                 .p(BProps.MESSAGE_ID, mi.getMsgid())
                                 .p(BProps.CONSUMER_RETRY, mi.getRetry())
                         .p(BProps.QSTATE, new int[]{mq.size(), mq.maxPriority(), mq.onwayLeft()});
-                //TODO return message size to broker
+                //DONE return message size to broker
             }else{
                 log.error("invalid optype {}", op.op);
                 break;

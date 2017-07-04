@@ -8,7 +8,7 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="用户定义的变量" enabled="true">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
-      <stringProp name="TestPlan.user_define_classpath">/conherence/siteqi/mytest/idmm2/idmm-test-2.1.0-Release.jar</stringProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="线程组" enabled="true">
@@ -31,7 +31,7 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="brokeAddr" elementType="Argument">
                 <stringProp name="Argument.name">brokeAddr</stringProp>
-                <stringProp name="Argument.value">10.113.183.36:4621</stringProp>
+                <stringProp name="Argument.value">10.113.183.41:9781/idmm4/broker</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="timeOut" elementType="Argument">
@@ -41,17 +41,12 @@
               </elementProp>
               <elementProp name="clientID" elementType="Argument">
                 <stringProp name="Argument.name">clientID</stringProp>
-                <stringProp name="Argument.value">mon</stringProp>
+                <stringProp name="Argument.value">Pub101</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="topic" elementType="Argument">
                 <stringProp name="Argument.name">topic</stringProp>
-                <stringProp name="Argument.value">T_mon</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="password" elementType="Argument">
-                <stringProp name="Argument.name">password</stringProp>
-                <stringProp name="Argument.value">123456</stringProp>
+                <stringProp name="Argument.value">TRecOprCntt</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="message" elementType="Argument">

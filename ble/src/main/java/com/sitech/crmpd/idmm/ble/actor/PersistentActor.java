@@ -5,21 +5,21 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Terminated;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.routing.ActorRefRoutee;
 import akka.routing.RoundRobinRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.Router;
 import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PersistentActor extends AbstractActor {
-    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
-
+//    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    private static final Logger log = LoggerFactory.getLogger(PersistentActor.class);
 
     private Router router;
     public static class StoreMsg {
@@ -32,7 +32,8 @@ public class PersistentActor extends AbstractActor {
     }
 
     private static class Worker extends AbstractActor{
-        private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+//        private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+//        private static final Logger log = LoggerFactory.getLogger(PersistentActor.class);
         public Receive createReceive(){
             return receiveBuilder()
                     .match(Oper.class, s -> {
@@ -68,6 +69,8 @@ public class PersistentActor extends AbstractActor {
                     o.channel = s.channel;
                     o.msgid = s.msgid;
                     o.seq = s.seq;
+                    o.process_time = s.process_time;
+                    o.next = s.next;
                     getSender().tell(o, getSelf());
                     log.info("send ackOP1 to memactor, {}", s.msgid);
                     break;

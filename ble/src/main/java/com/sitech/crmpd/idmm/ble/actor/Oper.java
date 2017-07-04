@@ -10,17 +10,19 @@ final public class Oper {
     public volatile OType type;
 
     public volatile Channel channel; // 应答通道
-    public volatile Object oneQ;    // 回送给OneThread 请求的队列
+//    public volatile Object oneQ;    // 回送给OneThread 请求的队列
 
     public volatile String msgid;
     public volatile MsgIndex mi;
     public volatile int seq;
-    public volatile long process_time;
+    public volatile int process_time;
     public volatile int ret = -1; // 0 success
     public long create_time;
+    public boolean next = false;
 
     public Oper(OType t) {
         this.type = t;
+        create_time = System.currentTimeMillis();
     }
     public void reset() {
         type = null;

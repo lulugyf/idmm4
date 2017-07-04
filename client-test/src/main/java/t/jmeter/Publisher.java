@@ -45,26 +45,8 @@ public class Publisher extends AbstractJavaSamplerClient
         config.setMaxIdlePerKey(poolsize);
         pool = new GenericKeyedObjectPool(
                 new PooledMessageContextFactory(this.brokeAddr, Integer.parseInt(this.timeOut)));
-
-//        try {
-//            context = (MessageContext)pool.borrowObject(clientID);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     }
 
-    public Arguments getDefaultParameters()
-    {
-        Arguments params = new Arguments();
-
-        params.addArgument("brokeAddr", "");
-        params.addArgument("timeOut", "60000");
-        params.addArgument("clientID", "");
-        params.addArgument("topic", "");
-        params.addArgument("password", "");
-        params.addArgument("message", "");
-        return params;
-    }
 
     public SampleResult runTest(JavaSamplerContext arg0)
     {
@@ -81,7 +63,7 @@ public class Publisher extends AbstractJavaSamplerClient
             Message message = Message.create(this.message);
 
             message.setProperty(PropertyOption.GROUP, String.valueOf(Math.abs(this.random.nextInt())));
-            message.setProperty(PropertyOption.VISIT_PASSWORD, this.password);
+//            message.setProperty(PropertyOption.VISIT_PASSWORD, this.password);
 
             String id = context.send(this.topic, message);
 

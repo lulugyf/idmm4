@@ -1,0 +1,34 @@
+
+初始化数据目录
+`pwd`/mysqlSoft/bin/mysqld --defaults-file=`pwd`/case3316/my3316.cnf --initialize
+  初始化完成后， root的临时密码在 log/error.log 中找， 
+
+mysqlSoft/bin/mysqld --defaults-file=`pwd`/case3316/my3316.cnf &
+
+mysqlSoft/bin/mysql --defaults-file=`pwd`/case3316/my3316.cnf -uroot -p
+
+alter user root@localhost identified by 'root';
+
+create database idmm;
+CREATE USER 'idmm'@'%' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON idmm.* TO 'idmm'@'%';
+CREATE USER 'idmm'@'localhost' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON idmm.* TO 'idmm'@'localhost'; 
+
+/conherence/siteqi/soft/mysql --no-defaults -uidmm -ppass -h10.113.183.40 -P3316 idmm
+
+
+Suy!1702
+Vmq@9031
+
+修改日期: date MMDDhhmmYYYY.ss
+date  070411382017
+
+
+2017-7-4
+================
+测试记录:   (记录10分钟时的数字)
+pub 10 线程
+sub 20 线程
+
+commit_and_next 模式, 
