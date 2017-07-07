@@ -128,7 +128,7 @@ public class DefaultMessageContext extends MessageContext {
 			final Message answerMessage = context.trade(getClientId(),
 					MessageType.SEND, message);
 			final String id = answerMessage.getId();
-			cache.put(id, message.getPropertiesAsString());
+//			cache.put(id, message.getPropertiesAsString());
 			return id;
 		} catch (final OperationException e) {
 			throw e;

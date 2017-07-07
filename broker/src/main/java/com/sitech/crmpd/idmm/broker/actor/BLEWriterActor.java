@@ -56,7 +56,7 @@ public class BLEWriterActor extends AbstractActor {
         try{
             ch.writeAndFlush(s.fm);
         }catch(Exception ex) {
-            log.error("", ex);
+            log.error("write failed", ex);
             // TODO 写失败后需要立刻向客户端应答异常
         }
 

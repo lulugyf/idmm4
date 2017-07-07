@@ -17,6 +17,19 @@ GRANT ALL PRIVILEGES ON idmm.* TO 'idmm'@'localhost';
 
 /conherence/siteqi/soft/mysql --no-defaults -uidmm -ppass -h10.113.183.40 -P3316 idmm
 
+上传jar包:
+
+cd /conherence/siteqi/idmm4
+lcd e:/worksrc/idmm/idmm4
+cd conf-ble
+put base/target/*.jar ble/target/*.jar
+cd ../conf-broker
+put base/target/*.jar broker/target/*.jar client-api/target/*.jar client-test/target/*.jar
+cd ../ext
+put client-api/target/*.jar client-test/target/*.jar
+
+
+
 
 Suy!1702
 Vmq@9031
@@ -27,8 +40,29 @@ date  070411382017
 
 2017-7-4
 ================
-测试记录:   (记录10分钟时的数字)
-pub 10 线程
-sub 20 线程
+测试记录:   (记录5分钟时的数字)
+pub 5 线程
+sub 5 线程
 
 commit_and_next 模式, 
+pub:
+summary = 1811201 in   306s = 5918.1/s Avg:     0 Min:     0 Max:  1474 Err:     0 (0.00%)
+sub:
+summary = 1811568 in   302s = 6007.2/s Avg:     0 Min:     0 Max:  1498 Err:     0 (0.00%)
+
+com.sitech.crmpd.idmm.broker.actor.BLEActor.timer_rm    broker与BLE的通讯统计， 分别起了两套 5+5 的jmeter
+             count = 12032795
+         mean rate = 16751.13 calls/second
+     1-minute rate = 20233.23 calls/second
+     5-minute rate = 17296.56 calls/second
+    15-minute rate = 9698.84 calls/second
+               min = 0.00 milliseconds
+               max = 2.00 milliseconds
+              mean = 0.32 milliseconds
+            stddev = 0.47 milliseconds
+            median = 0.00 milliseconds
+              75% <= 1.00 milliseconds
+              95% <= 1.00 milliseconds
+              98% <= 1.00 milliseconds
+              99% <= 1.00 milliseconds
+            99.9% <= 2.00 milliseconds

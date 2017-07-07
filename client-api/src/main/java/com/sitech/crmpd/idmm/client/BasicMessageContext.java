@@ -23,10 +23,6 @@ public final class BasicMessageContext {
 	/**
 	 * @param socket
 	 *            object of socket
-	 * @param host
-	 *            the host name, or null for the loopback address.
-	 * @param port
-	 *            the port number.
 	 * @param timeout
 	 *            the specified timeout, in milliseconds.
 	 * @throws OperationException
@@ -93,6 +89,7 @@ public final class BasicMessageContext {
 			isOK(answerMessage);
 			return answerMessage;
 		} catch (final IOException e) {
+			System.out.println("trade failed========="+socket.getLocalAddress().toString() + " :"+message.getId());
 			closeQuietly(socket);
 			throw e;
 		}
@@ -159,7 +156,7 @@ public final class BasicMessageContext {
 
 	/**
 	 *
-	 * @param socket
+	 * @param address
 	 * @param timeout
 	 *            the specified timeout, in milliseconds.
 	 * @return

@@ -17,8 +17,6 @@ public class RefMsg {
         this.obj = obj;
     }
     public RefMsg(String name, ActorRef ref) {
-        this.name = name;
-        this.ref = ref;
-        this.obj = null;
+        this(name, ref, null);
     }
 }

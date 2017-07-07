@@ -15,14 +15,23 @@ import com.sitech.crmpd.idmm.netapi.FramePacket;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Scope("prototype")
 public class ReplyActor extends AbstractActor {
 //    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private static final Logger log = LoggerFactory.getLogger(ReplyActor.class);
+
+    @Value("${actor.replyCount:20}")
+    private int replyCount; //tcp 应答actor数量
 
 
     private Router router;
@@ -59,9 +68,11 @@ public class ReplyActor extends AbstractActor {
         }
     }
 
-    public ReplyActor(int size) {
+    @PostConstruct
+    private void init(){
+//    public ReplyActor() {
         List<Routee> routees = new ArrayList<Routee>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < replyCount; i++) {
             ActorRef r = getContext().actorOf(Props.create(Worker.class));
             getContext().watch(r);
             routees.add(new ActorRefRoutee(r));

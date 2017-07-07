@@ -23,7 +23,7 @@ public class Publisher extends AbstractJavaSamplerClient
     private String password;
     private String message;
     private KeyedObjectPool<String, MessageContext> pool;
-    private Random random = new Random(100000000L);
+    private Random random = new Random(System.currentTimeMillis());
     private MessageContext context = null;
     private int poolsize = 50;
 

@@ -2,9 +2,8 @@ package com.sitech.crmpd.idmm.ble.actor;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import com.alibaba.fastjson.JSON;
 import com.sitech.crmpd.idmm.cfg.PartConfig;
 import com.sitech.crmpd.idmm.cfg.PartStatus;
@@ -13,21 +12,31 @@ import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.sitech.crmpd.idmm.ble.main.spring.SpringExtension.SPRING_EXTENSION_PROVIDER;
+
 /**
  * Created by gyf on 5/1/2017.
  */
+@Component
+@Scope("prototype")
 public class CmdActor extends AbstractActor {
 //    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private static final Logger log = LoggerFactory.getLogger(CmdActor.class);
     private ActorRef reply;
-    private ActorRef store;
+    private ActorRef persist;
     private ActorRef brk;
     private HashMap<Integer, Mem> parts = new HashMap<>();
+
+    @Resource
+    private ActorSystem system;
 
     private int seq_seed = 0;
     private HashMap<Integer, Msg> toMem = new HashMap<>(); //发往MemActor的操作, 等待通知后应答Supervisor
@@ -119,8 +128,8 @@ public class CmdActor extends AbstractActor {
     private void onReceive(RefMsg s){
         if("brk".equals(s.name))
             brk = s.ref;
-        else if("store".equals(s.name)){
-            store = s.ref;
+        else if("persist".equals(s.name)){
+            persist = s.ref;
         }else if("reply".equals(s.name)){
             reply = s.ref;
         }else if("zk".equals(s.name)) {
@@ -265,8 +274,11 @@ public class CmdActor extends AbstractActor {
             // 创建分区 actor
             int seq = seq_seed ++;
             toMem.put(seq, s);
-            ActorRef mem = getContext().actorOf(
-                    Props.create(MemActor.class, pc, store, brk, reply, getSelf(), seq),
+//            ActorRef mem = getContext().actorOf(
+//                    Props.create(MemActor.class, pc, persist, brk, reply, getSelf(), seq),
+//                    String.valueOf(part_id));
+            ActorRef mem = getContext().actorOf(SPRING_EXTENSION_PROVIDER.get(system)
+                    .props(MemActor.class, pc, persist, brk, reply, getSelf(), seq),
                     String.valueOf(part_id));
 
             Mem x = new Mem();

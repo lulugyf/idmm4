@@ -45,7 +45,7 @@ public class Caches {
 					connectionTimeoutMs, new RetryNTimes(Integer.MAX_VALUE, 5000));
 			client.start();
 			client.blockUntilConnected();
-			System.out.println("====path:"+path);
+//			System.out.println("====path:"+path);
 			pathChildrenCache = new PathChildrenCache(client, path, false);
 			pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
 

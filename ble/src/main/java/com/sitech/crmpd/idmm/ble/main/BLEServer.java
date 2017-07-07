@@ -1,10 +1,13 @@
 package com.sitech.crmpd.idmm.ble.main;
 
+import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.codahale.metrics.MetricRegistry;
 import com.sitech.crmpd.idmm.ble.actor.*;
 import com.sitech.crmpd.idmm.netapi.FrameCoder;
+import com.sitech.crmpd.idmm.util.Mon;
 import com.sitech.crmpd.idmm.util.Util;
 import com.sitech.crmpd.idmm.util.ZK;
 import io.netty.bootstrap.ServerBootstrap;
@@ -19,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import static com.sitech.crmpd.idmm.ble.main.spring.SpringExtension.SPRING_EXTENSION_PROVIDER;
 
 import javax.annotation.Resource;
 import java.net.InetSocketAddress;
@@ -33,18 +37,23 @@ public class BLEServer {
     @Value("${netty.workerCount:10}")
     private int nt_workerCount;
 
+    @Resource
+    private Mon mon;
+
 //    @Value("${netty.brk.addr}")
 //    private String nt_brk_addr;
 //    @Value("${netty.cmd.addr}")
 //    private String nt_cmd_addr;
 
-    @Value("${actor.replyCount:20}")
-    private int replyCount; //tcp 应答actor数量
-    @Value("${actor.persistentCount:30}")
-    private int persistentCount; //持久化actor数量
-
     @Resource
     private ZK zk;
+
+    @Resource
+    private ActorSystem system;
+
+    @Resource
+    private MetricRegistry metrics;
+
 
     private String bleid;
 
@@ -55,7 +64,6 @@ public class BLEServer {
 
             BLEServer server = applicationContext.getBean(BLEServer.class);
             server.startup();
-
 
         } catch (final Exception e) {
             log.error("startup failed", e);
@@ -76,16 +84,17 @@ public class BLEServer {
 //        final ExecutorService executorService =
 //                MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(50));
 
-        ActorSystem system = ActorSystem.create("root");
-        ActorRef replyActor = system.actorOf(Props.create(ReplyActor.class, replyCount), "reply");
-        ActorRef storeActor = system.actorOf(Props.create(PersistentActor.class, persistentCount), "store");
-        ActorRef cmdactor = system.actorOf(Props.create(CmdActor.class), "cmd");
-        ActorRef brkactor = system.actorOf(Props.create(BrkActor.class), "brk");
+//        ActorSystem system = ActorSystem.create("root");
+        ActorRef replyActor = getRef(ReplyActor.class, "reply");
+        ActorRef storeActor = getRef(PersistentActor.class, "persist");
+        ActorRef cmdactor = getRef(CmdActor.class, "cmd");
+        ActorRef brkactor = getRef(BrkActor.class, "brk");
 
         // 逐个提供 ActorRef
-        cmdactor.tell(new RefMsg("store", storeActor), ActorRef.noSender());
+        cmdactor.tell(new RefMsg("persist", storeActor), ActorRef.noSender());
         cmdactor.tell(new RefMsg("brk", brkactor), ActorRef.noSender());
         cmdactor.tell(new RefMsg("reply", replyActor), ActorRef.noSender());
+//        cmdactor.tell(new RefMsg("metrics", null, metrics), ActorRef.noSender());
         brkactor.tell(new RefMsg("cmd", cmdactor), ActorRef.noSender());
         //brkactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
 
@@ -143,7 +152,10 @@ public class BLEServer {
 
             bleid = zk.createBLE(hostAddr+":"+port1,
                     hostAddr+":"+port2);
+
+//            test();
             if(bleid != null) {
+                mon.setNodeid("bl-"+bleid);
                 log.warn("startup successfully!");
 
                 cf.sync();
@@ -160,5 +172,19 @@ public class BLEServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+    }
+    private ActorRef getRef(Class<? extends Actor> actorClass, String name) {
+        return system.actorOf(SPRING_EXTENSION_PROVIDER.get(system)
+                .props(actorClass), name);
+    }
+
+    private void test() {
+        ActorRef test1 = system.actorOf(SPRING_EXTENSION_PROVIDER.get(system)
+                .props(TestActor.class, "aa"), "actorname");
+        test1.tell("hello", ActorRef.noSender());
+
+        ActorRef test2 = system.actorOf(SPRING_EXTENSION_PROVIDER.get(system)
+                .props(TestActor.class, "bb"), "actorname1");
+        test2.tell("hellobb", ActorRef.noSender());
     }
 }

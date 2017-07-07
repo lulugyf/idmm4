@@ -7,16 +7,16 @@ import io.netty.channel.Channel;
  * Created by guanyf on 3/17/2017.
  */
 final public class Oper {
-    public volatile OType type;
+    public OType type;
 
-    public volatile Channel channel; // 应答通道
+    public Channel channel; // 应答通道
 //    public volatile Object oneQ;    // 回送给OneThread 请求的队列
 
-    public volatile String msgid;
-    public volatile MsgIndex mi;
-    public volatile int seq;
-    public volatile int process_time;
-    public volatile int ret = -1; // 0 success
+    public String msgid;
+    public MsgIndex mi;
+    public int seq;
+    public int process_time;
+    public int ret = -1; // 0 success
     public long create_time;
     public boolean next = false;
 

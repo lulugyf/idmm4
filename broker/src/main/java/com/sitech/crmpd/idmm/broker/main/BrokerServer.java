@@ -3,11 +3,13 @@ package com.sitech.crmpd.idmm.broker.main;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.codahale.metrics.MetricRegistry;
 import com.sitech.crmpd.idmm.broker.actor.*;
 import com.sitech.crmpd.idmm.broker.config.Config;
 import com.sitech.crmpd.idmm.broker.config.Loader;
 import com.sitech.crmpd.idmm.broker.config.TopicConf;
 import com.sitech.crmpd.idmm.broker.handler.LogicHandler;
+import com.sitech.crmpd.idmm.util.Mon;
 import com.sitech.crmpd.idmm.util.Util;
 import com.sitech.crmpd.idmm.util.ZK;
 import com.sitech.crmpd.idmm.client.api.Message;
@@ -73,7 +75,13 @@ public class BrokerServer {
 
     private ActorRef bleActor;
 
+    @Resource
+    private MetricRegistry metrics;
+    @Resource
+    private Mon mon;
+
     private Map<String, ActorRef> bles = new HashMap<>();
+    private String brokerid;
 
     private CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
             .build(true);
@@ -158,6 +166,7 @@ public class BrokerServer {
 //        cmdactor.tell(new RefMsg("brk", brkactor), system.deadLetters());
         bleActor.tell(new RefMsg("reply", replyActor), ActorRef.noSender());
         bleActor.tell(new RefMsg("persist", persistActor), ActorRef.noSender());
+        bleActor.tell(new RefMsg("metrics", null, null, null, metrics), ActorRef.noSender());
 //        brkactor.tell(new RefMsg("cmd", cmdactor), system.deadLetters());
         //brkactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
 
@@ -220,7 +229,10 @@ public class BrokerServer {
                 }
             });
 
-            zk.createBroker(hostAddr+":"+port1); //向zk注册broker地址
+            brokerid = hostAddr+":"+port1;
+            zk.createBroker(brokerid); //向zk注册broker地址
+
+            mon.setNodeid("bk-"+brokerid);
 
             cf.sync(); //阻塞调用
         } finally {

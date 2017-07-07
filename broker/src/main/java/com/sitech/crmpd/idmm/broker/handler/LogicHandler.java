@@ -143,10 +143,10 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 				}
 
                 final SocketAddress address = ctx.channel().remoteAddress();
-                final MessageId id = messageIdGenerator.generate((InetSocketAddress) address, message,
-                        messageIdSequence.incrementAndGet());
-                message.setId(id.getValue());
-                messageCache.put(id.getValue(), message);
+                final String id = messageIdGenerator.generate((InetSocketAddress) address, message,
+                        messageIdSequence.incrementAndGet()).getValue();
+                message.setId(id);
+                messageCache.put(id, message);
                 persist.tell(new PersistActor.Msg(ctx.channel(), msg), ActorRef.noSender());
             }
 				break;
@@ -256,6 +256,20 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 		OUTERLOOP:
 		for(String msgid: batchIds) {
 			Message message = messageCache.get(msgid);
+			if(message == null){
+				for(int i=0; i<10; i++){ // 等待试试， 看能不能解决这个问题， 但也有可能是客户端错误引起的
+					try{Thread.sleep(10L);}catch(Exception e){}
+					message = messageCache.get(msgid);
+					if(message != null)
+						break;
+				}
+				if(message == null) {
+					//// TODO 这里可能存在缓存不同步的问题， 偶发事件， 但会引起报错
+					log.error("cache not found for messageid: {}", msgid);
+					refuse = true;
+					break;
+				}
+			}
 			messageCache.remove(msgid); //TODO 应该commit 成功后再删除, 以便允许客户端重试
 			String src_topic = message.getStringProperty(PropertyOption.TOPIC);
 			String producer_client = message.getStringProperty(PropertyOption.CLIENT_ID);
@@ -335,7 +349,7 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 	 */
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		log.error(Strings.nullToEmpty(cause.getMessage()), cause);
+		log.error(Strings.nullToEmpty(cause.getMessage()));//, cause);
 		ctx.close();
 	}
 

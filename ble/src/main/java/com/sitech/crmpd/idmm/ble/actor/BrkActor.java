@@ -10,6 +10,8 @@ import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,6 +20,8 @@ import java.util.LinkedHashMap;
  * Created by gyf on 5/1/2017.
  * 处理由broker发来的报文, 业务通讯的关键管道
  */
+@Component
+@Scope("prototype")
 public class BrkActor extends AbstractActor {
 //    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private static final Logger log = LoggerFactory.getLogger(BrkActor.class);
@@ -76,17 +80,17 @@ public class BrkActor extends AbstractActor {
     private void onReceive(PartState s){
         parts.put(s.part_id, s);
     }
-    private void onReceive(Msg s) {
-        FramePacket p = s.packet;
+    private void onReceive(Msg msg) {
+        FramePacket p = msg.packet;
         int seq = p.getSeq();
         BMessage m = p.getMessage();
 
         switch(p.getType() ) {
             case HEARTBEAT:
-                log.info("HEARTBEAT, {}", System.currentTimeMillis());
+                log.info("HEARTBEAT, {}", msg.channel.remoteAddress());
                 break;
             case BRK_CONNECT:
-                log.info("BRK_CONNECT, {}", System.currentTimeMillis());
+                log.info("BRK_CONNECT, {}", msg.channel.remoteAddress());
                 break;
 
             case BRK_SEND_COMMIT:
@@ -101,7 +105,7 @@ public class BrkActor extends AbstractActor {
                     FramePacket f = new FramePacket(FrameType.CMD_PT_START_ACK, BMessage.c()
                             .p(BProps.RESULT_CODE, RetCode.REQUIRED_PARAMETER_MISSING)
                             .p(BProps.RESULT_DESC, "request without part_id"), seq);
-                    s.channel.writeAndFlush(f);
+                    msg.channel.writeAndFlush(f);
                     break;
                 }
                 int part_id = m.p(BProps.PART_ID);
@@ -112,10 +116,10 @@ public class BrkActor extends AbstractActor {
                     FramePacket f = new FramePacket(FrameType.CMD_PT_START_ACK, BMessage.c()
                             .p(BProps.RESULT_CODE, RetCode.BAD_REQUEST)
                             .p(BProps.RESULT_DESC, "part not found:"+part_id), seq);
-                    s.channel.writeAndFlush(f);
+                    msg.channel.writeAndFlush(f);
                 }else {
                     log.info("operator: {} to part {} seq {}", p.getType(), part_id, p.getSeq());
-                    parts.get(part_id).ref.tell(new MemActor.Msg(s.channel, p), getSelf());
+                    parts.get(part_id).ref.tell(new MemActor.Msg(msg.channel, p, msg.create_time), getSelf());
                 }
             }
                 break;

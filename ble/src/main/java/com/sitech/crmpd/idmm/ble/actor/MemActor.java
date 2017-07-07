@@ -2,8 +2,9 @@ package com.sitech.crmpd.idmm.ble.actor;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.sitech.crmpd.idmm.ble.mem.MsgIndex;
 import com.sitech.crmpd.idmm.ble.mem.JournalOP;
 import com.sitech.crmpd.idmm.ble.mem.MemQueue;
@@ -13,10 +14,18 @@ import com.sitech.crmpd.idmm.cfg.PartStatus;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * Created by gyf on 5/1/2017.
  */
+@Component
+@Scope("prototype")
 public class MemActor extends AbstractActor {
 //    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private static final Logger log = LoggerFactory.getLogger(MemActor.class);
@@ -28,18 +37,20 @@ public class MemActor extends AbstractActor {
     private PartConfig c;
     private MemQueue mq;
 
-    private ActorRef persistent;
+    private ActorRef persist;
     private ActorRef brk;
     private ActorRef reply;
     private ActorRef cmd;
 
+    @Value("${default.priority:200}")
     private int default_priority = 200; //TODO 默认优先级从配置中获取
+
 
     public MemActor(PartConfig c,
                     ActorRef persistent, ActorRef brk,  ActorRef reply, ActorRef cmd,
                     int seq) {
         this.c = c;
-        this.persistent = persistent;
+        this.persist = persistent;
         this.brk = brk;
         this.reply = reply;
         this.cmd = cmd;
@@ -63,6 +74,22 @@ public class MemActor extends AbstractActor {
         }
     }
 
+    @Resource
+    private MetricRegistry metrics;
+    private Counter counter;
+    private Counter counterOnway;
+    private Meter meterProduce;
+    private Meter meterConsume;
+
+    @PostConstruct
+    private void init() {
+        String ss = c.getBleid()+"-"+part_id+"-";
+        counter = metrics.counter(ss+"S"); //size
+        counterOnway = metrics.counter(ss+"O"); //on-way
+        meterProduce = metrics.meter(ss+"P"); //produce
+        meterConsume = metrics.meter(ss+"C"); //consume
+    }
+
     private void _startFinished(int seq) {
         // 通知brkActor 有新的part上线了
         brk.tell(new BrkActor.PartState(getSelf(), c), getSelf());
@@ -83,6 +110,9 @@ public class MemActor extends AbstractActor {
         public long create_time;
         public Msg(Channel c, FramePacket p) {
             channel = c;packet = p; create_time=System.currentTimeMillis();
+        }
+        public Msg(Channel c, FramePacket p, long ctime) {
+            channel = c;packet = p; create_time=ctime;
         }
     }
     public static class PartChg{
@@ -147,8 +177,10 @@ public class MemActor extends AbstractActor {
         FramePacket fr = null;
         switch (s.type) {
             case addOP1:
-                // after persistent
+                // after persist
                 mq.add(s.mi);
+                counter.inc();
+                meterProduce.mark();
                 log.info("add index {}, size: {} seq {}", s.mi.getMsgid(), mq.size(), s.seq);
                 fr = new FramePacket(FrameType.BRK_SEND_COMMIT_ACK,
                         BMessage.c().p(BProps.RESULT_CODE, RetCode.OK), s.seq ) ;
@@ -162,9 +194,11 @@ public class MemActor extends AbstractActor {
                             BMessage.c().p(BProps.RESULT_CODE, RetCode.INTERNAL_SERVER_ERROR)
                                 .p(BProps.RESULT_DESC, "ack to mem failed"), s.seq ) ;
                 }else{
+                    counter.dec();
+                    counterOnway.dec();
+                    meterConsume.mark();
                     log.info("commit success {}", s.msgid);
-                    if(s.next){
-
+                    if(s.next){ // commit_and_next
                         fr = new FramePacket(FrameType.BRK_COMMIT_ACK,
                                 pull(s.process_time),
                                 s.seq);
@@ -213,18 +247,18 @@ public class MemActor extends AbstractActor {
         return refuse;
     }
 
-    private void onReceive(Msg s) {
-        FramePacket p = s.packet;
+    private void onReceive(Msg msg) {
+        FramePacket p = msg.packet;
         int seq = p.getSeq();
         BMessage m = p.getMessage();
         BMessage mr = null;
 
-        if(_checkStatus(p.getType(), s.channel, seq))
+        if(_checkStatus(p.getType(), msg.channel, seq))
             return;
         try {
             switch (p.getType()) {
                 case BRK_SEND_COMMIT:
-                    mr = sendCommit(m, s.channel, seq);
+                    mr = sendCommit(msg);
                     if(mr == null)
                         return; //to store actor
                     break;
@@ -236,17 +270,17 @@ public class MemActor extends AbstractActor {
                     log.info("BRK_COMMIT, {}", System.currentTimeMillis());
                     String msgid = m.p(BProps.MESSAGE_ID);
                     if(mq.exists(msgid)) {
-                        // persistent first
+                        // persist first
                         Oper o = new Oper(Oper.OType.ackOP);
                         o.msgid = msgid;
-                        o.channel = s.channel;
+                        o.channel = msg.channel;
                         o.seq = p.getSeq();
                         if(m.existProperty(BProps.PROCESSING_TIME)){
                             // 作为 commit_and_next 的处理流程
                             o.next = true;
                             o.process_time = m.p(BProps.PROCESSING_TIME);
                         }
-                        persistent.tell(o, getSelf());
+                        persist.tell(o, getSelf());
                         return;
                     }else{
                         // already committed
@@ -281,8 +315,8 @@ public class MemActor extends AbstractActor {
                         Oper o = new Oper(Oper.OType.skipOP);
                         o.mi = mi;
                         o.seq = p.getSeq();
-                        o.channel = s.channel;
-                        persistent.tell(o, getSelf());
+                        o.channel = msg.channel;
+                        persist.tell(o, getSelf());
                         return;
                     }else{
                         log.error("SKIP {} failed", msgid);
@@ -320,28 +354,32 @@ public class MemActor extends AbstractActor {
         FramePacket pr = new FramePacket(
                 FrameType.valueOfCode(p.getType().code()|0x80),
                 mr, seq);
-        reply.tell( new ReplyActor.Msg(s.channel, pr), getSelf());
+        reply.tell( new ReplyActor.Msg(msg.channel, pr), getSelf());
     }
 
-    private BMessage sendCommit(BMessage m, Channel ch, int seq) {
+    private BMessage sendCommit(Msg msg) {
+        BMessage m = msg.packet.getMessage();
+        Channel ch = msg.channel;
         MsgIndex mi = new MsgIndex();
         mi.setMsgid(m.p(BProps.MESSAGE_ID));
         mi.setGroupid(m.p(BProps.GROUP));
         int priority = default_priority;
         if(m.existProperty(BProps.PRIORITY))
             priority = m.p(BProps.PRIORITY);
-        mi.setPriority(default_priority);
-        log.info("BRK_SEND_COMMIT, {}", System.currentTimeMillis());
+        mi.setPriority(priority);
+//        log.info("BRK_SEND_COMMIT, {}", System.currentTimeMillis());
         if(!mq.exists(mi.getMsgid())) {
             Oper o = new Oper(Oper.OType.addOP);
             o.mi = mi;
             o.channel = ch;
+            int seq = msg.packet.getSeq();
             o.seq = seq;
-            persistent.tell(o, getSelf());
-            log.info("send addOP to persistent seq {}", seq);
+            o.create_time = msg.create_time;
+            persist.tell(o, getSelf());
+            log.info("send addOP to persist seq {}", seq);
         }else{
             // duplicated with mem, return OK
-            log.info("duplicated index");
+            log.warn("duplicated index {}", mi.getMsgid());
             return BMessage.c().p(BProps.RESULT_CODE, RetCode.OK);
         }
         return null;
@@ -349,7 +387,7 @@ public class MemActor extends AbstractActor {
 
     private BMessage pull(int ptime) {
 //        int ptime = m.p(BProps.PROCESSING_TIME);
-        log.info("BRK_PULL, ptime: {}", ptime);
+//        log.info("BRK_PULL, ptime: {}", ptime);
         while (true) {
             JournalOP op = mq.get("", ptime);
             if(op == null){
@@ -360,10 +398,12 @@ public class MemActor extends AbstractActor {
                 log.info("save one failed index");
                 Oper o = new Oper(Oper.OType.failOP);
                 o.mi = op.mi;
-                persistent.tell(o, getSelf());
+                counter.dec();
+                persist.tell(o, getSelf());
             }else if(op.op == JournalOP.OP.GET){
                 log.info("got one message from mem");
                 MsgIndex mi = op.mi;
+                counterOnway.inc();
                 return BMessage.c().p(BProps.RESULT_CODE, RetCode.OK)
                                 .p(BProps.MESSAGE_ID, mi.getMsgid())
                                 .p(BProps.CONSUMER_RETRY, mi.getRetry())

@@ -213,6 +213,8 @@ def main_clear():
     zk.delete('/idmm4/supervisor')
     for n in zk.list('/idmm4/broker'):
         zk.delete('/idmm4/broker/'+n)
+    for n in zk.list('/idmm4/ble'):
+        zk.delete('/idmm4/ble/'+n)
     zk.close()
     
 

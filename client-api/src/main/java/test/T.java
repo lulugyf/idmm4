@@ -68,7 +68,7 @@ public class T {
             pool.returnObject(pub_client_id, context);
 
             context = pool.borrowObject(sub_client_id);
-//            consumAll(context, taret_topic);
+            consumAll(context, taret_topic);
             pool.returnObject(sub_client_id, context);
 
             // context.close();

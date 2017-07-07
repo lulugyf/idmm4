@@ -12,17 +12,19 @@ public class RefMsg {
     final public ActorRef ref;
     final public String str;
     final public Channel ch;
+    final public Object obj;
 
     public RefMsg(String name, ActorRef ref) {
-        this.name = name;
-        this.ref = ref;
-        str = null;
-        ch = null;
+        this(name, ref, null, null, null);
     }
     public RefMsg(String name, ActorRef ref, String str, Channel ch) {
+        this(name, ref, str, ch, null);
+    }
+    public RefMsg(String name, ActorRef ref, String str, Channel ch, Object obj) {
         this.name = name;
         this.ref = ref;
         this.str = str;
         this.ch = ch;
+        this.obj = obj;
     }
 }

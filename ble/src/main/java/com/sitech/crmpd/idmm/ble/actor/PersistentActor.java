@@ -13,13 +13,22 @@ import com.sitech.crmpd.idmm.netapi.*;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Scope("prototype")
 public class PersistentActor extends AbstractActor {
 //    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private static final Logger log = LoggerFactory.getLogger(PersistentActor.class);
+
+    @Value("${actor.persistentCount:30}")
+    private int persistentCount; //持久化actor数量
 
     private Router router;
     public static class StoreMsg {
@@ -89,9 +98,11 @@ public class PersistentActor extends AbstractActor {
         }
     }
 
-    public PersistentActor(int size) {
+    @PostConstruct
+    private void init() {
+        //public PersistentActor() {
         List<Routee> routees = new ArrayList<Routee>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < persistentCount; i++) {
             ActorRef r = getContext().actorOf(Props.create(Worker.class));
             getContext().watch(r);
             routees.add(new ActorRefRoutee(r));
