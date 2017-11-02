@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>150</x>
+      <y>130</y>
+      <w>280</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>BLE0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>290</x>
+      <y>180</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:7
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>230</x>
+      <y>180</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:4
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>170</x>
+      <y>180</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:1
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>350</x>
+      <y>180</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q3
+NUM:1
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>150</x>
+      <y>330</y>
+      <w>280</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>BLE1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>290</x>
+      <y>380</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:8
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>230</x>
+      <y>380</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:5
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>170</x>
+      <y>380</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:2
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>350</x>
+      <y>380</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q2
+NUM:1
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>150</x>
+      <y>530</y>
+      <w>280</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>BLE2</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>290</x>
+      <y>580</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:9
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>230</x>
+      <y>580</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:6
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>170</x>
+      <y>580</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q1
+NUM:3
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>350</x>
+      <y>580</y>
+      <w>50</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Q: q2
+NUM:2
+ID: n</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>690</x>
+      <y>160</y>
+      <w>110</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>symbol=artifact
+broker0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>690</x>
+      <y>300</y>
+      <w>110</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>symbol=artifact
+broker1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>690</x>
+      <y>440</y>
+      <w>110</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>symbol=artifact
+broker2</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>690</x>
+      <y>590</y>
+      <w>110</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>symbol=artifact
+broker3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>700</x>
+      <y>630</y>
+      <w>90</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Supervisor</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1110</x>
+      <y>340</y>
+      <w>140</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+zookeeper
+
+Partitions data</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>440</x>
+      <y>160</y>
+      <w>280</w>
+      <h>510</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+command</panel_attributes>
+    <additional_attributes>10.0;10.0;260.0;490.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>420</x>
+      <y>390</y>
+      <w>300</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+command</panel_attributes>
+    <additional_attributes>10.0;10.0;280.0;260.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>420</x>
+      <y>600</y>
+      <w>300</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+command</panel_attributes>
+    <additional_attributes>10.0;10.0;280.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>780</x>
+      <y>410</y>
+      <w>410</w>
+      <h>260</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+更新分区状态数据</panel_attributes>
+    <additional_attributes>390.0;10.0;10.0;240.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>790</x>
+      <y>370</y>
+      <w>340</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+同步分区数据</panel_attributes>
+    <additional_attributes>10.0;110.0;320.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>790</x>
+      <y>370</y>
+      <w>340</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+同步分区数据</panel_attributes>
+    <additional_attributes>10.0;260.0;320.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>790</x>
+      <y>190</y>
+      <w>340</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+同步分区数据</panel_attributes>
+    <additional_attributes>10.0;10.0;320.0;190.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>480</x>
+      <y>180</y>
+      <w>190</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;&gt;
+data transfer</panel_attributes>
+    <additional_attributes>170.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>390</x>
+      <y>150</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>cmd</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>390</x>
+      <y>230</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>data</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>1110</x>
+      <y>600</y>
+      <w>110</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>symbol=artifact
+
+Config data</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>780</x>
+      <y>630</y>
+      <w>350</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+定时读取配置数据</panel_attributes>
+    <additional_attributes>10.0;20.0;330.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>790</x>
+      <y>330</y>
+      <w>340</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+同步分区数据</panel_attributes>
+    <additional_attributes>10.0;10.0;320.0;50.0</additional_attributes>
+  </element>
+</diagram>

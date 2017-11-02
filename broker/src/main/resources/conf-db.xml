@@ -32,9 +32,6 @@
         <constructor-arg ref="dsConfig" />
     </bean>
 
-    <!--
-
--->
     <util:map id="cfg_sqls">
         <entry key="getQueues">
             <value><![CDATA[

@@ -66,3 +66,15 @@ com.sitech.crmpd.idmm.broker.actor.BLEActor.timer_rm    broker与BLE的通讯统
               98% <= 1.00 milliseconds
               99% <= 1.00 milliseconds
             99.9% <= 2.00 milliseconds
+			
+2017-11-1
+=================
+   测试方式：
+    1. 启动1 ~ n 个 com.sitech.crmpd.idmm.ble.main.BLEServer
+	2. 启动1 ~ n 个 com.sitech.crmpd.idmm.broker.main.BrokerServer
+	
+	client-test 目录下的 test.Pub 包括了publish和subscribe的代码
+	
+	有一个问题: sub时候no_more_message 的时候， 可能有分区仍然有消息（单次fetch遍历分区限定在5个）
+	如何查看各分区积压的消息
+	

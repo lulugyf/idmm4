@@ -26,6 +26,8 @@ import static com.sitech.crmpd.idmm.ble.main.spring.SpringExtension.SPRING_EXTEN
 
 import javax.annotation.Resource;
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
+import java.util.List;
 
 @Configuration
 public class BLEServer {
@@ -75,10 +77,24 @@ public class BLEServer {
         }
     }
 
+    static class ServicePort{
+        private SimpleChannelInboundHandler handler;
+        private String name;
+        private int port;
+        private Channel channel;
+        private ChannelFuture cf;
+        ServicePort(String name, SimpleChannelInboundHandler h, int port){
+            this.name = name;
+            this.port = port;
+            this.handler = h;
+        }
+    }
+
     public void startup() throws Exception {
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(nt_bossCount);
         EventLoopGroup workerGroup = new NioEventLoopGroup(nt_workerCount);
+
 
 //        final EventLoopGroup eventExceuteGroup = new NioEventLoopGroup(10);
 //        final ExecutorService executorService =
@@ -98,50 +114,38 @@ public class BLEServer {
         brkactor.tell(new RefMsg("cmd", cmdactor), ActorRef.noSender());
         //brkactor.tell(new RefMsg("reply", replyActor), system.deadLetters());
 
+        List<ServicePort> plist = new LinkedList<>();
+        plist.add(new ServicePort("dataport", new BrkServerHandler(brkactor), 0));
+        plist.add(new ServicePort("cmdport", new CmdServerHandler(cmdactor), 0));
+
         try {
-            ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.SO_REUSEADDR, true)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>(){
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new FrameCoder());
-                            pipeline.addLast(new BrkServerHandler(brkactor));
-                        }
-                    });
+            for(ServicePort sp: plist) {
+                log.info("init listen port {} on {}", sp.name, sp.port);
+                ServerBootstrap bootstrap = new ServerBootstrap();
+                bootstrap.group(bossGroup, workerGroup)
+                        .channel(NioServerSocketChannel.class)
+                        .option(ChannelOption.TCP_NODELAY, true)
+                        .option(ChannelOption.SO_REUSEADDR, true)
+                        .handler(new LoggingHandler(LogLevel.INFO))
+                        .childHandler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            public void initChannel(SocketChannel ch) throws Exception {
+                                ChannelPipeline pipeline = ch.pipeline();
+                                pipeline.addLast(new FrameCoder());
+                                pipeline.addLast(sp.handler);
+                            }
+                        });
 
-
-//            int port1 = Integer.parseInt(nt_brk_addr.substring(nt_brk_addr.indexOf(':')+1));
-//            String brk_host = nt_brk_addr.substring(0, nt_brk_addr.indexOf(':'));
-//            Channel ch = bootstrap.bind(brk_host, port1).sync().channel();
-            Channel ch = bootstrap.bind("0.0.0.0", 0).sync().channel();
-            int port1 = ((InetSocketAddress) ch.localAddress()).getPort();
-            ChannelFuture cf = ch.closeFuture();
-
-            ServerBootstrap bootstrap1 = new ServerBootstrap();
-            bootstrap1.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.SO_REUSEADDR, true)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>(){
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new FrameCoder());
-                            pipeline.addLast(new CmdServerHandler(cmdactor));
-                        }
-                    });
-
-//            int port2 = Integer.parseInt(nt_cmd_addr.substring(nt_cmd_addr.indexOf(':')+1));
-//            String cmd_host = nt_cmd_addr.substring(0, nt_cmd_addr.indexOf(':'));
-            Channel ch1 = bootstrap1.bind("0.0.0.0", 0).sync().channel();
-            int port2 = ((InetSocketAddress) ch1.localAddress()).getPort();
-            ChannelFuture cf1 = ch1.closeFuture();
+                Channel ch = bootstrap.bind("0.0.0.0", sp.port).sync().channel();
+                if(sp.port == 0){
+                    int port1 = ((InetSocketAddress) ch.localAddress()).getPort();
+                    sp.port = port1;
+                    log.info("bind port on {}", port1);
+                }
+                ChannelFuture cf = ch.closeFuture();
+                sp.channel = ch;
+                sp.cf = cf;
+            }
 
             zk.init();
 
@@ -150,6 +154,7 @@ public class BLEServer {
             // 把zk传送给CmdActor
             cmdactor.tell(new RefMsg("zk", null, zk), ActorRef.noSender());
 
+            int port1 = plist.get(0).port, port2 = plist.get(1).port;
             bleid = zk.createBLE(hostAddr+":"+port1,
                     hostAddr+":"+port2);
 
@@ -158,13 +163,13 @@ public class BLEServer {
                 mon.setNodeid("bl-"+bleid);
                 log.warn("startup successfully!");
 
-                cf.sync();
-                cf1.sync();
+                for(ServicePort sp: plist)
+                    sp.cf.sync();
+
             }else{
                 log.error("startup failed!");
-
-                ch.close();
-                ch1.close();
+                for(ServicePort sp: plist)
+                    sp.channel.close();
 
                 system.terminate();
             }

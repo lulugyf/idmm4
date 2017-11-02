@@ -356,14 +356,4 @@ public class LogicHandler extends SimpleChannelInboundHandler<FrameMessage> impl
 	public Map<String, MessageHandler> getMessageHandlers() {
 		return applicationContext.getBeansOfType(MessageHandler.class);
 	}
-
-	/**
-	 * 获取{@link #remoteAddresses}属性的值
-	 *
-	 * @return {@link #remoteAddresses}属性的值
-	 */
-	public Set<SocketAddress> getRemoteAddresses() {
-		return remoteAddresses;
-	}
-
 }
